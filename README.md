@@ -22,3 +22,65 @@ In addition to this, in the Properties of the project containing main(), you'll 
 You can add this in the format $(SolutionDir)name_of_project_folder.
 This will allow you to simply #include "project_name" in the main file instead of doing some shenanigans with including the directory in the include statement.
 this *should* compile, but it gets funky sometimes, so let me know if you're having issues and we'll work it out. I was having some weird issues and had to register some stuff.
+
+## Syntax, Styling, and Comments
+### Syntax
+Just a quick note about some of the weirder syntax quirks of C++.
+Class definitions should end the curly brace with a semicolon, while function definitions should not:
+```C++
+class MyClass {
+	...
+};	// semicolon
+
+void myFunction() {
+
+}	// no semicolon
+```
+Classes should be defined inside a header (.h) file and should contain method stubs:
+```C++
+class MyClass {
+public:
+	int x;
+
+	void myFunction(parameter);
+}
+```
+The function will then be defined inside the corressponding .cpp file like so:
+```C++
+void MyClass::myFunction(parameter) {
+	...
+}
+```
+Functions that are not contained within classes follow the same rules.  Stubs in the header, then full definitions in the .cpp file.  The difference is you do not need to specify the scope (`::`).
+
+The format of a main function is:
+```C++
+int main() {
+	...
+	return 0;
+}
+```
+
+### Styling
+In C++, the typical naming conventions are: 
+* Classes: `UpperCamelCase`
+* Functions: `lowerCamelCase`
+* Variables: `lowerCamelCase`
+
+### Comments
+The general rule for comments is to put detailed block comments (`/**`) in your header file with your definitions, and then functional comments (`//`) with your actual code. For example, this would go in the header:
+```C++
+/**
+ * Calculates the dot product of two Vectors.
+ * 
+ * The dot product of Vectors essentially tells how much of the second Vector is being applied in the direction of the first Vector.
+ * This can be used to calculate work when the force and displacement Vectors have different directions, or to help calculate Theta, the angle between two Vectors.
+ * 
+ * @param vector1 - The Vector that determines the direction
+ * @param vector2 - The Vector that is measured in the direction of the first Vector
+ */
+double dotProduct(Vector vector1, Vector vector2);
+```
+The middle section of this comment is optional if the purpose/use is self explanatory, just include a brief definition of what it does.
+
+Then you can comment your code however you like in your .cpp file. See Vector.h and Vector.cpp for more examples.
