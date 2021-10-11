@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak();
 
 // read the shader file and convert it into a string
 static std::string ParseShader(const std::string& filepath) {
@@ -86,6 +87,9 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	// waits for 1 screen update to swap the interval, results in basically vsync!
+	glfwSwapInterval(1);
+
 	if (glewInit() != GLEW_OK)
 		std::cout << "GLEW is not OK!" << std::endl;
 
@@ -141,6 +145,16 @@ int main(void)
 	unsigned int shader = CreateShader(vertexSource, fragmentSource);
 	glUseProgram(shader);
 
+	//retrieve the location of the uniform we are using for color
+	int location = glGetUniformLocation(shader, "u_Color");
+	// this assert is optional since we may not use color, but I figured it's important to include for now
+	ASSERT(location != -1);
+	// glUnform 4 f because for a vec4 we need 4 floats
+	glUniform4f(location, 0.3f, 0.3f, 0.8f, 1.0f);
+
+	// variables to represent red and how much we want it to change each tick
+	float r = 0.0f;
+	float increment = 0.05f;
 
 	// RENDER LOOP //
 
@@ -153,8 +167,19 @@ int main(void)
 		/*glDrawArrays(GL_TRIANGLES, 0, 6);	// 0 is the starting index in the positions array, and 3 is the number of indices (vertices)  WITHOUT INDEX BUFFER*/
 		// since OpenGL is a state machine, this will draw the buffer that is currently bound with glBindBuffer
 
+		// sending r in as red to animate the color
+		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+
 		// still drawing in triangles, then the number of INDICES (not vertices), and the data type of the indices.
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		// change r to animate the color of the object
+		if (r > 1.0)
+			increment = -0.05f;
+		else if (r < 0.0f)
+			increment = 0.05f;
+
+		r += increment;
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
