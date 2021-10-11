@@ -70,11 +70,19 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 
 int main(void)
 {
+	// GLFW INITIALIZATION //
+
 	GLFWwindow* window;
 
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
+
+	/* Set the version of OpenGL to 3.3 */
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	/* Set the profile to CORE */
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
@@ -95,6 +103,8 @@ int main(void)
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	
+	// DEFINING THE OBJECT TO RENDER //
+
 	// each line is a vertex position in the form x, y
 	float positions[] = {
 		-0.5f, -0.5f,	// 0
@@ -109,11 +119,18 @@ int main(void)
 		2, 3, 0
 	};
 
+	// INITIAL VERTEX ARRAY OBJECT AND BUFFER CREATION //
+
+	// create and bind our vertex array object
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	// create a vertex buffer
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 	
 	// REMEMBER to enable this or it won't work.  The index is that of the attribute
 	glEnableVertexAttribArray(0);
@@ -125,7 +142,7 @@ int main(void)
 	//			   do you want them normalized?
 	//			   stride amount you need to go forward to get to the next vertex
 	//			   pointer is the amount to the next attribute.  If you have a struct for your vertex, you can use offsetof()
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);	// with this line, we say index 0 of this vertex array is bound to the currently bound array buffer.  This links the buffer to the VAO.  This can be used to bind multiple vertex buffers to a single VAO.
 
 	// create an index buffer
 	unsigned int ibo;	// index buffer object
@@ -152,6 +169,14 @@ int main(void)
 	// glUnform 4 f because for a vec4 we need 4 floats
 	glUniform4f(location, 0.3f, 0.3f, 0.8f, 1.0f);
 
+
+	// unbind the buffers, to test use of vertex array object
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
 	// variables to represent red and how much we want it to change each tick
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -164,11 +189,15 @@ int main(void)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		/*glDrawArrays(GL_TRIANGLES, 0, 6);	// 0 is the starting index in the positions array, and 3 is the number of indices (vertices)  WITHOUT INDEX BUFFER*/
-		// since OpenGL is a state machine, this will draw the buffer that is currently bound with glBindBuffer
-
+		// bind the shader
+		glUseProgram(shader);
 		// sending r in as red to animate the color
 		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+
+		// before drawing, bind the vertex array, and the index buffer
+		// this adjustment is helpful for rendering multiple objects
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 		// still drawing in triangles, then the number of INDICES (not vertices), and the data type of the indices.
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
