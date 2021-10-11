@@ -13,6 +13,12 @@
 "SccProvider" = "8:"
     "Hierarchy"
     {
+        "Entry"
+        {
+        "MsmKey" = "8:_E9AD1637031C4CC884CD1E2C6CB12DE6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -31,6 +37,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -47,6 +61,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -245,6 +267,20 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_9AD995ECD11E4DFDA14F45A6254B1A1D"
+            {
+            "Name" = "8:Shortcut to Primary Output from tests (Active)"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_E9AD1637031C4CC884CD1E2C6CB12DE6"
+            "Folder" = "8:_15424E0FAD5C4B8E906D73E5CD1699CF"
+            "WorkingFolder" = "8:_304DE6B3817848BE99E6849FC050387D"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
@@ -644,9 +680,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8BFF4FD4A0684E9BA1E3E545071E3DE0"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E9AD1637031C4CC884CD1E2C6CB12DE6"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\Debug\\tests.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_304DE6B3817848BE99E6849FC050387D"
@@ -666,7 +702,7 @@
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{8B7A3A6F-C061-430E-8E20-8C44C02800C1}"
+            "OutputProjectGuid" = "8:{08FFFEAF-18A0-42F6-9950-157883FF722E}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
