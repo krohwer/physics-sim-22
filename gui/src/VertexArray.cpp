@@ -1,6 +1,8 @@
+#include "pch.h"
+
 #include "VertexArray.h"
 
-#include "Renderer.h"
+#include "GLErrorManager.h"
 
 VertexArray::VertexArray() {
 	glGenVertexArrays(1, &m_RendererID);

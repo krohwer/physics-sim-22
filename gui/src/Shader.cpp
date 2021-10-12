@@ -1,11 +1,8 @@
+#include "pch.h"
+
 #include "Shader.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
-#include "Renderer.h"
+#include "GLErrorManager.h"
 
 Shader::Shader(const std::string& filepathVertex, const std::string& filepathFragment) {
 	m_FilePathVertex = filepathVertex;
@@ -84,21 +81,31 @@ unsigned int Shader::createShader(const std::string& vertexShader, const std::st
 }
 
 void Shader::bind() const {
+
 	glUseProgram(m_RendererID);
 }
 
 void Shader::unbind() const {
+
 	glUseProgram(0);
 }
 
 void Shader::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3) {
+
 	glUniform4f(getUniformLocation(name), v0, v1, v2, v3);
 }
 
 int Shader::getUniformLocation(const std::string& name) {
-	int location = glGetUniformLocation(m_RendererID, name.c_str());
-	if (location == -1)
-		std::cout << "Warning: uniform '" << name << "' doesn't exist" << std::endl;
+
+	int location;
+
+	if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+		location = m_UniformLocationCache[name];
+	else
+		location = glGetUniformLocation(m_RendererID, name.c_str());
+		if (location == -1)
+			std::cout << "Warning: uniform '" << name << "' doesn't exist" << std::endl;
+		m_UniformLocationCache[name] = location;
 
 	return location;
 }

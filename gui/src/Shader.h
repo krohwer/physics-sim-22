@@ -1,12 +1,14 @@
 #pragma once
 
-#include <string>
-
 class Shader {
+	/// Filepath of the vertex shader.
 	std::string m_FilePathVertex;
+	/// Filepath of the fragment shader.
 	std::string m_FilePathFragment;
+	/// Caching system for uniforms. Prevents finding the location every time.
+	std::unordered_map<std::string, int> m_UniformLocationCache;
 	unsigned int m_RendererID;
-	// caching system for uniforms
+
 public:
 	Shader(const std::string& filepathVertex, const std::string& filepathFragment);
 	~Shader();

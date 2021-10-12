@@ -1,6 +1,8 @@
+#include "pch.h"
+
 #include "VertexBuffer.h"
 
-#include "Renderer.h"
+#include "GLErrorManager.h"
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size) {
 	glGenBuffers(1, &m_RendererID);

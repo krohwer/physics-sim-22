@@ -1,10 +1,5 @@
-#include <GL/glew.h> // must be included before other OpenGL Libraries
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
+#include "pch.h"
+#include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 
 #include "Renderer.h"
 
@@ -97,6 +92,9 @@ int main(void)
 		ib.unbind();
 		shader.unbind();
 
+		// create a renderer
+		Renderer renderer;
+
 		// variables to represent red and how much we want it to change each tick
 		float r = 0.0f;
 		float increment = 0.05f;
@@ -107,20 +105,19 @@ int main(void)
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
-			glClear(GL_COLOR_BUFFER_BIT);
+
+			renderer.clear();
 
 			// bind the shader
 			shader.bind();
 			// sending r in as red to animate the color
 			shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
-			// before drawing, bind the vertex array, and the index buffer
-			// using a VAO in this way is helpful for rendering multiple objects
-			va.bind();
-			ib.bind();
-
-			// still drawing in triangles, then the number of INDICES (not vertices), and the data type of the indices.
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			// call the renderer to draw something
+			// send in a vertex array, an index buffer, and a shader
+			// in a more traditional setup, we would be using a material instead of a shader
+			// a material is a shader AND its associated uniforms
+			renderer.draw(va, ib, shader);
 
 			// change r to animate the color of the object
 			if (r > 1.0)
