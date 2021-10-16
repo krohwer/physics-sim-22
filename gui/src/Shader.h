@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 class Shader {
 	/// Filepath of the vertex shader.
 	std::string m_FilePathVertex;
@@ -16,9 +18,11 @@ public:
 	void bind() const;
 	void unbind() const;
 
-	// set uniforms
+	// SET UNIFORMS //
+
 	// could write a templated setUniform function to set it, or parse the source code to do this automatically
 	void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+	void setUniformMat4f(const std::string& name, const glm::mat4& matrix);
 private:
 	/**
 	 * Read the shader file and convert it into a string.
