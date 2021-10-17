@@ -10,7 +10,7 @@
 class Vector {
 public:
 	/// x, y are the x and y coordinate of the vector head when the tail is placed at the origin
-	double x, y;
+	float x, y;
 
 	/**
 	 * Default constructor for the Vector class.
@@ -25,26 +25,26 @@ public:
 	 * @param xComponent - The desired X component of the Vector
 	 * @param yComponent - The desired Y component of the Vector
 	 */
-	Vector(double xComponent, double yComponent);
+	Vector(float xComponent, float yComponent);
 
 	/**
 	 * Alters the X component of the Vector.
 	 * 
 	 * @param xComponent - The desired X component of the Vector
 	 */
-	void setX(double xComponent);
+	void setX(float xComponent);
 
 	/**
 	 * Alters the Y component of the Vector.
 	 * 
 	 * @param yComponent - The desired Y component of the Vector
 	 */
-	void setY(double yComponent);
+	void setY(float yComponent);
 
 	/**
 	 * Gets the magnitude of the Vector, which is the distance from tail to head.
 	 */
-	double magnitude();
+	float magnitude();
 };
 
 /**
@@ -69,7 +69,7 @@ Vector sub(Vector vector1, Vector vector2);
  * @param vector - The Vector to be scaled
  * @param scalar - a double value to multiply the components of a Vector
  */
-Vector scalarMult(Vector vector, double scalar);
+Vector scalarMult(Vector vector, float scalar);
 
 /**
  * Calculates the dot product of two Vectors.
@@ -80,7 +80,7 @@ Vector scalarMult(Vector vector, double scalar);
  * @param vector1 - The Vector that determines the direction
  * @param vector2 - The Vector that is measured in the direction of the first Vector
  */
-double dotProduct(Vector vector1, Vector vector2);
+float dotProduct(Vector vector1, Vector vector2);
 
 // ADDITIONAL NOTES //
 // eventually might need a function to get the smallest angle between vectors.
