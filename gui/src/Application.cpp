@@ -27,8 +27,8 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	int windowWidth = 640;
-	int windowHeight = 480;
+	int windowWidth = 960;
+	int windowHeight = 540;
 	window = glfwCreateWindow(windowWidth, windowHeight, "Hello World", NULL, NULL);
 	if (!window)
 	{
@@ -53,11 +53,14 @@ int main(void)
 
 		// each line is a vertex position in the form x, y
 		// since we have a projection matrix set up now, 0,0 is the bottom left of the screen
+		// NOTE: we want to define these vertex positions as centered around 0,0 for our object coordinates
+		//		 Then we'll use our model matrix to actually place it in *world* coordinates
+		//		 This data will probably need to be stored in the object class
 		float positions[] = {
-			1.0f, 1.0f,	// 0
-			20.0f, 1.0f,	// 1
-			20.0f, 20.0f,	// 2
-			1.0f, 20.0f	// 3
+			-50.0f, -50.0f,	// 0
+			 50.0f, -50.0f,	// 1
+			 50.0f,  50.0f,	// 2
+			-50.0f,  50.0f	// 3
 		};
 
 		// this is an index buffer.  It tells OpenGL how to draw a square without storing duplicate vertices
@@ -94,8 +97,6 @@ int main(void)
 
 		// set the color uniform for the shader
 		shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.8f, 1.0f);
-		// set the matrix uniform for the projection matrix
-		shader.setUniformMat4f("u_MVP", projection);
 
 		// UNBIND EVERYTHING //
 
@@ -122,23 +123,44 @@ int main(void)
 			renderer.clear();
 
 			// bind the shader
+			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
 			shader.bind();
+
+			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
+
+				// identity model matrix
+				// can use it to move the object with glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
+				// the vec3 you're sending in is basically the displacement vector, telling how much the object moves in each direction
+				// for multiple objects, we will need a separate model matrix for each one since it converts from "object" coordinates to "world" coordinates
+				glm::mat4 model(1.0f);
+				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
+				// translations, rotations, and scaling
+
+				// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
+				// NOTE: even though matrices are quick to run on the GPU, we want to be doing these kinds of calculations on the CPU because they DO NOT need to run for every vertex.
+				//		 Only put things in the shader that *need* to run for every single vertex
+				glm::mat4 mvp = projection * model;
+
+				// set the matrix uniform for the mvp matrix so it updates every frame
+				shader.setUniformMat4f("u_MVP", mvp);
+
+				// call the renderer to draw something
+				// send in a vertex array, an index buffer, and a shader
+				// in a more traditional setup, we would be using a material instead of a shader
+				// a material is a shader AND its associated uniforms
+				renderer.draw(va, ib, shader);
+
+			}
+
 			// sending r in as red to animate the color
-			shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-
-			// call the renderer to draw something
-			// send in a vertex array, an index buffer, and a shader
-			// in a more traditional setup, we would be using a material instead of a shader
-			// a material is a shader AND its associated uniforms
-			renderer.draw(va, ib, shader);
-
+			// this should actually be done before the draw, but whatevs
+			//shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 			// change r to animate the color of the object
-			if (r > 1.0)
-				increment = -0.01f;
-			else if (r < 0.0f)
-				increment = 0.01f;
-
-			r += increment;
+// 			if (r > 1.0)
+// 				increment = -0.01f;
+// 			else if (r < 0.0f)
+// 				increment = 0.01f;
+//			r += increment;
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
