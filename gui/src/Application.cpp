@@ -63,6 +63,15 @@ int main(void)
 			-50.0f,  50.0f	// 3
 		};
 
+		/*
+		BIG NOTE:
+		Since we are working with very basic objects and we will have set types, one way to go about rendering multiple of these is to predefine default objects, and store either an entire model matrix, or simply the vec3's that we need to calculate the model matrix for each given object.  These vec3's being position, rotation, and scale. Things that we would probably want to be storing for each object anyway.
+		This means that each time we want to render a square, we simply use the default vertex array for a square, apply the object's transformations to the model matrix, set the uniform, and then draw the object. We would then also need a default vertex array for a circle, and any other shape/sprite that we wish to render.
+		What I'm not sure about is how this will affect collisions, since I guess we will need to somehow get the "model" of the object to check if it intersects with anything. 
+
+		Finally if we do need to use vec3s to store that data, that means we'll be importing glm in the PhysicsObject class anyway, so we might as well actually change vectorUtils to use vec3's like was mentioned before, and just use glm vectors for everything. Oh joy. I realized I set stuff up so this isn't that difficult, because the dependencies directory is actually in the solution folder, not the gui project folder. 
+		*/
+
 		// this is an index buffer.  It tells OpenGL how to draw a square without storing duplicate vertices
 		unsigned int indices[] = {
 			0, 1, 2,
