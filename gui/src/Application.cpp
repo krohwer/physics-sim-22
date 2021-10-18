@@ -29,7 +29,7 @@ int main(void)
 	/* Create a windowed mode window and its OpenGL context */
 	int windowWidth = 960;
 	int windowHeight = 540;
-	window = glfwCreateWindow(windowWidth, windowHeight, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(windowWidth, windowHeight, "Kinetics Lab", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -136,6 +136,12 @@ int main(void)
 			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
 			shader.bind();
 
+			/**
+			 * Somewhere about here we'll want to put a boolean controlled if/switch statement.
+			 * This statement will be responsible for starting, pausing, and stopping our simulation.
+			 * As such, within this statement we should include all of our physics calculations, so that they are executed every frame (when sim is running) before we draw each object.
+			 */
+
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
 				// identity model matrix
@@ -161,7 +167,7 @@ int main(void)
 				// a material is a shader AND its associated uniforms
 				renderer.draw(va, ib, shader);
 
-			}
+			} // end of mvp matrix scope
 
 			// sending r in as red to animate the color
 			// this should actually be done before the draw, but whatevs
@@ -179,7 +185,7 @@ int main(void)
 			/* Poll for and process events */
 			glfwPollEvents();
 		}
-	} // end of scope
+	} // end of GL scope
 
 	glfwTerminate();
 	return 0;
