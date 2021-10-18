@@ -27,9 +27,9 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	int windowWidth = 640;
-	int windowHeight = 480;
-	window = glfwCreateWindow(windowWidth, windowHeight, "Hello World", NULL, NULL);
+	int windowWidth = 960;
+	int windowHeight = 540;
+	window = glfwCreateWindow(windowWidth, windowHeight, "Kinetics Lab", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -53,12 +53,25 @@ int main(void)
 
 		// each line is a vertex position in the form x, y
 		// since we have a projection matrix set up now, 0,0 is the bottom left of the screen
+		// NOTE: we want to define these vertex positions as centered around 0,0 for our object coordinates
+		//		 Then we'll use our model matrix to actually place it in *world* coordinates
+		//		 This data will probably need to be stored in the object class
 		float positions[] = {
-			1.0f, 1.0f,	// 0
-			20.0f, 1.0f,	// 1
-			20.0f, 20.0f,	// 2
-			1.0f, 20.0f	// 3
+			-50.0f, -50.0f,	// 0
+			 50.0f, -50.0f,	// 1
+			 50.0f,  50.0f,	// 2
+			-50.0f,  50.0f	// 3
 		};
+
+		/*
+		BIG NOTE:
+		Since we are working with very basic objects and we will have set types, one way to go about rendering multiple of these is to predefine default objects, and store either an entire model matrix, or simply the vec3's that we need to calculate the model matrix for each given object.  These vec3's being position, rotation, and scale. Things that we would probably want to be storing for each object anyway.
+		This means that each time we want to render a square, we simply use the default vertex array for a square, apply the object's transformations to the model matrix, set the uniform, and then draw the object. We would then also need a default vertex array for a circle, and any other shape/sprite that we wish to render.
+		What I'm not sure about is how this will affect collisions, since I guess we will need to somehow get the "model" of the object to check if it intersects with anything.
+		EDIT: Okay so after a bit more thought, we will have some separate way of calculating the bounds of the object in the collisions calculations, and essentially the PhysicsObject class will operate as a transportable container. The physics engine will calculate the object position, rotation, and scale, then store it in an object. That object will be picked up by the renderer, and those attributes will be used to transform the default shape and draw it for each object in the scene.
+
+		Finally if we do need to use vec3s to store that data, that means we'll be importing glm in the PhysicsObject class anyway, so we might as well actually change vectorUtils to use vec3's like was mentioned before, and just use glm vectors for everything. Oh joy. I realized I set stuff up so this isn't that difficult, because the dependencies directory is actually in the solution folder, not the gui project folder. 
+		*/
 
 		// this is an index buffer.  It tells OpenGL how to draw a square without storing duplicate vertices
 		unsigned int indices[] = {
@@ -94,8 +107,6 @@ int main(void)
 
 		// set the color uniform for the shader
 		shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.8f, 1.0f);
-		// set the matrix uniform for the projection matrix
-		shader.setUniformMat4f("u_MVP", projection);
 
 		// UNBIND EVERYTHING //
 
@@ -122,23 +133,51 @@ int main(void)
 			renderer.clear();
 
 			// bind the shader
+			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
 			shader.bind();
+
+			/**
+			 * Somewhere about here we'll want to put a boolean controlled if/switch statement.
+			 * This statement will be responsible for starting, pausing, and stopping our simulation.
+			 * As such, within this statement we should include all of our physics calculations, so that they are executed every frame (when sim is running) before we draw each object.
+			 */
+
+			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
+
+				// identity model matrix
+				// can use it to move the object with glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
+				// the vec3 you're sending in is basically the displacement vector, telling how much the object moves in each direction
+				// for multiple objects, we will need a separate model matrix for each one since it converts from "object" coordinates to "world" coordinates
+				glm::mat4 model(1.0f);
+				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
+				model = glm::translate(model, glm::vec3(480.0f, 270.0f, 0.0f));	// translate to the center of the screen for now
+				// translations, rotations, and scaling
+
+				// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
+				// NOTE: even though matrices are quick to run on the GPU, we want to be doing these kinds of calculations on the CPU because they DO NOT need to run for every vertex.
+				//		 Only put things in the shader that *need* to run for every single vertex
+				glm::mat4 mvp = projection * model;
+
+				// set the matrix uniform for the mvp matrix so it updates every frame
+				shader.setUniformMat4f("u_MVP", mvp);
+
+				// call the renderer to draw something
+				// send in a vertex array, an index buffer, and a shader
+				// in a more traditional setup, we would be using a material instead of a shader
+				// a material is a shader AND its associated uniforms
+				renderer.draw(va, ib, shader);
+
+			} // end of mvp matrix scope
+
 			// sending r in as red to animate the color
-			shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-
-			// call the renderer to draw something
-			// send in a vertex array, an index buffer, and a shader
-			// in a more traditional setup, we would be using a material instead of a shader
-			// a material is a shader AND its associated uniforms
-			renderer.draw(va, ib, shader);
-
+			// this should actually be done before the draw, but whatevs
+			//shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 			// change r to animate the color of the object
-			if (r > 1.0)
-				increment = -0.01f;
-			else if (r < 0.0f)
-				increment = 0.01f;
-
-			r += increment;
+// 			if (r > 1.0)
+// 				increment = -0.01f;
+// 			else if (r < 0.0f)
+// 				increment = 0.01f;
+//			r += increment;
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
@@ -146,7 +185,7 @@ int main(void)
 			/* Poll for and process events */
 			glfwPollEvents();
 		}
-	} // end of scope
+	} // end of GL scope
 
 	glfwTerminate();
 	return 0;
