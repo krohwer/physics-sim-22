@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TestSetup", "TestSetup\TestSetup.vdproj", "{A3E0BD1F-4CA3-4C54-BA23-9E4054FBBC51}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcxproj", "{08FFFEAF-18A0-42F6-9950-157883FF722E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B7A3A6F-C061-430E-8E20-8C44C02800C1} = {8B7A3A6F-C061-430E-8E20-8C44C02800C1}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "gui\gui.vcxproj", "{2628AD97-BF7A-4FB6-A5FC-DC82FB781A22}"
 EndProject
