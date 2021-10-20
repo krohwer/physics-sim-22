@@ -37,7 +37,8 @@ namespace physics {
 	void removeForce(PhysicsObject& object, glm::vec3 force);
 
 	/**
-	 * Modifies the velocity vector of an object based on the value of its acceleration vector and the change in time.
+	 * [HELPER, USE updateObject() INSTEAD] 
+	 * Updates the *current* velocity of an object based on the value of its acceleration vector and the change in time.
 	 *
 	 * @param object - the object whose velocity will be recalculated
 	 * @param deltaTime - the length of time to apply the acceleration over, measured in seconds (s)
@@ -45,12 +46,21 @@ namespace physics {
 	void updateVelocity(PhysicsObject& object, double deltaTime);
 
 	/**
+	 * [HELPER, USE updateObject() INSTEAD] 
 	 * Modifies the position vector of an object based on the value of its velocity vector and the change in time.
 	 * 
 	 * @param object - the object whose position will be recalculated
 	 * @param deltaTime - the length of time to apply the velocity over, measured in seconds (s)
 	 */
 	void updatePosition(PhysicsObject& object, double deltaTime);
+
+	/**
+	 * Updates an objects position based on it's initial velocity (velocity at previous timestep), then updates its velocity to the current instantaneous velocity.
+	 * 
+	 * @param object - the object whose position and velocity will be recalculated
+	 * @param deltaTime - the length of time to apply over, measured in seconds (s)
+	 */
+	void updateObject(PhysicsObject& object, double deltaTime);
 }
 
 #endif
