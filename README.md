@@ -21,7 +21,10 @@ Then under Configuration Properties > General, change the Configuration Type to 
 In addition to this, in the Properties of the project containing main(), you'll need to add the project directory to the "Additional Include Directories" under C/C++ > General.
 You can add this in the format $(SolutionDir)name_of_project_folder.
 This will allow you to simply #include "project_name" in the main file instead of doing some shenanigans with including the directory in the include statement.
-this *should* compile, but it gets funky sometimes, so let me know if you're having issues and we'll work it out. I was having some weird issues and had to register some stuff.
+
+Next, in order to *use* these static libraries, you have to add them as a *reference* to the project you want to use them in. 
+Simply right click the project you need the library in (`gui` or `tests` in our case), and click Add > Reference... then in the menu, check any projects that you need to include, such as `physics`.
+This should now compile and run without any linker errors.
 
 Finally, we will be compiling all of our things into 32bit (x86) windows applications. On the top bar next to the windows debugger button, be sure to set the options to debug and x86.
 
