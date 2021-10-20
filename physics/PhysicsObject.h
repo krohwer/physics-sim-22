@@ -2,6 +2,9 @@
 
 #include <glm/glm.hpp>
 
+#ifndef PHYSICS_OBJECT_H
+#define PHYSICS_OBJECT_H
+
 /// Enumerated type for the object shape
 enum class Shape {BOX, TRIANGLE, BALL};
 
@@ -33,3 +36,5 @@ struct PhysicsObject {
 	/// scale stores the amount to scale the object along each axis. Z should remain 1.0f
 	glm::vec3 scale;
 };
+
+#endif

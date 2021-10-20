@@ -130,6 +130,14 @@ int main(void)
 			 * Somewhere about here we'll want to put a boolean controlled if/switch statement.
 			 * This statement will be responsible for starting, pausing, and stopping our simulation.
 			 * As such, within this statement we should include all of our physics calculations, so that they are executed every frame (when sim is running) before we draw each object.
+			 * 
+			 * define startTime within start
+			 * somehow store current (default) object attributes at start
+			 * every frame:
+			 *	set previousTime = currentTime
+			 *	grab currentTime from glfw (double glfwGetTime())
+			 *	calculate deltaTime = currentTime - previousTime
+			 *	calculate totalTime = currentTime - startTime
 			 */
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
