@@ -1,4 +1,9 @@
 #include "pch.h"
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
@@ -112,6 +117,14 @@ int main(void)
 		// variables to represent red and how much we want it to change each tick
 // 		float r = 0.0f;
 // 		float increment = 0.01f;
+
+		// IMGUI WINDOW CREATION //
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		ImGui::StyleColorsDark();
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init("#version 330");
 
 		// RENDER LOOP //
 
