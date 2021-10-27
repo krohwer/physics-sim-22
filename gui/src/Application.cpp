@@ -135,6 +135,12 @@ int main(void)
 
 			renderer.clear();
 
+			// IMGUI INITIALIZATION
+			// Must be called before any other ImGui code
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
 			// bind the shader
 			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
 			shader.bind();
@@ -192,6 +198,14 @@ int main(void)
 // 				increment = 0.01f;
 //			r += increment;
 
+			// Text at the top of the ImGUI window
+			ImGui::Begin("Test Window using ImGUI");
+			ImGui::End();
+
+			// Must be included after the above set of code related to ImGUI
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
 
@@ -199,6 +213,12 @@ int main(void)
 			glfwPollEvents();
 		}
 	} // end of GL scope
+
+	// Delete things related to ImGUI
+	// Similar to other delete functions
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwTerminate();
 	return 0;
