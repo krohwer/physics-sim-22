@@ -126,6 +126,10 @@ int main(void)
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 
+		// Setup for ImGui Window variables
+		glm::vec3 translation(480, 270, 0); // translate to the center of the screen by default
+		bool drawObject = false;
+
 		// RENDER LOOP //
 
 		/* Loop until the user closes the window */
@@ -168,7 +172,7 @@ int main(void)
 				glm::mat4 model(1.0f);
 				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 				// translate, then rotate, then scale.  VERY IMPORTANT
-				model = glm::translate(model, glm::vec3(480.0f, 270.0f, 0.0f));	// translate to the center of the screen for now
+				model = glm::translate(model, translation);
 				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
 				model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
 
@@ -184,7 +188,11 @@ int main(void)
 				// send in a vertex array, an index buffer, and a shader
 				// in a more traditional setup, we would be using a material instead of a shader
 				// a material is a shader AND its associated uniforms
-				renderer.draw(va, ib, shader);
+				//	ImGui nonsense butting in here
+				// if statement allows us to toggle whether the object is drawn or not
+				// since we're only dealing with one object, this is the easiest way to go about it FOR NOW
+				if (drawObject)
+					renderer.draw(va, ib, shader);
 
 			} // end of mvp matrix scope
 
@@ -198,9 +206,38 @@ int main(void)
 // 				increment = 0.01f;
 //			r += increment;
 
-			// Text at the top of the ImGUI window
-			ImGui::Begin("Test Window using ImGUI");
+			// Text at the top of the ImGui window
+			ImGui::Begin("Control Panel");
+
+			// Buttons to create/clear the object
+			// Resets the object to the "default" position and allows it to be drawn
+			if (ImGui::Button("Create Object")) {
+				translation.x = 480;
+				translation.y = 270;
+				drawObject = true;
+			}
+			// Removes the ability for the object to be drawn
+			if (ImGui::Button("Delete Object")) {
+				drawObject = false;
+			}
+
+			// Sliders to mess with horizontal and vertical position(s) of the object
+			ImGui::Text("Object Horizontal Position");
+			ImGui::SliderFloat("X", &translation.x, 0.0f, windowWidth);
+			ImGui::Text("Object Vertical Position");
+			ImGui::SliderFloat("Y", &translation.y, 0.0f, windowHeight);
+
+			// Buttons to actually conduct default experiment
+			if (ImGui::Button("Play Simulation")) {
+				// Physics happens here
+			}
+			if (ImGui::Button("Stop Simulation")) {
+				translation.x = 480;
+				translation.y = 270;
+			}
+
 			ImGui::End();
+			// Marks end of this ImGui window
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
