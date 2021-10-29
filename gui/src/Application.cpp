@@ -15,6 +15,23 @@
 #include "VertexArray.h"
 #include "Shader.h"
 
+#include "Environment.h"
+#include "Physics.h"
+#include "PhysicsObject.h"
+
+void printOneVector(glm::vec3 vector) {
+	std::cout << "{" << vector.x << ", " << vector.y << ", " << vector.z << "}" << std::endl;
+}
+
+void printVectors(PhysicsObject object) {
+	std::cout << "Position:";
+	printOneVector(object.position);
+	std::cout << "Velocity:";
+	printOneVector(object.velocity);
+	std::cout << "Acceleration:";
+	printOneVector(object.acceleration);
+}
+
 int main(void)
 {
 	// GLFW INITIALIZATION //
@@ -32,8 +49,9 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	int windowWidth = 960;
-	int windowHeight = 540;
+	int windowWidth = 1600;
+	int windowHeight = 900;
+	glm::vec2 windowCenter(windowWidth / 2.0f, windowHeight / 2.0f);
 	window = glfwCreateWindow(windowWidth, windowHeight, "Kinetics Lab", NULL, NULL);
 	if (!window)
 	{
@@ -101,7 +119,7 @@ int main(void)
 		// SET UNIFORMS //
 
 		// set the color uniform for the shader
-		shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.8f, 1.0f);
+		shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
 
 		// UNBIND EVERYTHING //
 
@@ -127,8 +145,25 @@ int main(void)
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 		// Setup for ImGui Window variables
-		glm::vec3 translation(480, 270, 0); // translate to the center of the screen by default
+		glm::vec3 translation(windowCenter.x, windowCenter.y, 0); // translate to the center of the screen by default
 		bool drawObject = false;
+		bool doPhysics = false;
+
+		// Physics timing variables
+		const float physicsFPS = 60;
+		const float timestep = 1 / physicsFPS;
+		float accumulator = 0;
+		float frameStart;
+		float startTime;
+
+		// Physics environment and object setup
+		Environment env = {16.0f, 9.0f, 9.81f, 0.0f}; // change the order of width and height because height->width make mad
+		env.pixelRatio = windowHeight / env.height;
+		// fix the translation
+		translation = translation / env.pixelRatio;
+		PhysicsObject object;
+		object.mass = 10.0f;
+		object.position = translation;
 
 		// RENDER LOOP //
 
@@ -149,19 +184,21 @@ int main(void)
 			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
 			shader.bind();
 
-			/**
-			 * Somewhere about here we'll want to put a boolean controlled if/switch statement.
-			 * This statement will be responsible for starting, pausing, and stopping our simulation.
-			 * As such, within this statement we should include all of our physics calculations, so that they are executed every frame (when sim is running) before we draw each object.
-			 * 
-			 * define startTime within start
-			 * somehow store current (default) object attributes at start
-			 * every frame:
-			 *	set previousTime = currentTime
-			 *	grab currentTime from glfw (double glfwGetTime())
-			 *	calculate deltaTime = currentTime - previousTime
-			 *	calculate totalTime = currentTime - startTime
-			 */
+			if (doPhysics) {
+				const float currentTime = glfwGetTime();
+
+				accumulator += currentTime - frameStart;
+
+				frameStart = currentTime;
+
+				while (accumulator > timestep) {
+					// do the physics
+					physics::updateObject(object, env, timestep);
+					//std::cout << "Accumulator: " << accumulator << std::endl;
+					//std::cout << "Timestep: " << timestep << std::endl;
+					accumulator -= timestep;
+				}
+			}
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
@@ -172,9 +209,9 @@ int main(void)
 				glm::mat4 model(1.0f);
 				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 				// translate, then rotate, then scale.  VERY IMPORTANT
-				model = glm::translate(model, translation);
-				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
-				model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
+				model = glm::translate(model, object.position * env.pixelRatio);
+				//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
+				//model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
 
 				// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
 				// NOTE: even though matrices are quick to run on the GPU, we want to be doing these kinds of calculations on the CPU because they DO NOT need to run for every vertex.
@@ -212,28 +249,39 @@ int main(void)
 			// Buttons to create/clear the object
 			// Resets the object to the "default" position and allows it to be drawn
 			if (ImGui::Button("Create Object")) {
-				translation.x = 480;
-				translation.y = 270;
+				object.position = translation;
+				physics::resetObject(object);
 				drawObject = true;
 			}
 			// Removes the ability for the object to be drawn
 			if (ImGui::Button("Delete Object")) {
 				drawObject = false;
+				doPhysics = false;
 			}
 
 			// Sliders to mess with horizontal and vertical position(s) of the object
 			ImGui::Text("Object Horizontal Position");
-			ImGui::SliderFloat("X", &translation.x, 0.0f, windowWidth);
+			ImGui::SliderFloat("X Pos", &object.position.x, 0.5f, env.width - 0.5f);
 			ImGui::Text("Object Vertical Position");
-			ImGui::SliderFloat("Y", &translation.y, 0.0f, windowHeight);
+			ImGui::SliderFloat("Y Pos", &object.position.y, 0.5f, env.height - 0.5f);
+			ImGui::Text("Object Horizontal Velocity");
+			ImGui::SliderFloat("X Vel", &object.velocity.x, -50.0f, 50.0f);
+			ImGui::Text("Object Vertical Velocity");
+			ImGui::SliderFloat("Y Vel", &object.velocity.y, -50.0f, 50.0f);
 
 			// Buttons to actually conduct default experiment
 			if (ImGui::Button("Play Simulation")) {
 				// Physics happens here
+				frameStart = glfwGetTime();
+				startTime = glfwGetTime();
+				physics::applyGravity(object, env);
+				doPhysics = true;
 			}
-			if (ImGui::Button("Stop Simulation")) {
-				translation.x = 480;
-				translation.y = 270;
+			if (ImGui::Button("Stop/Reset Simulation")) {
+				object.position = translation;
+				std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+				physics::resetObject(object);
+				doPhysics = false;
 			}
 
 			ImGui::End();

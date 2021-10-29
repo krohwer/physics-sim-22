@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui;$(SolutionDir)physics</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui;$(SolutionDir)physics</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui;$(SolutionDir)physics</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -145,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.3.4\include;$(SolutionDir)Dependencies\glew-2.1.0\include;$(SolutionDir)imgui;$(SolutionDir)physics</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
