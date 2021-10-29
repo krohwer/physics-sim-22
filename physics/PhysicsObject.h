@@ -34,7 +34,7 @@ struct PhysicsObject {
 	float rotation = 0.0f;
 
 	/// scale stores the amount to scale the object along each axis. Z should remain 1.0f
-	glm::vec3 scale = glm::vec3(0, 0, 0);
+	glm::vec3 scale = glm::vec3(1, 1, 1);
 };
 
 #endif

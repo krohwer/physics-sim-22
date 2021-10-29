@@ -36,7 +36,33 @@ void physics::updatePosition(PhysicsObject& object, double deltaTime) {
 	object.position.z = object.position.z + (object.velocity.z * deltaTime) + (0.5 * object.acceleration.z * (deltaTime * deltaTime));
 }
 
-void physics::updateObject(PhysicsObject& object, double deltaTime) {
+void physics::updateObject(PhysicsObject& object, Environment env, double deltaTime) {
+	
+	if (object.position.x < 0.5f)
+	{
+		object.acceleration.x = 0.0f;
+		object.velocity.x = 0.0f;
+		object.position.x = 0.5f;
+	}
+	if (object.position.x > (env.width - 0.5f))
+	{
+		object.acceleration.x = 0.0f;
+		object.velocity.x = 0.0f;
+		object.position.x = env.width - 0.5f;
+	}
+	if (object.position.y < 0.5f)
+	{
+		object.acceleration.y = 0.0f;
+		object.velocity.y = 0.0f;
+		object.position.y = 0.5f;
+	}
+// 	if (object.position.y > (env.height - 0.5f))
+// 	{
+// 		object.acceleration.y = 0.0f;
+// 		object.velocity.y = 0.0f;
+// 		object.position.y = env.height - 0.5f;
+// 	}
+	
 	// update the position of the object using the velocity of the previous timestep as the initial velocity
 	updatePosition(object, deltaTime);
 	// update the object's velocity to the current velocity
@@ -44,3 +70,14 @@ void physics::updateObject(PhysicsObject& object, double deltaTime) {
 
 	// TODO: might force compliance with terminal velocity and drag, who knows
 }
+
+void physics::resetObject(PhysicsObject& object) {
+	object.velocity.x = 0.0f;
+	object.velocity.y = 0.0f;
+	object.velocity.z = 0.0f;
+
+	object.acceleration.x = 0.0f;
+	object.acceleration.y = 0.0f;
+	object.acceleration.z = 0.0f;
+}
+

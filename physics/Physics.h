@@ -60,7 +60,9 @@ namespace physics {
 	 * @param object - the object whose position and velocity will be recalculated
 	 * @param deltaTime - the length of time to apply over, measured in seconds (s)
 	 */
-	void updateObject(PhysicsObject& object, double deltaTime);
+	void updateObject(PhysicsObject& object, Environment env, double deltaTime);
+
+	void resetObject(PhysicsObject& object);
 }
 
 #endif
