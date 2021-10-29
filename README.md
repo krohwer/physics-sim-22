@@ -5,7 +5,7 @@ Physics Simulator 2022
 To open this code for editing and compiling, first open Visual Studio and clone the repo. 
 In your Solution Explorer, you should see a file titled "physics-sim-22.sln" which is the solution file for this project. 
 Double click this to open the solution, and then click the button that looks like 3 files, to show all files. (you may have to show all files within projects as well)
-You can now open and edit any of these files, and select your build type (debug, release, etc) and your architecture.
+You can now open and edit any of these files.
 
 ## Contributing to This Project With VS
 For each individual component that you wish to add, click File > New > Project... and in the dialog box select Empty Project.
@@ -21,7 +21,12 @@ Then under Configuration Properties > General, change the Configuration Type to 
 In addition to this, in the Properties of the project containing main(), you'll need to add the project directory to the "Additional Include Directories" under C/C++ > General.
 You can add this in the format $(SolutionDir)name_of_project_folder.
 This will allow you to simply #include "project_name" in the main file instead of doing some shenanigans with including the directory in the include statement.
-this *should* compile, but it gets funky sometimes, so let me know if you're having issues and we'll work it out. I was having some weird issues and had to register some stuff.
+
+Next, in order to *use* these static libraries, you have to add them as a *reference* to the project you want to use them in. 
+Simply right click the project you need the library in (`gui` or `tests` in our case), and click Add > Reference... then in the menu, check any projects that you need to include, such as `physics`.
+This should now compile and run without any linker errors.
+
+Finally, we will be compiling all of our things into 32bit (x86) windows applications. On the top bar next to the windows debugger button, be sure to set the options to debug and x86.
 
 ## Syntax, Styling, and Comments
 ### Syntax
@@ -84,3 +89,26 @@ double dotProduct(Vector vector1, Vector vector2);
 The middle section of this comment is optional if the purpose/use is self explanatory, just include a brief definition of what it does.
 
 Then you can comment your code however you like in your .cpp file. See Vector.h and Vector.cpp for more examples.
+
+## Vectors
+Our previous vector class has now been completely deprecated, as glm's vec3 does literally everything we need and more. 
+I'm basically just leaving it around for documentations sake, and it will not be compiled into our final product.
+
+To use vectors, make sure your project has `$(SolutionDir)Dependencies` in its additional include directories under properties, and then use `#include <glm/glm.hpp>`
+
+### Vector Operations
+glm has basically all the functions we'll need for using their vectors and more. Here is a nice summary:
+```C++
+// adding vectors:
+glm::vec3 vectorSum = vector1 + vector2;
+// subtracting vectors:
+glm::vec3 vectorDiff = vector1 - vector2;
+// magnitude of a vector:
+float magnitude = glm::length(vector);
+// dot product:
+float dotProduct = glm::dot(vector1, vector2);
+// cross product:
+float crossProduct = glm::cross(vector1, vector2);
+// reflection:
+glm::vec3 result = glm::reflect(incidentVector, surfaceNormalVector);
+```
