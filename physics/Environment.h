@@ -1,10 +1,11 @@
 #pragma once
 
-#include <list>
-#include "PhysicsObject.h"
-
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
+
+#include <list>
+
+struct Body;
 
 class Environment {
 public:
@@ -15,7 +16,7 @@ public:
 	/// the gravitational acceleration of the environment, measured downward in meters/second squared (m/s^2)
 	float gravity;
 	/// the constant amount of time that passes between each physics update
-	double timestep;
+	float timestep;
 
 	/// the list of bodies (objects) within the physics environment
 	std::list <Body> bodyList;
@@ -23,7 +24,7 @@ public:
 	/// the ratio of windowHeight / environmentHeight, used for converting meters to pixels before rendering
 	float pixelRatio;
 
-	Environment(float eHeight, float eWidth, float eGravity, double eTimestep);
+	Environment(float eHeight, float eWidth, float eGravity, float eTimestep);
 
 	/**
 	 * Adds a body to the environment to be rendered and included in physics calculations.

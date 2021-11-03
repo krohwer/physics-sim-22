@@ -1,15 +1,15 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
-#include "PhysicsObject.h"
-#include "Environment.h"
 
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include <glm/glm.hpp>
+
+struct Body;
+
 /**
- * @brief Namespace for physics-related functions and calculations
+ * @brief Namespace for physics-related functions and calculations [DEPRECATED]
  */
 namespace physics {
 	/**
@@ -18,7 +18,7 @@ namespace physics {
 	 * @param object - the object whose position and velocity will be recalculated
 	 * @param deltaTime - the length of time to apply over, measured in seconds (s)
 	 */
-	void stepObject(Body& object, double deltaTime);
+	void stepObject(Body& object, float deltaTime);
 }
 
 #endif

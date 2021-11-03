@@ -1,12 +1,10 @@
 #include "Environment.h"
 
 #include <list>
-#include <iterator>
 
 #include "PhysicsObject.h"
-#include "Physics.h"
 
-Environment::Environment(float eHeight, float eWidth, float eGravity, double eTimestep) {
+Environment::Environment(float eHeight, float eWidth, float eGravity, float eTimestep) {
 	height = eHeight;
 	width = eWidth;
 	gravity = eGravity;
@@ -15,7 +13,12 @@ Environment::Environment(float eHeight, float eWidth, float eGravity, double eTi
 }
 
 void Environment::addBody(Body* body) {
-	body->massData.inverseMass = 1.0f / body->massData.mass;
+	// handling for 0 mass as "infinite" mass
+	if (body->mass == 0)
+		body->inverseMass = 0;
+	else
+		body->inverseMass = 1.0f / body->mass;
+
 	bodyList.push_back(*body);
 }
 
@@ -24,10 +27,7 @@ void Environment::removeBody(Body* body) {
 }
 
 void Environment::step() {
-// 	for (std::list<Body>::iterator iter = bodyList.begin(); iter != bodyList.end(); ++iter) {
-// 		physics::stepObject(*iter, timestep);
-// 	}
 	for (Body& body : bodyList) {
-		physics::stepObject(body, timestep);
+		body.step(timestep);
 	}
 }

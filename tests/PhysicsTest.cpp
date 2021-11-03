@@ -20,31 +20,31 @@ void printVectors(Environment env) {
 	cout << "Velocity:";
 	printOneVector(object.velocity);
 	cout << "Acceleration:";
-	printOneVector(object.massData.inverseMass * object.force);
+	printOneVector(object.inverseMass * object.force);
 	cout << "Force:";
 	printOneVector(object.force);
 }
 
 int main() {
-	double totalTime = 0;
+	float totalTime = 0;
 
 	Environment env = Environment(50.0f, 50.0f, 9.81f, 1.0);
 
-	double deltaTime = env.timestep;
+	float deltaTime = env.timestep;
 
 	Body object;
-	object.massData.mass = 10.0f;
+	object.mass = 10.0f;
 	object.position = glm::vec3(0.0f, 50.0f, 0);
 
 	// calculate the force of gravitation for the object into a vector and apply it
-	glm::vec3 gravity(0, object.massData.mass * env.gravity, 0);
+	glm::vec3 gravity(0, object.mass * env.gravity, 0);
 	object.force -= gravity;
 
 	env.addBody(&object);
 
 	// initial time
 	cout << "Time Elapsed: " << totalTime << endl;
-	cout << "Mass: " << object.massData.mass << endl;
+	cout << "Mass: " << object.mass << endl;
 	printVectors(env);
 	cout << endl;
 
