@@ -40,7 +40,7 @@ int main() {
 	glm::vec3 gravity(0, object.mass * env.gravity, 0);
 	object.force -= gravity;
 
-	env.addBody(&object);
+	env.addBody(object);
 
 	// initial time
 	cout << "Time Elapsed: " << totalTime << endl;

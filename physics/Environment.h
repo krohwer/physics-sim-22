@@ -9,8 +9,6 @@ struct Body;
 
 class Environment {
 public:
-	/// the vertical size of the environment, measured in meters (m)
-	float height;
 	/// the horizontal size of the environment, measured in meters (m)
 	float width;
 	/// the vertical size of the environment, measured in meters (m)
@@ -26,7 +24,7 @@ public:
 	/// the ratio of windowHeight / environmentHeight, used for converting meters to pixels before rendering
 	float pixelRatio;
 
-	Environment(float eHeight, float eWidth, float eGravity, float eTimestep);
+	Environment(float eWidth, float eHeight, float eGravity, float eTimestep);
 
 	/**
 	 * Adds a body to the environment to be rendered and included in physics calculations.
