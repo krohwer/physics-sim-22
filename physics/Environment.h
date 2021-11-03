@@ -13,6 +13,8 @@ public:
 	float height;
 	/// the horizontal size of the environment, measured in meters (m)
 	float width;
+	/// the vertical size of the environment, measured in meters (m)
+	float height;
 	/// the gravitational acceleration of the environment, measured downward in meters/second squared (m/s^2)
 	float gravity;
 	/// the constant amount of time that passes between each physics update

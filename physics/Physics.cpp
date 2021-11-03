@@ -29,3 +29,14 @@ void physics::stepObject(Body& object, float deltaTime) {
 
 	// TODO: might force compliance with terminal velocity and drag, who knows
 }
+
+void physics::resetObject(PhysicsObject& object) {
+	object.velocity.x = 0.0f;
+	object.velocity.y = 0.0f;
+	object.velocity.z = 0.0f;
+
+	object.acceleration.x = 0.0f;
+	object.acceleration.y = 0.0f;
+	object.acceleration.z = 0.0f;
+}
+
