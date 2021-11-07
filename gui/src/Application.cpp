@@ -152,6 +152,9 @@ int main(void)
 		std::cout << env.width << ", " << env.height << std::endl;
 		std::cout << translation.x << ", " << translation.y << std::endl;
 
+		// a vector to store the object's starting locations
+		std::vector<glm::vec3> startPositions;
+
 		// RENDER LOOP //
 
 		/* Loop until the user closes the window */
@@ -244,9 +247,11 @@ int main(void)
 				drawObject = true;
 			}
 			// Removes the ability for the object to be drawn
-			if (ImGui::Button("Delete Object")) {
+			if (ImGui::Button("Delete Objects")) {
 				drawObject = false;
 				doPhysics = false;
+				env.bodyList.clear();
+				startPositions.clear();
 			}
 
 			// Sliders to mess with horizontal and vertical position(s) of the object
@@ -261,6 +266,10 @@ int main(void)
 
 			// Buttons to actually conduct default experiment
 			if (ImGui::Button("Play Simulation")) {
+				// save object positions
+				for (Body& body : env.bodyList) {
+					startPositions.push_back(body.position);
+				}
 				// Physics happens here
 				frameStart = glfwGetTime();
 				startTime = glfwGetTime();
@@ -272,7 +281,8 @@ int main(void)
 				int count = 0;
 				for (Body& body : env.bodyList) {
 					body.velocity = glm::vec3(0.0f);
-					body.position = 
+					body.position = startPositions[count];
+					count++;
 				}
 				doPhysics = false;
 			}
