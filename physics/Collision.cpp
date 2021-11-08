@@ -55,10 +55,12 @@ bool AABBvsAABB(Manifold* man) {
 			}
 		}
 	}
+
+	return collision;
 }
 
 bool CirclevsCircle(Manifold* man) {
-	bool collisionDetected = true;
+	bool collision = true;
 	// pointers to objects
 	Body* a = man->A;
 	Body* b = man->B;
@@ -72,7 +74,7 @@ bool CirclevsCircle(Manifold* man) {
 
 	// check if the circles in the manifold are actually colliding
 	if (r < (n.x * n.x) + (n.y * n.y) + (n.z * n.z)) 
-		collisionDetected = false;
+		collision = false;
 	else {
 		// if they are colliding
 
@@ -83,4 +85,5 @@ bool CirclevsCircle(Manifold* man) {
 			man->penetration = r - distance;
 		}
 	}
+	return collision;
 }

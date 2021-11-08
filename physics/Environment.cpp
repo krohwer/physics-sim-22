@@ -4,9 +4,9 @@
 
 #include "PhysicsObject.h"
 
-Environment::Environment(float eHeight, float eWidth, float eGravity, float eTimestep) {
-	height = eHeight;
+Environment::Environment(float eWidth, float eHeight, float eGravity, float eTimestep) {
 	width = eWidth;
+	height = eHeight;
 	gravity = eGravity;
 	timestep = eTimestep;
 	pixelRatio = 0;
