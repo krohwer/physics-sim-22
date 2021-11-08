@@ -151,8 +151,6 @@ int main(void)
 		env.pixelRatio = windowHeight / env.height;
 		// fix the translation
 		translation = translation / env.pixelRatio;
-		std::cout << env.width << ", " << env.height << std::endl;
-		std::cout << translation.x << ", " << translation.y << std::endl;
 
 		// a vector to store the object's starting locations
 		std::vector<glm::vec3> startPositions;
@@ -201,8 +199,8 @@ int main(void)
 					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 					// translate, then rotate, then scale.  VERY IMPORTANT
 					model = glm::translate(model, body.position * env.pixelRatio);
-					//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
-					//model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
+					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
+					model = glm::scale(model, body.scale);
 
 					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
 					glm::mat4 mvp = projection * model;
@@ -239,14 +237,16 @@ int main(void)
 			// Buttons to create/clear the object
 			// Resets the object to the "default" position and allows it to be drawn
 			if (ImGui::Button("Create Object")) {
-				Body object;
-				object.mass = 10.0f;
-				object.position = translation;
-				// calculate the force of gravitation for the object into a vector and apply it
-				glm::vec3 gravity(0, object.mass * env.gravity, 0);
-				object.force -= gravity;
-				env.addBody(&object);
-				drawObject = true;
+				if (!doPhysics) {
+					Body object;
+					object.mass = 10.0f;
+					object.position = translation;
+					// calculate the force of gravitation for the object into a vector and apply it
+					glm::vec3 gravity(0, object.mass * env.gravity, 0);
+					object.force -= gravity;
+					env.addBody(&object);
+					drawObject = true;
+				}
 			}
 			// Removes the ability for the object to be drawn
 			if (ImGui::Button("Delete Objects")) {
@@ -272,23 +272,26 @@ int main(void)
 				// save object positions
 				for (Body& body : env.bodyList) {
 					startPositions.push_back(body.position);
+					// need to also implement storing initial velocity.  Incoming storage manager POG?
 				}
 				// Physics happens here
 				frameStart = glfwGetTime();
 				startTime = glfwGetTime();
-				// TODO: Store a list of original positions
+				// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
 				doPhysics = true;
 			}
 			if (ImGui::Button("Stop/Reset Simulation")) {
-				std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
-				int count = 0;
-				for (Body& body : env.bodyList) {
-					body.velocity = glm::vec3(0.0f);
-					body.position = startPositions[count];
-					count++;
+				if (doPhysics) {
+					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+					int count = 0;
+					for (Body& body : env.bodyList) {
+						body.velocity = glm::vec3(0.0f);
+						body.position = startPositions[count];
+						count++;
+					}
+					startPositions.clear();
+					doPhysics = false;
 				}
-				startPositions.clear();
-				doPhysics = false;
 			}
 
 			ImGui::End();
