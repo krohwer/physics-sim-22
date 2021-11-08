@@ -4,6 +4,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "GuiUtils.h"
+
 #include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
@@ -255,10 +257,11 @@ int main(void)
 			}
 
 			// Sliders to mess with horizontal and vertical position(s) of the object
-			ImGui::Text("Object Horizontal Position");
-			ImGui::SliderFloat("X Pos", &translation.x, 0.5f, env.width - 0.5f);
-			ImGui::Text("Object Vertical Position");
-			ImGui::SliderFloat("Y Pos", &translation.y, 0.5f, env.height - 0.5f);
+			// ImGui::Text("Object Horizontal Position");
+			// ImGui::SliderFloat("X Pos", &translation.x, 0.5f, env.width - 0.5f);
+			// ImGui::Text("Object Vertical Position");
+			// ImGui::SliderFloat("Y Pos", &translation.y, 0.5f, env.height - 0.5f);
+
 // 			ImGui::Text("Object Horizontal Velocity");
 // 			ImGui::SliderFloat("X Vel", &object.velocity.x, -50.0f, 50.0f);
 // 			ImGui::Text("Object Vertical Velocity");
@@ -284,11 +287,14 @@ int main(void)
 					body.position = startPositions[count];
 					count++;
 				}
+				startPositions.clear();
 				doPhysics = false;
 			}
 
 			ImGui::End();
 			// Marks end of this ImGui window
+
+			gui_utils::createAllObjectMenus(env);
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
