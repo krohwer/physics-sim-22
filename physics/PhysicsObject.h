@@ -43,7 +43,7 @@ struct Body {
 	float torque = 0.0f;
 
 	/// Mass is simply the mass of the object measured in kilograms (kg)
-	float mass;
+	float mass = 10.0f;
 	/// Inverse mass is 1/mass, which is very commonly used in calculations
 	float inverseMass;
 
@@ -73,7 +73,7 @@ struct Body {
 	}
 
 	/**
-	 * 
+	 * Applies the impulse from a collision to an object at a certain contact point
 	 * 
 	 * @param impulse - 
 	 * @param contactVector - 

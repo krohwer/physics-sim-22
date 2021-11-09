@@ -24,10 +24,10 @@ struct Manifold
 	Body* A;
 	Body* B;
 
-	float penetration;     // Depth of penetration from collision
+	float penetration = 0.0f;     // Depth of penetration from collision
 	glm::vec3 normal;      // From A to B
 	//Vec2 contacts[2];     // Points of contact during collision
-	int contact_count; // Number of contacts that occured during collision
+	int contact_count = 0; // Number of contacts that occured during collision
 	float epsilon;         // Mixed restitution
 	float df;              // Mixed dynamic friction
 	float sf;              // Mixed static friction
