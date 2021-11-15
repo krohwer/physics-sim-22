@@ -287,6 +287,18 @@ int main(void)
 					doPhysics = false;
 				}
 			}
+// 			if (ImGui::Button("Pause Simulation")) {
+// 				if (doPhysics) {
+// 					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+// 					doPhysics = false;
+// 				}
+// 				else {
+// 					// reset start time and do physics
+// 					frameStart = glfwGetTime();
+// 					startTime = glfwGetTime();
+// 					doPhysics = true;
+// 				}
+// 			}
 
 			ImGui::End(); // End of Simulation Manager Window
 
