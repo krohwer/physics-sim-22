@@ -3,6 +3,7 @@
 #include <list>
 
 #include "PhysicsObject.h"
+#include "Collision.h"
 
 Environment::Environment(float eWidth, float eHeight, float eGravity, float eTimestep) {
 	width = eWidth;
@@ -29,5 +30,6 @@ void Environment::removeBody(Body* body) {
 void Environment::step() {
 	for (Body& body : bodyList) {
 		body.step(timestep);
+		bool collided = collisionWithEnv(width, &body);
 	}
 }

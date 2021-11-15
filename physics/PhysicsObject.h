@@ -43,14 +43,15 @@ struct Body {
 	float torque = 0.0f;
 
 	/// Mass is simply the mass of the object measured in kilograms (kg)
-	float mass;
+	float mass = 10.0f;
 	/// Inverse mass is 1/mass, which is very commonly used in calculations
 	float inverseMass;
 
 	/// Moment of inertia, mr^2 where m is the mass and r is the distance from the center of rotation (CoM)
 	float momentOfInertia;
 
-	/// restitution
+	/// Restitution is the coefficient of "bounciness" of an object.  Used to calculate velocity after a collision. (Wood by default)
+	float restitution = 0.2f;
 
 	/// force stores the sum of forces acting on the object in each direction. Each component measured in Newtons (N)
 	glm::vec3 force = glm::vec3(0, 0, 0);
@@ -62,7 +63,7 @@ struct Body {
 	Shape shape = Shape::BOX;
 
 	/// scale stores the amount to scale the object along each axis. Z should remain 1.0f
-	glm::vec3 scale = glm::vec3(0, 0, 0);
+	glm::vec3 scale = glm::vec3(1, 1, 1);
 
 	/**
 	 * Applies a force vector to the object
@@ -72,7 +73,7 @@ struct Body {
 	}
 
 	/**
-	 * 
+	 * Applies the impulse from a collision to an object at a certain contact point
 	 * 
 	 * @param impulse - 
 	 * @param contactVector - 
