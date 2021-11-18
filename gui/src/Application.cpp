@@ -140,7 +140,7 @@ int main(void)
 		bool doPhysics = false;
 
 		// Physics timing variables
-		const float physicsFPS = 60;
+		const float physicsFPS = 200;
 		const float timestep = 1 / physicsFPS;
 		float accumulator = 0;
 		float frameStart;
@@ -274,6 +274,9 @@ int main(void)
 					startPositions.push_back(body.position);
 					// need to also implement storing initial velocity.  Incoming storage manager POG?
 				}
+				// physics pre-calculations
+				env.generatePairs();
+
 				// Physics happens here
 				frameStart = glfwGetTime();
 				startTime = glfwGetTime();

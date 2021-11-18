@@ -4,8 +4,10 @@
 #define ENVIRONMENT_H
 
 #include <list>
+#include <vector>
 
 struct Body;
+struct Pair;
 
 class Environment {
 public:
@@ -20,6 +22,9 @@ public:
 
 	/// the list of bodies (objects) within the physics environment
 	std::list <Body> bodyList;
+
+	/// contains the possible collision pairs
+	std::vector <Pair> pairs;
 
 	/// the ratio of windowHeight / environmentHeight, used for converting meters to pixels before rendering
 	float pixelRatio;
@@ -36,6 +41,16 @@ public:
 	 * Removes a body from the environment.
 	 */
 	void removeBody(Body* body);
+
+	/**
+	 * Calculates the inverse mass of all objects in the environment
+	 */
+	void calculateInverseMasses();
+
+	/**
+	 * Broad phase, generate all possible non-duplicate pairs of bodies in the environment
+	 */
+	void generatePairs();
 
 	/**
 	 * Advances all objects in the environment 
