@@ -4,6 +4,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "GuiUtils.h"
+
 #include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,21 +18,9 @@
 #include "Shader.h"
 
 #include "Environment.h"
-#include "Physics.h"
 #include "PhysicsObject.h"
-
-void printOneVector(glm::vec3 vector) {
-	std::cout << "{" << vector.x << ", " << vector.y << ", " << vector.z << "}" << std::endl;
-}
-
-void printVectors(PhysicsObject object) {
-	std::cout << "Position:";
-	printOneVector(object.position);
-	std::cout << "Velocity:";
-	printOneVector(object.velocity);
-	std::cout << "Acceleration:";
-	printOneVector(object.acceleration);
-}
+#include "Collision.h"
+#include "Manifold.h"
 
 int main(void)
 {
@@ -150,20 +140,20 @@ int main(void)
 		bool doPhysics = false;
 
 		// Physics timing variables
-		const float physicsFPS = 60;
+		const float physicsFPS = 200;
 		const float timestep = 1 / physicsFPS;
 		float accumulator = 0;
 		float frameStart;
-		float startTime;
+		float startTime = glfwGetTime();
 
-		// Physics environment and object setup
-		Environment env = {16.0f, 9.0f, 9.81f, 0.0f}; // change the order of width and height because height->width make mad
+		// Physics environment setup
+		Environment env = Environment(16.0f, 9.0f, 9.81f, timestep);
 		env.pixelRatio = windowHeight / env.height;
 		// fix the translation
 		translation = translation / env.pixelRatio;
-		PhysicsObject object;
-		object.mass = 10.0f;
-		object.position = translation;
+
+		// a vector to store the object's starting locations
+		std::vector<glm::vec3> startPositions;
 
 		// RENDER LOOP //
 
@@ -193,7 +183,7 @@ int main(void)
 
 				while (accumulator > timestep) {
 					// do the physics
-					physics::updateObject(object, env, timestep);
+					env.step();
 					//std::cout << "Accumulator: " << accumulator << std::endl;
 					//std::cout << "Timestep: " << timestep << std::endl;
 					accumulator -= timestep;
@@ -202,34 +192,32 @@ int main(void)
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
-				// identity model matrix
-				// can use it to move the object with glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
-				// the vec3 you're sending in is basically the displacement vector, telling how much the object moves in each direction
-				// for multiple objects, we will need a separate model matrix for each one since it converts from "object" coordinates to "world" coordinates
-				glm::mat4 model(1.0f);
-				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
-				// translate, then rotate, then scale.  VERY IMPORTANT
-				model = glm::translate(model, object.position * env.pixelRatio);
-				//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
-				//model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
+				// render each object
+				for (Body& body : env.bodyList) {
+					// identity model matrix
+					glm::mat4 model(1.0f);
+					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
+					// translate, then rotate, then scale.  VERY IMPORTANT
+					model = glm::translate(model, body.position * env.pixelRatio);
+					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
+					model = glm::scale(model, body.scale);
 
-				// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-				// NOTE: even though matrices are quick to run on the GPU, we want to be doing these kinds of calculations on the CPU because they DO NOT need to run for every vertex.
-				//		 Only put things in the shader that *need* to run for every single vertex
-				glm::mat4 mvp = projection * model;
+					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
+					glm::mat4 mvp = projection * model;
 
-				// set the matrix uniform for the mvp matrix so it updates every frame
-				shader.setUniformMat4f("u_MVP", mvp);
+					// set the matrix uniform for the mvp matrix so it updates every frame
+					shader.setUniformMat4f("u_MVP", mvp);
 
-				// call the renderer to draw something
-				// send in a vertex array, an index buffer, and a shader
-				// in a more traditional setup, we would be using a material instead of a shader
-				// a material is a shader AND its associated uniforms
-				//	ImGui nonsense butting in here
-				// if statement allows us to toggle whether the object is drawn or not
-				// since we're only dealing with one object, this is the easiest way to go about it FOR NOW
-				if (drawObject)
-					renderer.draw(va, ib, shader);
+					// call the renderer to draw something
+					// send in a vertex array, an index buffer, and a shader
+					// in a more traditional setup, we would be using a material instead of a shader
+					// a material is a shader AND its associated uniforms
+					//	ImGui nonsense butting in here
+					// if statement allows us to toggle whether the object is drawn or not
+					// since we're only dealing with one object, this is the easiest way to go about it FOR NOW
+					if (drawObject)
+						renderer.draw(va, ib, shader);
+				}
 
 			} // end of mvp matrix scope
 
@@ -249,43 +237,75 @@ int main(void)
 			// Buttons to create/clear the object
 			// Resets the object to the "default" position and allows it to be drawn
 			if (ImGui::Button("Create Object")) {
-				object.position = translation;
-				physics::resetObject(object);
-				drawObject = true;
+				if (!doPhysics) {
+					Body object;
+					object.mass = 10.0f;
+					object.position = translation;
+					// calculate the force of gravitation for the object into a vector and apply it
+					glm::vec3 gravity(0, object.mass * env.gravity, 0);
+					object.force -= gravity;
+					env.addBody(&object);
+					drawObject = true;
+				}
 			}
 			// Removes the ability for the object to be drawn
-			if (ImGui::Button("Delete Object")) {
+			if (ImGui::Button("Delete All Objects")) {
 				drawObject = false;
 				doPhysics = false;
+				env.bodyList.clear();
+				startPositions.clear();
 			}
 
-			// Sliders to mess with horizontal and vertical position(s) of the object
-			ImGui::Text("Object Horizontal Position");
-			ImGui::SliderFloat("X Pos", &object.position.x, 0.5f, env.width - 0.5f);
-			ImGui::Text("Object Vertical Position");
-			ImGui::SliderFloat("Y Pos", &object.position.y, 0.5f, env.height - 0.5f);
-			ImGui::Text("Object Horizontal Velocity");
-			ImGui::SliderFloat("X Vel", &object.velocity.x, -50.0f, 50.0f);
-			ImGui::Text("Object Vertical Velocity");
-			ImGui::SliderFloat("Y Vel", &object.velocity.y, -50.0f, 50.0f);
+			gui_utils::createAllObjectMenus(env);
 
+			ImGui::End(); // End of Control Panel Window
+
+			ImGui::Begin("Simulation Manager");
 			// Buttons to actually conduct default experiment
 			if (ImGui::Button("Play Simulation")) {
+				// save object positions
+				for (Body& body : env.bodyList) {
+					startPositions.push_back(body.position);
+					// need to also implement storing initial velocity.  Incoming storage manager POG?
+				}
+				// physics pre-calculations
+				env.generatePairs();
+
 				// Physics happens here
 				frameStart = glfwGetTime();
 				startTime = glfwGetTime();
-				physics::applyGravity(object, env);
+				// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
 				doPhysics = true;
 			}
 			if (ImGui::Button("Stop/Reset Simulation")) {
-				object.position = translation;
-				std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
-				physics::resetObject(object);
-				doPhysics = false;
+				if (doPhysics) {
+					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+					int count = 0;
+					for (Body& body : env.bodyList) {
+						body.velocity = glm::vec3(0.0f);
+						body.position = startPositions[count];
+						count++;
+					}
+					startPositions.clear();
+					doPhysics = false;
+				}
 			}
+// 			if (ImGui::Button("Pause Simulation")) {
+// 				if (doPhysics) {
+// 					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+// 					doPhysics = false;
+// 				}
+// 				else {
+// 					// reset start time and do physics
+// 					frameStart = glfwGetTime();
+// 					startTime = glfwGetTime();
+// 					doPhysics = true;
+// 				}
+// 			}
 
-			ImGui::End();
-			// Marks end of this ImGui window
+			ImGui::End(); // End of Simulation Manager Window
+
+			// Marks end of all ImGui windows
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();

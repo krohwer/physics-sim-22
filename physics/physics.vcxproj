@@ -143,12 +143,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Environment.h" />
-    <ClInclude Include="Physics.h" />
+    <ClInclude Include="Manifold.h" />
     <ClInclude Include="PhysicsObject.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Environment.cpp" />
+    <ClCompile Include="Manifold.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
