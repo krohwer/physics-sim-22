@@ -9,6 +9,11 @@ struct Manifold;
 struct Body;
 class Environment;
 
+struct Pair {
+	Body* A;
+	Body* B;
+};
+
 /// detect a collision between two axis aligned bounding boxes
 bool AABBvsAABB(Manifold *man);
 
@@ -45,6 +50,10 @@ void resolveCollision(Manifold* man);
  * Corrects sinking of a body based on the normal vector and the penetration depth
  */
 void positionalCorrection(glm::vec3 normal, Body* body, float penetration);
+
+
+
+
 
 //typedef void (*CollisionCallback)(Manifold* m, Body* a, Body* b);
 

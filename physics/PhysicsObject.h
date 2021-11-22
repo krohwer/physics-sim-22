@@ -118,7 +118,7 @@ struct Body {
 
 		// same for y
 		box.max.y = position.y + 0.5f * scale.y;
-		box.min.y = position.y + 0.5f * scale.y;
+		box.min.y = position.y - 0.5f * scale.y;
 
 		return box;
 	}

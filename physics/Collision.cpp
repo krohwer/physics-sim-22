@@ -37,7 +37,7 @@ bool AABBvsAABB(Manifold* man) {
 		// SAT test on y
 		if (y_overlap > 0) {
 			// find the axis of least penetration
-			if (x_overlap > y_overlap) {
+			if (x_overlap < y_overlap) {
 				// point toward b since n points from a to b
 				if (n.x < 0)
 					man->normal = glm::vec3(-1.0f, 0.0f, 0.0f);
@@ -133,9 +133,9 @@ void resolveCollision(glm::vec3 normal, Body* body, float penetration) {
 		glm::vec3 impulse = j * normal;
 		body->velocity += body->inverseMass * impulse;
 
-		// positional correction
-		positionalCorrection(normal, body, penetration);
 	}
+	// positional correction
+	positionalCorrection(normal, body, penetration);
 }
 
 void resolveCollision(Manifold* manifold) {
@@ -147,7 +147,7 @@ void resolveCollision(Manifold* manifold) {
 	float veloctyAlongNormal = glm::dot(relativeVelocity, manifold->normal);
 
 	// only continue if the objects are not separating
-	if (veloctyAlongNormal <= 0) {
+	if (veloctyAlongNormal < 0) {
 		// calculate the restitution
 		float epsilon = std::min(a->restitution, b->restitution);
 
@@ -160,13 +160,13 @@ void resolveCollision(Manifold* manifold) {
 		glm::vec3 impulse = j * manifold->normal;
 		a->velocity -= a->inverseMass * impulse;
 		b->velocity += b->inverseMass * impulse;
-
-		// positional correction
 	}
+	// positional correction
+	manifold->PositionalCorrection();
 }
 
 void positionalCorrection(glm::vec3 normal, Body* body, float penetration) {
-	const float percent = 0.2; // usually 20% to 80%
+	const float percent = 1.0; // usually 20% to 80%
 	const float slop = 0.01; // usually 0.01 to 0.1
 	glm::vec3 correction = (std::max(penetration - slop, 0.0f) / (body->inverseMass)) * percent * normal;
 	body->position += body->inverseMass * correction;

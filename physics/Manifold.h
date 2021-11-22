@@ -15,11 +15,11 @@ struct Manifold
 	{
 	}
 
-	void Solve(void);                 // Generate contact information
-	void Initialize(void);            // Precalculations for impulse solving
-	void ApplyImpulse(void);          // Solve impulse and apply
-	void PositionalCorrection(void);  // Naive correction of positional penetration
-	void InfiniteMassCorrection(void);
+// 	void Solve();                 // Generate contact information
+// 	void Initialize();            // Precalculations for impulse solving
+// 	void ApplyImpulse();          // Solve impulse and apply
+ 	void PositionalCorrection();  // Naive correction of positional penetration
+// 	void InfiniteMassCorrection();
 
 	Body* A;
 	Body* B;
