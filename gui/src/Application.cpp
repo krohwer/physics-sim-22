@@ -136,8 +136,8 @@ int main(void)
 
 		// Setup for ImGui Window variables
 		glm::vec3 translation(windowCenter.x, windowCenter.y, 0); // translate to the center of the screen by default
-		bool drawObject = false;
 		bool doPhysics = false;
+		bool isPaused = false;
 
 		// Physics timing variables
 		const float physicsFPS = 200;
@@ -149,11 +149,12 @@ int main(void)
 		// Physics environment setup
 		Environment env = Environment(16.0f, 9.0f, 9.81f, timestep);
 		env.pixelRatio = windowHeight / env.height;
-		// fix the translation
+		// Adjust the translation
 		translation = translation / env.pixelRatio;
 
-		// a vector to store the object's starting locations
+		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
+		std::vector<glm::vec3> startVelocities;
 
 		// RENDER LOOP //
 
@@ -184,8 +185,6 @@ int main(void)
 				while (accumulator > timestep) {
 					// do the physics
 					env.step();
-					//std::cout << "Accumulator: " << accumulator << std::endl;
-					//std::cout << "Timestep: " << timestep << std::endl;
 					accumulator -= timestep;
 				}
 			}
@@ -212,11 +211,7 @@ int main(void)
 					// send in a vertex array, an index buffer, and a shader
 					// in a more traditional setup, we would be using a material instead of a shader
 					// a material is a shader AND its associated uniforms
-					//	ImGui nonsense butting in here
-					// if statement allows us to toggle whether the object is drawn or not
-					// since we're only dealing with one object, this is the easiest way to go about it FOR NOW
-					if (drawObject)
-						renderer.draw(va, ib, shader);
+					renderer.draw(va, ib, shader);
 				}
 
 			} // end of mvp matrix scope
@@ -231,13 +226,21 @@ int main(void)
 // 				increment = 0.01f;
 //			r += increment;
 
-			// Text at the top of the ImGui window
+			// IMGUI WINDOWS //
+
+			// Forces next window to be a width of 500px and height of 600px upon launch of application
+			// Users can still resize it afterwards
+			// TODO: throw the sizes to a variable outside of the render loop
+			ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_FirstUseEver);
+
+			// TODO: Potentially throw all created windows into GuiUtils for structure
+			// Window to manage environment objects
 			ImGui::Begin("Control Panel");
 
-			// Buttons to create/clear the object
-			// Resets the object to the "default" position and allows it to be drawn
+			// Creates a new object at the center of the screen
 			if (ImGui::Button("Create Object")) {
-				if (!doPhysics) {
+				if (!doPhysics && !isPaused) {
+					// Cannot press this button if the simulation is running or paused
 					Body object;
 					object.mass = 10.0f;
 					object.position = translation;
@@ -245,67 +248,92 @@ int main(void)
 					glm::vec3 gravity(0, object.mass * env.gravity, 0);
 					object.force -= gravity;
 					env.addBody(&object);
-					drawObject = true;
 				}
 			}
-			// Removes the ability for the object to be drawn
+			// Removes all objects in the current environment
 			if (ImGui::Button("Delete All Objects")) {
-				drawObject = false;
-				doPhysics = false;
-				env.bodyList.clear();
-				startPositions.clear();
+				if (!doPhysics && !isPaused) {
+					// Cannot press this button if the simulation is running or paused
+					doPhysics = false;
+					env.bodyList.clear();
+					startPositions.clear();
+					startVelocities.clear();
+				}
 			}
 
 			gui_utils::createAllObjectMenus(env);
 
 			ImGui::End(); // End of Control Panel Window
 
-			ImGui::Begin("Simulation Manager");
-			// Buttons to actually conduct default experiment
-			if (ImGui::Button("Play Simulation")) {
-				// save object positions
-				for (Body& body : env.bodyList) {
-					startPositions.push_back(body.position);
-					// need to also implement storing initial velocity.  Incoming storage manager POG?
-				}
-				// physics pre-calculations
-				env.generatePairs();
+			// Forces window to a width of 700px and height of 400px upon launch of application
+			// Users can still resize it afterwards
+			// TODO: throw the sizes to a variable outside of the render loop
+			ImGui::SetNextWindowSize(ImVec2(700, 400), ImGuiCond_FirstUseEver);
 
-				// Physics happens here
-				frameStart = glfwGetTime();
-				startTime = glfwGetTime();
-				// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
-				doPhysics = true;
+			// Window with buttons to manage the set up experiment
+			ImGui::Begin("Simulation Manager");
+
+			// TODO: Mess with the style of the buttons when they're disabled
+			// Begins simulation and stores initial objects
+			if (ImGui::Button("Start Simulation")) {
+				if (!doPhysics && !isPaused) {
+					// Cannot press this button if the simulation is running or paused
+
+					// save object starting positions and velocities
+					for (Body& body : env.bodyList) {
+						startPositions.push_back(body.position);
+						startVelocities.push_back(body.velocity);
+						// Incoming storage manager POG?
+					}
+					// Physics pre-calculations
+					env.generatePairs();
+
+					// Physics happens here
+					frameStart = glfwGetTime();
+					startTime = glfwGetTime();
+					// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
+					doPhysics = true;
+				}
 			}
-			if (ImGui::Button("Stop/Reset Simulation")) {
+
+			// Will pause/resume simulation once it's been started
+			if (ImGui::Button("Pause/Resume Simulation")) {
+				// Cannot press this button if the simulation was not started
 				if (doPhysics) {
-					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
+					// Pauses simulation if it's running
+					/*std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;*/
+					doPhysics = false;
+					isPaused = true;
+				}
+				else if (isPaused) {
+					// Reset start time and continue the physics simulation
+					frameStart = glfwGetTime();
+					startTime = glfwGetTime();
+					doPhysics = true;
+					isPaused = false;
+				}
+			}
+
+			// Stops and resets objects as they were at the start of the simulation
+			if (ImGui::Button("Stop/Reset Simulation")) {
+				if (doPhysics || isPaused) {
+					/*std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;*/
 					int count = 0;
 					for (Body& body : env.bodyList) {
-						body.velocity = glm::vec3(0.0f);
 						body.position = startPositions[count];
+						body.velocity = startVelocities[count];
 						count++;
 					}
 					startPositions.clear();
+					startVelocities.clear();
 					doPhysics = false;
+					isPaused = false;
 				}
 			}
-// 			if (ImGui::Button("Pause Simulation")) {
-// 				if (doPhysics) {
-// 					std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
-// 					doPhysics = false;
-// 				}
-// 				else {
-// 					// reset start time and do physics
-// 					frameStart = glfwGetTime();
-// 					startTime = glfwGetTime();
-// 					doPhysics = true;
-// 				}
-// 			}
 
 			ImGui::End(); // End of Simulation Manager Window
 
-			// Marks end of all ImGui windows
+			// End of all ImGui windows
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
