@@ -15,11 +15,9 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 }
 
 void Environment::addBody(Body* body) {
-	// handling for 0 mass as "infinite" mass
-	if (body->mass == 0)
-		body->inverseMass = 0;
-	else
-		body->inverseMass = 1.0f / body->mass;
+	body->recalcInverseMass();
+	body->recalcInertia();
+	body->shape.SetBox();
 
 	bodyList.push_back(*body);
 }
@@ -42,13 +40,14 @@ void Environment::generatePairs() {
 			Body* A = &(*i);	// 0_o thanks for being weird iterators
 			Body* B = &(*j);
 
-			// create the pair
-			Pair pair;
-			pair.A = A;
-			pair.B = B;
+			// only create and add the pair if at most 1 of the objects has infinite mass
+			if (!(A->mass == 0.0f && B->mass == 0.0f)) {
+				Pair pair;
+				pair.A = A;
+				pair.B = B;
 
-			// add it to pairs
-			pairs.push_back(pair);
+				pairs.push_back(pair);
+			}
 		}
 	}
 }
@@ -56,14 +55,14 @@ void Environment::generatePairs() {
 void Environment::step() {
 	for (Body& body : bodyList) {
 		body.step(timestep);
-		bool envCollision = collisionWithEnv(width, &body);
 	}
-	// create manifolds, check for collisions, and solve
+	// check pairs for broad phase
 	for (Pair& pair : pairs) {
+		// create manifolds, check for collisions, and solve
 		Manifold manifold(pair.A, pair.B);
-		bool objectCollision = AABBvsAABB(&manifold);
-		if (objectCollision) {
-			resolveCollision(&manifold);
+		Dispatch[(int)pair.A->shape.type][(int)pair.B->shape.type](&manifold);
+		if (manifold.contactCount) {
+			manifold.ApplyImpulse();
 		}
 	}
 }

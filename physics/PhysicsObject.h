@@ -4,6 +4,7 @@
 #define PHYSICS_OBJECT_H
 
 #include <glm/glm.hpp>
+#include "Shape.h"
 
 // AXIS ALIGNED BOUNDING BOX
 
@@ -11,9 +12,6 @@ struct AABB {
 	glm::vec3 min;
 	glm::vec3 max;
 };
-
-/// Enumerated type for the object shape
-enum class Shape {BOX, TRIANGLE, BALL};
 
 /**
  * Contains the material attributes of a physics body
@@ -35,7 +33,7 @@ struct Body {
 	/// velocity stores the speed of an object and in what direction. Each component measured in meters/second (m/s)
 	glm::vec3 velocity = glm::vec3(0, 0, 0);
 
-	/// rotation stores the angle of rotation about the Z AXIS measured in radians
+	/// rotation stores the angle of counter-clockwise rotation about the Z AXIS measured in radians
 	float rotation = 0.0f;
 	/// the rotational speed of the object
 	float angularVelocity = 0.0f;
@@ -45,10 +43,13 @@ struct Body {
 	/// Mass is simply the mass of the object measured in kilograms (kg)
 	float mass = 10.0f;
 	/// Inverse mass is 1/mass, which is very commonly used in calculations
-	float inverseMass;
+	float inverseMass = 0.1f;
 
 	/// Moment of inertia, mr^2 where m is the mass and r is the distance from the center of rotation (CoM)
-	float momentOfInertia;
+	float momentOfInertia = 0.0f;
+
+	/// Inverse moment of inertia, similar to inverse mass
+	float inverseInertia = 0.0f;
 
 	/// Restitution is the coefficient of "bounciness" of an object.  Used to calculate velocity after a collision. (Wood by default)
 	float restitution = 0.2f;
@@ -60,7 +61,7 @@ struct Body {
 	//Material material;
 
 	/// shape determines how the object is intended to be rendered
-	Shape shape = Shape::BOX;
+	Shape shape;
 
 	/// scale stores the amount to scale the object along each axis. Z should remain 1.0f
 	glm::vec3 scale = glm::vec3(1, 1, 1);
@@ -69,7 +70,8 @@ struct Body {
 	 * Applies a force vector to the object
 	 */
 	void applyForce(glm::vec3 f) {
-		force += f;
+		if (!(inverseMass == 0.0f))
+			force += f;
 	}
 
 	/**
@@ -86,28 +88,32 @@ struct Body {
 	void step(float deltaTime) {
 		float dtSquared = deltaTime * deltaTime;
 
-		// update the current position
-		// s = s0 + v0t +1/2at^2 for x, y, and z
-		// a = f/m
-		position.x += (velocity.x * deltaTime) + (0.5f * (inverseMass * force.x) * dtSquared);
-		position.y += (velocity.y * deltaTime) + (0.5f * (inverseMass * force.y) * dtSquared);
-		position.z += (velocity.z * deltaTime) + (0.5f * (inverseMass * force.z) * dtSquared);
+		// infinite mass check
+		if (!(inverseMass == 0.0f)) {
+			// update the current position
+			// s = s0 + v0t +1/2at^2 for x, y, and z
+			// a = f/m
+			position.x += (velocity.x * deltaTime) + (0.5f * (inverseMass * force.x) * dtSquared);
+			position.y += (velocity.y * deltaTime) + (0.5f * (inverseMass * force.y) * dtSquared);
+			position.z += (velocity.z * deltaTime) + (0.5f * (inverseMass * force.z) * dtSquared);
 
-		// update the rotation
-		// theta = theta0 + w0t + 1/2alphat^2
-		// alpha = torque * (1 / momentOfInertia)
-		//object.rotation += object.angularVelocity * deltaTime + (0.5f * (object.torque / object.momentOfInertia) * dtSquared);
+			// update the rotation
+			// theta = theta0 + w0t + 1/2alphat^2
+			// alpha = torque * inverseInertia
+			rotation += angularVelocity * deltaTime + (0.5f * (torque * inverseInertia) * dtSquared);
 
+			// update the current velocity
+			// v = v0 + at for x, y, and z
+			// a = f/m
+			velocity.x += (inverseMass * force.x) * deltaTime;
+			velocity.y += (inverseMass * force.y) * deltaTime;
+			velocity.z += (inverseMass * force.z) * deltaTime;
 
+			// update the angular velocity
+			angularVelocity += torque * inverseInertia * deltaTime;
 
-		// update the current velocity
-		// v = v0 + at for x, y, and z
-		// a = f/m
-		velocity.x += (inverseMass * force.x) * deltaTime;
-		velocity.y += (inverseMass * force.y) * deltaTime;
-		velocity.z += (inverseMass * force.z) * deltaTime;
-
-		// TODO: might force compliance with terminal velocity and drag, who knows
+			// TODO: might force compliance with terminal velocity and drag, who knows
+		}
 	}
 
 	AABB getAABB() {
@@ -122,12 +128,21 @@ struct Body {
 
 		return box;
 	}
+
+	void recalcInverseMass() {
+		if (mass == 0.0f)
+			inverseMass = 0.0f;
+		else
+			inverseMass = 1 / mass;
+	}
+	void recalcInertia() {
+
+	}
 };
 
-inline
-bool operator==(const Body& lhs, const Body& rhs)
+inline bool operator==(const Body& lhs, const Body& rhs)
 {
-	return (lhs.position == rhs.position) && (lhs.shape == rhs.shape);
+	return (lhs.position == rhs.position) && (lhs.shape.type == rhs.shape.type) && (lhs.scale == rhs.scale);
 }
 
 #endif

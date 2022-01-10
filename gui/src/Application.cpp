@@ -21,6 +21,7 @@
 #include "PhysicsObject.h"
 #include "Collision.h"
 #include "Manifold.h"
+#include "PhysicsMath.h"
 
 int main(void)
 {
@@ -139,18 +140,34 @@ int main(void)
 		bool doPhysics = false;
 		bool isPaused = false;
 
-		// Physics timing variables
-		const float physicsFPS = 200;
-		const float timestep = 1 / physicsFPS;
+		// timing variables
 		float accumulator = 0;
 		float frameStart;
 		float startTime = glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(16.0f, 9.0f, 9.81f, timestep);
+		Environment env = Environment(16.0f, 9.0f, GRAVITY, timestep);
 		env.pixelRatio = windowHeight / env.height;
 		// Adjust the translation
 		translation = translation / env.pixelRatio;
+
+		// create walls
+		Body leftWall;
+		leftWall.mass = 0.0f;
+		leftWall.position = glm::vec3(-0.5f, (0.5f * env.height), 0.0f);
+		leftWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
+		Body rightWall;
+		rightWall.mass = 0.0f;
+		rightWall.position = glm::vec3(env.width + 0.5f, (0.5f * env.height), 0.0f);
+		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
+		Body floor;
+		floor.mass = 0.0f;
+		floor.position = glm::vec3((0.5f * env.width), -0.5f, 0.0f);
+		floor.scale = glm::vec3(32.0f, 1.0f, 1.0f);
+
+		env.addBody(&floor);
+		env.addBody(&leftWall);
+		env.addBody(&rightWall);
 
 		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
@@ -207,6 +224,12 @@ int main(void)
 					// set the matrix uniform for the mvp matrix so it updates every frame
 					shader.setUniformMat4f("u_MVP", mvp);
 
+					// infinite mass is gray!
+					if (body.mass == 0)
+						shader.setUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
+					else
+						shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+
 					// call the renderer to draw something
 					// send in a vertex array, an index buffer, and a shader
 					// in a more traditional setup, we would be using a material instead of a shader
@@ -244,9 +267,6 @@ int main(void)
 					Body object;
 					object.mass = 10.0f;
 					object.position = translation;
-					// calculate the force of gravitation for the object into a vector and apply it
-					glm::vec3 gravity(0, object.mass * env.gravity, 0);
-					object.force -= gravity;
 					env.addBody(&object);
 				}
 			}
@@ -279,13 +299,22 @@ int main(void)
 				if (!doPhysics && !isPaused) {
 					// Cannot press this button if the simulation is running or paused
 
-					// save object starting positions and velocities
+					// Physics pre-calculations
 					for (Body& body : env.bodyList) {
+						// save object starting positions and velocities
 						startPositions.push_back(body.position);
 						startVelocities.push_back(body.velocity);
 						// Incoming storage manager POG?
+
+						// while we're looping objects, go ahead and recalculate some important values
+						body.recalcInverseMass();
+						body.recalcInertia();
+						body.shape.scaleX(body.scale);
+						body.shape.scaleY(body.scale);
+						// calculate the force of gravitation for the object into a vector and apply it
+						glm::vec3 gravity(0, body.mass * env.gravity, 0);
+						body.force -= gravity;
 					}
-					// Physics pre-calculations
 					env.generatePairs();
 
 					// Physics happens here
@@ -323,6 +352,9 @@ int main(void)
 						body.position = startPositions[count];
 						body.velocity = startVelocities[count];
 						count++;
+
+						// clear forces!
+						body.force = glm::vec3(0.0f);
 					}
 					startPositions.clear();
 					startVelocities.clear();

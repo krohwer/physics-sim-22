@@ -146,7 +146,9 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Manifold.h" />
+    <ClInclude Include="PhysicsMath.h" />
     <ClInclude Include="PhysicsObject.h" />
+    <ClInclude Include="Shape.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Collision.cpp" />
