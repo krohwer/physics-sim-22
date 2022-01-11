@@ -18,6 +18,7 @@
 #include "Shader.h"
 
 #include "Environment.h"
+#include "Shape.h"
 #include "PhysicsObject.h"
 #include "Collision.h"
 #include "Manifold.h"
@@ -152,17 +153,17 @@ int main(void)
 		translation = translation / env.pixelRatio;
 
 		// create walls
-		Body leftWall;
+		Shape leftWallShape;
+		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
 		leftWall.mass = 0.0f;
-		leftWall.position = glm::vec3(-0.5f, (0.5f * env.height), 0.0f);
 		leftWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
-		Body rightWall;
+		Shape rightWallShape;
+		Body rightWall(&rightWallShape, env.width + 0.5f, (0.5f * env.height));
 		rightWall.mass = 0.0f;
-		rightWall.position = glm::vec3(env.width + 0.5f, (0.5f * env.height), 0.0f);
 		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
-		Body floor;
+		Shape floorShape;
+		Body floor(&floorShape, (0.5f * env.width), -0.5);
 		floor.mass = 0.0f;
-		floor.position = glm::vec3((0.5f * env.width), -0.5f, 0.0f);
 		floor.scale = glm::vec3(32.0f, 1.0f, 1.0f);
 
 		env.addBody(&floor);
@@ -264,9 +265,8 @@ int main(void)
 			if (ImGui::Button("Create Object")) {
 				if (!doPhysics && !isPaused) {
 					// Cannot press this button if the simulation is running or paused
-					Body object;
-					object.mass = 10.0f;
-					object.position = translation;
+					Shape shape;
+					Body object(&shape, (windowCenter.x / env.pixelRatio), (windowCenter.y / env.pixelRatio));
 					env.addBody(&object);
 				}
 			}
@@ -278,6 +278,9 @@ int main(void)
 					env.bodyList.clear();
 					startPositions.clear();
 					startVelocities.clear();
+					env.addBody(&floor);
+					env.addBody(&leftWall);
+					env.addBody(&rightWall);
 				}
 			}
 
@@ -307,10 +310,10 @@ int main(void)
 						// Incoming storage manager POG?
 
 						// while we're looping objects, go ahead and recalculate some important values
-						body.recalcInverseMass();
-						body.recalcInertia();
-						body.shape.scaleX(body.scale);
-						body.shape.scaleY(body.scale);
+						body.computeInverseMass();
+						body.computeInertia();
+						body.shape->scaleX(body.scale);
+						body.shape->scaleY(body.scale);
 						// calculate the force of gravitation for the object into a vector and apply it
 						glm::vec3 gravity(0, body.mass * env.gravity, 0);
 						body.force -= gravity;

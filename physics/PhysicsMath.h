@@ -23,6 +23,8 @@ struct mat22 {
 	float m00, m01,
 		  m10, m11;
 
+	mat22() {}
+
 	mat22(float xx, float xy, float yx, float yy) {
 		m00 = xx; m01 = xy;
 		m10 = yx; m11 = yy;

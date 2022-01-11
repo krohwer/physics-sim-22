@@ -15,21 +15,14 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 }
 
 void Environment::addBody(Body* body) {
-	body->recalcInverseMass();
-	body->recalcInertia();
-	body->shape.SetBox();
+	body->shape->SetBox();
+	body->shape->body = body;
 
 	bodyList.push_back(*body);
 }
 
 void Environment::removeBody(Body* body) {
 	bodyList.remove(*body);
-}
-
-void Environment::calculateInverseMasses() {
-	for (Body& body : bodyList) {
-		body.inverseMass = 1.0f / body.mass;
-	}
 }
 
 void Environment::generatePairs() {
@@ -60,7 +53,7 @@ void Environment::step() {
 	for (Pair& pair : pairs) {
 		// create manifolds, check for collisions, and solve
 		Manifold manifold(pair.A, pair.B);
-		Dispatch[(int)pair.A->shape.type][(int)pair.B->shape.type](&manifold);
+		Dispatch[(int)pair.A->shape->type][(int)pair.B->shape->type](&manifold);
 		if (manifold.contactCount) {
 			manifold.ApplyImpulse();
 		}
