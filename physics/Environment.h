@@ -43,11 +43,6 @@ public:
 	void removeBody(Body* body);
 
 	/**
-	 * Calculates the inverse mass of all objects in the environment
-	 */
-	void calculateInverseMasses();
-
-	/**
 	 * Broad phase, generate all possible non-duplicate pairs of bodies in the environment
 	 */
 	void generatePairs();

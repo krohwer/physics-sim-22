@@ -4,64 +4,35 @@
 #define COLLISION_H
 
 #include <glm/glm.hpp>
-
-struct Manifold;
-struct Body;
-class Environment;
+#include "PhysicsObject.h"
+#include "Shape.h"
+#include "Manifold.h"
 
 struct Pair {
 	Body* A;
 	Body* B;
 };
 
-/// detect a collision between two axis aligned bounding boxes
-bool AABBvsAABB(Manifold *man);
+float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B);
 
-// CIRCLES
+void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex);
 
-struct Circle {
-	float radius;
-	glm::vec3 position;
-};
+int Clip(glm::vec3 n, float c, glm::vec3* face);
 
-/// detect a collision between two circles
-bool CirclevsCircle(Manifold* man);
+/// detect a collision between two polygons
+//void PolygonvsPolygon(Manifold* m);
 
-/**
- * Detect a collision between a physics body and the environment bounds, and automatically resolve it
- */
-bool collisionWithEnv(float envWidth, Body* body);
+/// detect a collision between two bounding boxes
+void BoxvsBox(Manifold *manifold);
 
-/**
- * Resolve a collision between a single physics body and the environment
- * 
- * @param normal - The normal vector of the environment bound (straight up for the floor)
- * @param body - The body to resolve
- * @param penetration - The penetration depth of the body into the floor/wall
- */
-void resolveCollision(glm::vec3 normal, Body* body, float penetration);
+/// detect a collision between two balls
+void BallvsBall(Manifold* manifold);
 
-/**
- * Resolve a collision between two physics bodies in a manifold
- */
-void resolveCollision(Manifold* man);
+void BoxvsBall(Manifold* manifold);
+void BallvsBox(Manifold* manifold);
 
-/**
- * Corrects sinking of a body based on the normal vector and the penetration depth
- */
-void positionalCorrection(glm::vec3 normal, Body* body, float penetration);
+typedef void (*collisionCallback)(Manifold* man);
 
-
-
-
-
-//typedef void (*CollisionCallback)(Manifold* m, Body* a, Body* b);
-
-//extern CollisionCallback Dispatch[Shape::eCount][Shape::eCount];
-
-void CircletoCircle(Manifold* m, Body* a, Body* b);
-void CircletoPolygon(Manifold* m, Body* a, Body* b);
-void PolygontoCircle(Manifold* m, Body* a, Body* b);
-void PolygontoPolygon(Manifold* m, Body* a, Body* b);
+extern collisionCallback Dispatch[2][2];
 
 #endif

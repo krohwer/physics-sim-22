@@ -74,10 +74,12 @@ namespace gui_utils {
 	}
 	
 	void createAllObjectMenus(Environment& env) {
-		int objectNumber = 1;
+		int objectNumber = -2;
 		for (Body& body : env.bodyList) {
-			ImGui::Text(" ");
-			createSingleObjectMenu(env, body, objectNumber);
+			if (objectNumber > 0) {
+				ImGui::Text(" ");
+				createSingleObjectMenu(env, body, objectNumber);
+			}
 			objectNumber++;
 		}
 	}
