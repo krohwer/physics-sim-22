@@ -184,6 +184,7 @@
     <ClInclude Include="src\GLErrorManager.h" />
     <ClInclude Include="src\GuiUtils.h" />
     <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />

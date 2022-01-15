@@ -12,6 +12,8 @@
 
 #include "Renderer.h"
 
+#include "Input.h"
+
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
@@ -61,6 +63,10 @@ int main(void)
 		std::cout << "GLEW is not OK!" << std::endl;
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	// INPUT //
+	glfwSetKeyCallback(window, keyCallback);
+	glfwSetScrollCallback(window, scrollCallback);
 	
 	// DEFINING THE OBJECT TO RENDER //
 
@@ -98,9 +104,10 @@ int main(void)
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
 
-		// CREATE PROJECTION MATRIX //
+		// CREATE PROJECTION AND VIEW MATRICES //
 
 		glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, -1.0f, 1.0f);
+		glm::mat4 view(1.0f);
 
 		// LOAD SHADERS //
 
@@ -156,19 +163,19 @@ int main(void)
 		Shape leftWallShape;
 		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
 		leftWall.mass = 0.0f;
-		leftWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
-		Shape rightWallShape;
-		Body rightWall(&rightWallShape, env.width + 0.5f, (0.5f * env.height));
-		rightWall.mass = 0.0f;
-		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
+		leftWall.scale = glm::vec3(1.0f, env.height, 1.0f);
+// 		Shape rightWallShape;
+// 		Body rightWall(&rightWallShape, env.width + 0.5f, (0.5f * env.height));
+// 		rightWall.mass = 0.0f;
+// 		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
 		Shape floorShape;
 		Body floor(&floorShape, (0.5f * env.width), -0.5);
 		floor.mass = 0.0f;
-		floor.scale = glm::vec3(32.0f, 1.0f, 1.0f);
+		floor.scale = glm::vec3(env.width, 1.0f, 1.0f);
 
 		env.addBody(&floor);
 		env.addBody(&leftWall);
-		env.addBody(&rightWall);
+		//env.addBody(&rightWall);
 
 		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
@@ -209,6 +216,10 @@ int main(void)
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
+				view = translate(view, cameraPos);
+				view = scale(view, cameraZoom);
+				cameraZoom = glm::vec3(1.0f);
+
 				// render each object
 				for (Body& body : env.bodyList) {
 					// identity model matrix
@@ -220,7 +231,7 @@ int main(void)
 					model = glm::scale(model, body.scale);
 
 					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-					glm::mat4 mvp = projection * model;
+					glm::mat4 mvp = projection * view * model;
 
 					// set the matrix uniform for the mvp matrix so it updates every frame
 					shader.setUniformMat4f("u_MVP", mvp);
@@ -280,7 +291,7 @@ int main(void)
 					startVelocities.clear();
 					env.addBody(&floor);
 					env.addBody(&leftWall);
-					env.addBody(&rightWall);
+					//env.addBody(&rightWall);
 				}
 			}
 

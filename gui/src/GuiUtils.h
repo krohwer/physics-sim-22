@@ -74,7 +74,7 @@ namespace gui_utils {
 	}
 	
 	void createAllObjectMenus(Environment& env) {
-		int objectNumber = -2;
+		int objectNumber = -1;
 		for (Body& body : env.bodyList) {
 			if (objectNumber > 0) {
 				ImGui::Text(" ");
