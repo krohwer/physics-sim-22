@@ -6,35 +6,48 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-const float camSpeed = 6.0f;
+#include "Camera.h"
 
-glm::vec3 cameraPos(0.0f);
-glm::vec3 cameraZoom(1.0f);
+Camera* cameraInput;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
-	if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-		cameraPos.x = -camSpeed;
-	if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-		cameraPos.x = camSpeed;
-	if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
-		cameraPos.y = -camSpeed;
-	if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
-		cameraPos.y = camSpeed;
+	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+		cameraInput->cVelocity.x += CAM_SPEED;
+	}
+	if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) {
+		cameraInput->cVelocity.x -= CAM_SPEED;
+	}
 
-	if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
-		cameraPos.x = 0.0f;
-	if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE)
-		cameraPos.x = 0.0f;
-	if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
-		cameraPos.y = 0.0f;
-	if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
-		cameraPos.y = 0.0f;
+	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+		cameraInput->cVelocity.x -= CAM_SPEED;
+	}
+	if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE) {
+		cameraInput->cVelocity.x += CAM_SPEED;
+	}
+
+	if (key == GLFW_KEY_UP) {
+		if (action == GLFW_PRESS)
+			cameraInput->cVelocity.y += CAM_SPEED;
+		if (action == GLFW_RELEASE)
+			cameraInput->cVelocity.y -= CAM_SPEED;
+	}
+
+	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+		cameraInput->cVelocity.y -= CAM_SPEED;
+	}
+	if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE) {
+		cameraInput->cVelocity.y += CAM_SPEED;
+	}
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	cameraZoom.x += 0.25 * yoffset;
-	cameraZoom.y += 0.25 * yoffset;
+	if (yoffset > 0) {
+		cameraInput->cZoom *= 0.9f;
+	}
+	if (yoffset < 0) {
+		cameraInput->cZoom *= 1.1f;
+	}
 }
 
 #endif

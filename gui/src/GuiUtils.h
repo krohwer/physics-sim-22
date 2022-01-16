@@ -46,8 +46,8 @@ namespace gui_utils {
 		ImGui::InputFloat(yPositionText.c_str(), &object.position.y);
 
 		// Boundary checking for x position input
-		if (object.position.x > env.width - 0.5f * object.scale.x)
-			object.position.x = env.width - 0.5f * object.scale.x;
+// 		if (object.position.x > env.width - 0.5f * object.scale.x)
+// 			object.position.x = env.width - 0.5f * object.scale.x;
 		if (object.position.x < 0.5f * object.scale.x)
 			object.position.x = 0.5f * object.scale.x;
 		// Boundary checking for y position input

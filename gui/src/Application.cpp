@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
+#include "Camera.h"
 
 #include "Input.h"
 
@@ -63,10 +64,6 @@ int main(void)
 		std::cout << "GLEW is not OK!" << std::endl;
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
-
-	// INPUT //
-	glfwSetKeyCallback(window, keyCallback);
-	glfwSetScrollCallback(window, scrollCallback);
 	
 	// DEFINING THE OBJECT TO RENDER //
 
@@ -104,10 +101,16 @@ int main(void)
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
 
-		// CREATE PROJECTION AND VIEW MATRICES //
+		// CREATE CAMERA //
+		float halfWidth = (float)windowWidth;
+		float halfHeight = (float)windowHeight;
 
-		glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, -1.0f, 1.0f);
-		glm::mat4 view(1.0f);
+		Camera camera(-halfWidth, halfWidth, -halfHeight, halfHeight);
+
+		// SET INPUT //
+		cameraInput = &camera;
+		glfwSetKeyCallback(window, keyCallback);
+		glfwSetScrollCallback(window, scrollCallback);
 
 		// LOAD SHADERS //
 
@@ -144,7 +147,6 @@ int main(void)
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 		// Setup for ImGui Window variables
-		glm::vec3 translation(windowCenter.x, windowCenter.y, 0); // translate to the center of the screen by default
 		bool doPhysics = false;
 		bool isPaused = false;
 
@@ -154,10 +156,9 @@ int main(void)
 		float startTime = glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(16.0f, 9.0f, GRAVITY, timestep);
-		env.pixelRatio = windowHeight / env.height;
-		// Adjust the translation
-		translation = translation / env.pixelRatio;
+		Environment env = Environment(2000.0f, 1000.0f, GRAVITY, timestep);
+		// Pixel ratio hardcoded right now, very dependent on window size
+		env.pixelRatio = 100.0f;
 
 		// create walls
 		Shape leftWallShape;
@@ -190,6 +191,10 @@ int main(void)
 
 			renderer.clear();
 
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			std::cout << xpos << ", " << ypos << std::endl;
+
 			// IMGUI INITIALIZATION
 			// Must be called before any other ImGui code
 			ImGui_ImplOpenGL3_NewFrame();
@@ -216,9 +221,7 @@ int main(void)
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
-				view = translate(view, cameraPos);
-				view = scale(view, cameraZoom);
-				cameraZoom = glm::vec3(1.0f);
+				camera.recalculateView();
 
 				// render each object
 				for (Body& body : env.bodyList) {
@@ -231,16 +234,20 @@ int main(void)
 					model = glm::scale(model, body.scale);
 
 					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-					glm::mat4 mvp = projection * view * model;
+					glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
 
 					// set the matrix uniform for the mvp matrix so it updates every frame
 					shader.setUniformMat4f("u_MVP", mvp);
 
 					// infinite mass is gray!
-					if (body.mass == 0)
-						shader.setUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
-					else
-						shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+					if (body.mass == 0) {
+						body.color.a = 0.4f;
+						shader.setUniform4f("u_Color", body.color);
+					}
+					else {
+						body.color.a = 1.0f;
+						shader.setUniform4f("u_Color", body.color);
+					}
 
 					// call the renderer to draw something
 					// send in a vertex array, an index buffer, and a shader
@@ -277,7 +284,7 @@ int main(void)
 				if (!doPhysics && !isPaused) {
 					// Cannot press this button if the simulation is running or paused
 					Shape shape;
-					Body object(&shape, (windowCenter.x / env.pixelRatio), (windowCenter.y / env.pixelRatio));
+					Body object(&shape, (camera.cPosition.x / env.pixelRatio), (camera.cPosition.y / env.pixelRatio));
 					env.addBody(&object);
 				}
 			}
