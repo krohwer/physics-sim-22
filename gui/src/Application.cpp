@@ -12,7 +12,6 @@
 
 #include "Renderer.h"
 #include "Camera.h"
-
 #include "Input.h"
 
 #include "VertexBuffer.h"
@@ -102,15 +101,16 @@ int main(void)
 		IndexBuffer ib(indices, 6);
 
 		// CREATE CAMERA //
-		float halfWidth = (float)windowWidth;
-		float halfHeight = (float)windowHeight;
+		float halfWidth = (float)windowWidth / 2.0f;
+		float halfHeight = (float)windowHeight / 2.0f;
 
 		Camera camera(-halfWidth, halfWidth, -halfHeight, halfHeight);
 
-		// SET INPUT //
+		// SET INPUT CALLBACKS //
 		cameraInput = &camera;
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetScrollCallback(window, scrollCallback);
+		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 		// LOAD SHADERS //
 
@@ -134,10 +134,6 @@ int main(void)
 		// create a renderer
 		Renderer renderer;
 
-		// variables to represent red and how much we want it to change each tick
-// 		float r = 0.0f;
-// 		float increment = 0.01f;
-
 		// IMGUI WINDOW CREATION //
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -153,22 +149,16 @@ int main(void)
 		// timing variables
 		float accumulator = 0;
 		float frameStart;
-		float startTime = glfwGetTime();
+		float startTime = (float)glfwGetTime();
 
 		// Physics environment setup
 		Environment env = Environment(2000.0f, 1000.0f, GRAVITY, timestep);
-		// Pixel ratio hardcoded right now, very dependent on window size
-		env.pixelRatio = 100.0f;
 
 		// create walls
 		Shape leftWallShape;
 		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
 		leftWall.mass = 0.0f;
 		leftWall.scale = glm::vec3(1.0f, env.height, 1.0f);
-// 		Shape rightWallShape;
-// 		Body rightWall(&rightWallShape, env.width + 0.5f, (0.5f * env.height));
-// 		rightWall.mass = 0.0f;
-// 		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
 		Shape floorShape;
 		Body floor(&floorShape, (0.5f * env.width), -0.5);
 		floor.mass = 0.0f;
@@ -176,7 +166,6 @@ int main(void)
 
 		env.addBody(&floor);
 		env.addBody(&leftWall);
-		//env.addBody(&rightWall);
 
 		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
@@ -191,22 +180,14 @@ int main(void)
 
 			renderer.clear();
 
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			std::cout << xpos << ", " << ypos << std::endl;
-
 			// IMGUI INITIALIZATION
 			// Must be called before any other ImGui code
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// bind the shader
-			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
-			shader.bind();
-
 			if (doPhysics) {
-				const float currentTime = glfwGetTime();
+				const float currentTime = (float)glfwGetTime();
 
 				accumulator += currentTime - frameStart;
 
@@ -229,7 +210,7 @@ int main(void)
 					glm::mat4 model(1.0f);
 					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 					// translate, then rotate, then scale.  VERY IMPORTANT
-					model = glm::translate(model, body.position * env.pixelRatio);
+					model = glm::translate(model, body.position * PIXEL_RATIO);
 					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
 					model = glm::scale(model, body.scale);
 
@@ -258,15 +239,18 @@ int main(void)
 
 			} // end of mvp matrix scope
 
-			// sending r in as red to animate the color
-			// this should actually be done before the draw, but whatevs
-			//shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-			// change r to animate the color of the object
-// 			if (r > 1.0)
-// 				increment = -0.01f;
-// 			else if (r < 0.0f)
-// 				increment = 0.01f;
-//			r += increment;
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			xpos -= halfWidth;
+			ypos = halfHeight - ypos;
+
+// 			if (!doPhysics && !isPaused && createObject) {
+// 				// Cannot press this button if the simulation is running or paused
+// 				Shape shape;
+// 				Body object(&shape, (((xpos * camera.cZoom) + camera.cPosition.x) / env.pixelRatio), (((ypos * camera.cZoom) + camera.cPosition.y) / env.pixelRatio));
+// 				env.addBody(&object);
+// 				createObject = false;
+// 			}
 
 			// IMGUI WINDOWS //
 
@@ -284,7 +268,7 @@ int main(void)
 				if (!doPhysics && !isPaused) {
 					// Cannot press this button if the simulation is running or paused
 					Shape shape;
-					Body object(&shape, (camera.cPosition.x / env.pixelRatio), (camera.cPosition.y / env.pixelRatio));
+					Body object(&shape, (camera.cPosition.x / PIXEL_RATIO), (camera.cPosition.y  / PIXEL_RATIO));
 					env.addBody(&object);
 				}
 			}
@@ -298,7 +282,6 @@ int main(void)
 					startVelocities.clear();
 					env.addBody(&floor);
 					env.addBody(&leftWall);
-					//env.addBody(&rightWall);
 				}
 			}
 
@@ -328,10 +311,7 @@ int main(void)
 						// Incoming storage manager POG?
 
 						// while we're looping objects, go ahead and recalculate some important values
-						body.computeInverseMass();
-						body.computeInertia();
-						body.shape->scaleX(body.scale);
-						body.shape->scaleY(body.scale);
+						body.init();
 						// calculate the force of gravitation for the object into a vector and apply it
 						glm::vec3 gravity(0, body.mass * env.gravity, 0);
 						body.force -= gravity;

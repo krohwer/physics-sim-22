@@ -86,12 +86,26 @@ struct Body {
 	 */
 	void applyImpulse(glm::vec3 impulse, glm::vec3 contactVector);
 
+	/**
+	 * applies the equations of motion over the time deltaTime
+	 */
 	void step(float deltaTime);
 
 	AABB getAABB();
 
+	/**
+	 * recalculates the inverse mass of the object to account for any mass changes
+	 */
 	void computeInverseMass();
+	/**
+	 * recalculates the moment of inertia and inverse inertia
+	 */
 	void computeInertia();
+
+	/**
+	 * initializes the object to prepare for simulation start
+	 */
+	void init();
 };
 
 inline bool operator==(const Body& lhs, const Body& rhs)

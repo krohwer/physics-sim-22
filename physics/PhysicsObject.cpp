@@ -89,3 +89,10 @@ void Body::computeInverseMass() {
 void Body::computeInertia() {
 	inverseInertia = 0.0f;
 }
+
+void Body::init() {
+	computeInverseMass();
+	computeInertia();
+	shape->scaleX(scale);
+	shape->scaleY(scale);
+}

@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-const float CAM_SPEED = 10.0f;
+const float CAM_SPEED = 6.0f;
 
 struct Camera {
 	glm::mat4 projectionMatrix;

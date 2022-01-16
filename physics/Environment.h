@@ -26,8 +26,6 @@ public:
 	/// contains the possible collision pairs
 	std::vector <Pair> pairs;
 
-	/// the ratio of windowHeight / environmentHeight, used for converting meters to pixels before rendering
-	float pixelRatio;
 
 	Environment(float eWidth, float eHeight, float eGravity, float eTimestep);
 

@@ -5,6 +5,9 @@
 
 #include <glm/glm.hpp>
 
+// conversion factor from meters to pixels
+#define PIXEL_RATIO 100.0f
+
 // physics timing constants
 const float physicsFPS = 200;
 const float timestep = 1 / physicsFPS;

@@ -11,7 +11,6 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 	height = eHeight;
 	gravity = eGravity;
 	timestep = eTimestep;
-	pixelRatio = 0;
 }
 
 void Environment::addBody(Body* body) {
