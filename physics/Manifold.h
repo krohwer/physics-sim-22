@@ -22,8 +22,14 @@ struct Manifold
 	 */
  	void ApplyImpulse();
 
+	/**
+	 * Forces overlapping objects to correct
+	 */
 	void PositionalCorrection();
 
+	/**
+	 * Corrects infinite mass objects so that they do not move
+	 */
  	void InfiniteMassCorrection();
 
 	Body* A;

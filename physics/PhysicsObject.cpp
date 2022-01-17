@@ -15,6 +15,7 @@ Body::Body(Shape* s, float x, float y) {
 	torque = 0.0f;
 
 	scale = glm::vec3(1.0f);
+	color = glm::vec4(1.0f);
 
 	mass = 10.0f;
 	momentOfInertia = 0.0f;
@@ -87,4 +88,11 @@ void Body::computeInverseMass() {
 
 void Body::computeInertia() {
 	inverseInertia = 0.0f;
+}
+
+void Body::init() {
+	computeInverseMass();
+	computeInertia();
+	shape->scaleX(scale);
+	shape->scaleY(scale);
 }

@@ -91,7 +91,7 @@ void BallvsBall(Manifold* manifold) {
 		// if they are colliding
 
 		// safely do a square root for the distance between the objects
-		float distance = n.length();
+		float distance = length(n);
 
 		if (distance != 0) {
 			manifold->penetration = r - distance;
@@ -108,69 +108,69 @@ void BallvsBall(Manifold* manifold) {
  * Positive penetration indicates no collision
  * Negative penetration indicates a collision, and no separating axis
  */
-float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B) {
-	float bestDistance = -FLT_MAX;
-	int bestIndex = 0;
+// float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B) {
+// 	float bestDistance = -FLT_MAX;
+// 	int bestIndex = 0;
+// 
+// 	for (int i = 1; i < A->m_vertexCount; i++) {
+// 		// get a face normal from A
+// 		glm::vec3 normal = A->m_normals[i];
+// 		glm::vec3 nw = A->u * normal;
+// 
+// 		// transform face normal into B's model space
+// 		mat22 buT = B->u.Transpose();
+// 		normal = buT * nw;
+// 
+// 		// get a support point from B along -normal
+// 		glm::vec3 support = B->GetSupport(-normal);
+// 		// retrieve vertex on face from A
+// 		glm::vec3 vertex = A->m_vertices[i];
+// 
+// 		// convert the vertex into B's model space
+// 		vertex = A->u * vertex + A->body->position;
+// 		vertex -= B->body->position;
+// 		vertex = buT * vertex;
+// 
+// 		// Compute penetration distance (in B's model space)
+// 		float distance = glm::dot(normal, support - vertex);
+// 
+// 		// Store greatest distance
+// 		if (distance > bestDistance)
+// 		{
+// 			bestDistance = distance;
+// 			bestIndex = i;
+// 		}
+// 	}
+// 
+// 	*faceIndex = bestIndex;
+// 	return bestDistance;
+// }
 
-	for (int i = 1; i < A->m_vertexCount; i++) {
-		// get a face normal from A
-		glm::vec3 normal = A->m_normals[i];
-		glm::vec3 nw = A->u * normal;
-
-		// transform face normal into B's model space
-		mat22 buT = B->u.Transpose();
-		normal = buT * nw;
-
-		// get a support point from B along -normal
-		glm::vec3 support = B->GetSupport(-normal);
-		// retrieve vertex on face from A
-		glm::vec3 vertex = A->m_vertices[i];
-
-		// convert the vertex into B's model space
-		vertex = A->u * vertex + A->body->position;
-		vertex -= B->body->position;
-		vertex = buT * vertex;
-
-		// Compute penetration distance (in B's model space)
-		float distance = glm::dot(normal, support - vertex);
-
-		// Store greatest distance
-		if (distance > bestDistance)
-		{
-			bestDistance = distance;
-			bestIndex = i;
-		}
-	}
-
-	*faceIndex = bestIndex;
-	return bestDistance;
-}
-
-void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex) {
-	glm::vec3 referenceNormal = RefPoly->m_normals[referenceIndex];
-
-	// Calculate normal in incident's frame of reference
-	referenceNormal = RefPoly->u * referenceNormal; // To world space
-	referenceNormal = IncPoly->u.Transpose() * referenceNormal; // To incident's model space
-
-	// Find most anti-normal face on incident polygon
-	int incidentFace = 0;
-	float minDot = FLT_MAX;
-	for (int i = 1; i < IncPoly->m_vertexCount; i++)
-	{
-		float dot = glm::dot(referenceNormal, IncPoly->m_normals[i]);
-		if (dot < minDot)
-		{
-			minDot = dot;
-			incidentFace = i;
-		}
-	}
-
-	// Assign face vertices for incidentFace
-	v[0] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
-	incidentFace = incidentFace + 1 >= (int)IncPoly->m_vertexCount ? 0 : incidentFace + 1;
-	v[1] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
-}
+// void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex) {
+// 	glm::vec3 referenceNormal = RefPoly->m_normals[referenceIndex];
+// 
+// 	// Calculate normal in incident's frame of reference
+// 	referenceNormal = RefPoly->u * referenceNormal; // To world space
+// 	referenceNormal = IncPoly->u.Transpose() * referenceNormal; // To incident's model space
+// 
+// 	// Find most anti-normal face on incident polygon
+// 	int incidentFace = 0;
+// 	float minDot = FLT_MAX;
+// 	for (int i = 1; i < IncPoly->m_vertexCount; i++)
+// 	{
+// 		float dot = glm::dot(referenceNormal, IncPoly->m_normals[i]);
+// 		if (dot < minDot)
+// 		{
+// 			minDot = dot;
+// 			incidentFace = i;
+// 		}
+// 	}
+// 
+// 	// Assign face vertices for incidentFace
+// 	v[0] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
+// 	incidentFace = incidentFace + 1 >= (int)IncPoly->m_vertexCount ? 0 : incidentFace + 1;
+// 	v[1] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
+// }
 
 // int Clip(glm::vec3 n, float c, glm::vec3* face)
 // {

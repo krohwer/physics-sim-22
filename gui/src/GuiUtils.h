@@ -44,16 +44,16 @@ namespace GuiUtils {
 			ImGui::InputFloat(xPositionText.c_str(), &object.position.x);
 			ImGui::InputFloat(yPositionText.c_str(), &object.position.y);
 
-			// Boundary checking for x position input
-			if (object.position.x > env.width - 0.5f * object.scale.x)
-				object.position.x = env.width - 0.5f * object.scale.x;
-			if (object.position.x < 0.5f * object.scale.x)
-				object.position.x = 0.5f * object.scale.x;
-			// Boundary checking for y position input
-	// 		if (object.position.y > env.height - 0.5f * object.scale.y) // Limits ceiling, but since that's nonexistent, let it be
-	// 			object.position.y = env.height - 0.5f * object.scale.y;
-			if (object.position.y < 0.5f * object.scale.y)
-				object.position.y = 0.5f * object.scale.y;
+		// Boundary checking for x position input
+// 		if (object.position.x > env.width - 0.5f * object.scale.x)
+// 			object.position.x = env.width - 0.5f * object.scale.x;
+		if (object.position.x < 0.5f * object.scale.x)
+			object.position.x = 0.5f * object.scale.x;
+		// Boundary checking for y position input
+// 		if (object.position.y > env.height - 0.5f * object.scale.y) // Limits ceiling, but since that's nonexistent, let it be
+// 			object.position.y = env.height - 0.5f * object.scale.y;
+		if (object.position.y < 0.5f * object.scale.y)
+			object.position.y = 0.5f * object.scale.y;
 
 			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 			ImGui::InputFloat(xVelocityText.c_str(), &object.velocity.x);

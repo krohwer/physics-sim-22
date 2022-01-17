@@ -13,11 +13,11 @@ struct Pair {
 	Body* B;
 };
 
-float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B);
+//float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B);
 
-void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex);
+//void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex);
 
-int Clip(glm::vec3 n, float c, glm::vec3* face);
+//int Clip(glm::vec3 n, float c, glm::vec3* face);
 
 /// detect a collision between two polygons
 //void PolygonvsPolygon(Manifold* m);

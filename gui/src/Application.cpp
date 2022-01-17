@@ -11,6 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
+#include "Camera.h"
+#include "Input.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -98,9 +100,17 @@ int main(void)
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
 
-		// CREATE PROJECTION MATRIX //
+		// CREATE CAMERA //
+		float halfWidth = (float)windowWidth / 2.0f;
+		float halfHeight = (float)windowHeight / 2.0f;
 
-		glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, -1.0f, 1.0f);
+		Camera camera(-halfWidth, halfWidth, -halfHeight, halfHeight);
+
+		// SET INPUT CALLBACKS //
+		cameraInput = &camera;
+		glfwSetKeyCallback(window, keyCallback);
+		glfwSetScrollCallback(window, scrollCallback);
+		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 		// LOAD SHADERS //
 
@@ -124,10 +134,6 @@ int main(void)
 		// create a renderer
 		Renderer renderer;
 
-		// variables to represent red and how much we want it to change each tick
-// 		float r = 0.0f;
-// 		float increment = 0.01f;
-
 		// IMGUI WINDOW CREATION //
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -137,7 +143,6 @@ int main(void)
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 		// Setup for ImGui Window variables
-		glm::vec3 translation(windowCenter.x, windowCenter.y, 0); // translate to the center of the screen by default
 		bool doPhysics = false;
 		bool beginPhysics = false;
 		const float MIN_CONTROLPANEL_WIDTH = 350.0f;
@@ -149,31 +154,23 @@ int main(void)
 		// timing variables
 		float accumulator = 0;
 		float frameStart;
-		float startTime = glfwGetTime();
+		float startTime = (float)glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(16.0f, 9.0f, GRAVITY, timestep);
-		env.pixelRatio = windowHeight / env.height;
-		// Adjust the translation
-		translation = translation / env.pixelRatio;
+		Environment env = Environment(2000.0f, 1000.0f, GRAVITY, timestep);
 
 		// create walls
 		Shape leftWallShape;
 		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
 		leftWall.mass = 0.0f;
-		leftWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
-		Shape rightWallShape;
-		Body rightWall(&rightWallShape, env.width + 0.5f, (0.5f * env.height));
-		rightWall.mass = 0.0f;
-		rightWall.scale = glm::vec3(1.0f, 32.0f, 1.0f);
+		leftWall.scale = glm::vec3(1.0f, env.height, 1.0f);
 		Shape floorShape;
 		Body floor(&floorShape, (0.5f * env.width), -0.5);
 		floor.mass = 0.0f;
-		floor.scale = glm::vec3(32.0f, 1.0f, 1.0f);
+		floor.scale = glm::vec3(env.width, 1.0f, 1.0f);
 
 		env.addBody(&floor);
 		env.addBody(&leftWall);
-		env.addBody(&rightWall);
 
 		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
@@ -194,12 +191,8 @@ int main(void)
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// bind the shader
-			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
-			shader.bind();
-
 			if (doPhysics) {
-				const float currentTime = glfwGetTime();
+				const float currentTime = (float)glfwGetTime();
 
 				accumulator += currentTime - frameStart;
 
@@ -214,27 +207,33 @@ int main(void)
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
+				camera.recalculateView();
+
 				// render each object
 				for (Body& body : env.bodyList) {
 					// identity model matrix
 					glm::mat4 model(1.0f);
 					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 					// translate, then rotate, then scale.  VERY IMPORTANT
-					model = glm::translate(model, body.position * env.pixelRatio);
+					model = glm::translate(model, body.position * PIXEL_RATIO);
 					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
 					model = glm::scale(model, body.scale);
 
 					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-					glm::mat4 mvp = projection * model;
+					glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
 
 					// set the matrix uniform for the mvp matrix so it updates every frame
 					shader.setUniformMat4f("u_MVP", mvp);
 
 					// infinite mass is gray!
-					if (body.mass == 0)
-						shader.setUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
-					else
-						shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+					if (body.mass == 0) {
+						body.color.a = 0.4f;
+						shader.setUniform4f("u_Color", body.color);
+					}
+					else {
+						body.color.a = 1.0f;
+						shader.setUniform4f("u_Color", body.color);
+					}
 
 					// call the renderer to draw something
 					// send in a vertex array, an index buffer, and a shader
@@ -244,6 +243,19 @@ int main(void)
 				}
 
 			} // end of mvp matrix scope
+
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			xpos -= halfWidth;
+			ypos = halfHeight - ypos;
+
+// 			if (!doPhysics && !isPaused && createObject) {
+// 				// Cannot press this button if the simulation is running or paused
+// 				Shape shape;
+// 				Body object(&shape, (((xpos * camera.cZoom) + camera.cPosition.x) / env.pixelRatio), (((ypos * camera.cZoom) + camera.cPosition.y) / env.pixelRatio));
+// 				env.addBody(&object);
+// 				createObject = false;
+// 			}
 
 			// IMGUI WINDOWS //
 
@@ -261,8 +273,8 @@ int main(void)
 				if (ImGui::BeginTabItem("Object Manager")) {
 					if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 						if (!doPhysics && !beginPhysics) {
-							float xPosition = windowCenter.x / env.pixelRatio;
-							float yPosition = windowCenter.y / env.pixelRatio;
+							float xPosition = camera.cPosition.x / PIXEL_RATIO;
+							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
 							Menu::addUserObject(env, xPosition, yPosition);
 						}
 						else
@@ -281,7 +293,6 @@ int main(void)
 							startVelocities.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
-							env.addBody(&rightWall);
 						}
 						else
 							activateAlert = true;
@@ -329,7 +340,6 @@ int main(void)
 							startVelocities.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
-							env.addBody(&rightWall);
 
 							// Replace with functions that are based off center of camera
 							float obj1xPosition = (windowCenter.x - 100.0f) / env.pixelRatio;
@@ -375,6 +385,7 @@ int main(void)
 			ImGui::Begin("Simulation Manager");
 			// TODO: Mess with the style of the buttons when they're disabled
 			// Begins simulation and stores initial objects
+
 			if (!doPhysics) {
 				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 					if (!beginPhysics) {
@@ -388,10 +399,7 @@ int main(void)
 							// Incoming storage manager POG?
 
 							// while we're looping objects, go ahead and recalculate some important values
-							body.computeInverseMass();
-							body.computeInertia();
-							body.shape->scaleX(body.scale);
-							body.shape->scaleY(body.scale);
+							body.init();
 							// calculate the force of gravitation for the object into a vector and apply it
 							glm::vec3 gravity(0, body.mass * env.gravity, 0);
 							body.force -= gravity;
