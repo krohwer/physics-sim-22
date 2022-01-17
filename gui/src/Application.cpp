@@ -4,11 +4,15 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "Menu.h"
+
 #include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
+#include "Camera.h"
+#include "Input.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -16,21 +20,11 @@
 #include "Shader.h"
 
 #include "Environment.h"
-#include "Physics.h"
+#include "Shape.h"
 #include "PhysicsObject.h"
-
-void printOneVector(glm::vec3 vector) {
-	std::cout << "{" << vector.x << ", " << vector.y << ", " << vector.z << "}" << std::endl;
-}
-
-void printVectors(PhysicsObject object) {
-	std::cout << "Position:";
-	printOneVector(object.position);
-	std::cout << "Velocity:";
-	printOneVector(object.velocity);
-	std::cout << "Acceleration:";
-	printOneVector(object.acceleration);
-}
+#include "Collision.h"
+#include "Manifold.h"
+#include "PhysicsMath.h"
 
 int main(void)
 {
@@ -106,9 +100,17 @@ int main(void)
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
 
-		// CREATE PROJECTION MATRIX //
+		// CREATE CAMERA //
+		float halfWidth = (float)windowWidth / 2.0f;
+		float halfHeight = (float)windowHeight / 2.0f;
 
-		glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, -1.0f, 1.0f);
+		Camera camera(-halfWidth, halfWidth, -halfHeight, halfHeight);
+
+		// SET INPUT CALLBACKS //
+		cameraInput = &camera;
+		glfwSetKeyCallback(window, keyCallback);
+		glfwSetScrollCallback(window, scrollCallback);
+		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 		// LOAD SHADERS //
 
@@ -132,10 +134,6 @@ int main(void)
 		// create a renderer
 		Renderer renderer;
 
-		// variables to represent red and how much we want it to change each tick
-// 		float r = 0.0f;
-// 		float increment = 0.01f;
-
 		// IMGUI WINDOW CREATION //
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -145,25 +143,38 @@ int main(void)
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 		// Setup for ImGui Window variables
-		glm::vec3 translation(windowCenter.x, windowCenter.y, 0); // translate to the center of the screen by default
-		bool drawObject = false;
 		bool doPhysics = false;
+		bool beginPhysics = false;
+		const float MIN_CONTROLPANEL_WIDTH = 350.0f;
+		const float MIN_CONTROLPANEL_HEIGHT = 400.0f;
+		const float MIN_SIMULATORMANAGER_WIDTH = 200.0f;
+		const float MIN_SIMULATORMANAGER_HEIGHT = 100.0f;
+		bool activateAlert = false;
 
-		// Physics timing variables
-		const float physicsFPS = 60;
-		const float timestep = 1 / physicsFPS;
+		// timing variables
 		float accumulator = 0;
 		float frameStart;
-		float startTime;
+		float startTime = (float)glfwGetTime();
 
-		// Physics environment and object setup
-		Environment env = {16.0f, 9.0f, 9.81f, 0.0f}; // change the order of width and height because height->width make mad
-		env.pixelRatio = windowHeight / env.height;
-		// fix the translation
-		translation = translation / env.pixelRatio;
-		PhysicsObject object;
-		object.mass = 10.0f;
-		object.position = translation;
+		// Physics environment setup
+		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
+
+		// create walls
+		Shape leftWallShape;
+		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
+		leftWall.mass = 0.0f;
+		leftWall.scale = glm::vec3(1.0f, env.height, 1.0f);
+		Shape floorShape;
+		Body floor(&floorShape, (0.5f * env.width), -0.5);
+		floor.mass = 0.0f;
+		floor.scale = glm::vec3(env.width, 1.0f, 1.0f);
+
+		env.addBody(&floor);
+		env.addBody(&leftWall);
+
+		// Vectors to store all object starting positions and velocities
+		std::vector<glm::vec3> startPositions;
+		std::vector<glm::vec3> startVelocities;
 
 		// RENDER LOOP //
 
@@ -180,12 +191,8 @@ int main(void)
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// bind the shader
-			// in a perfect world, you do this right before you actually draw an object, and have a shader cache to make sure shaders are not bound multiple times
-			shader.bind();
-
 			if (doPhysics) {
-				const float currentTime = glfwGetTime();
+				const float currentTime = (float)glfwGetTime();
 
 				accumulator += currentTime - frameStart;
 
@@ -193,99 +200,267 @@ int main(void)
 
 				while (accumulator > timestep) {
 					// do the physics
-					physics::updateObject(object, env, timestep);
-					//std::cout << "Accumulator: " << accumulator << std::endl;
-					//std::cout << "Timestep: " << timestep << std::endl;
+					env.step();
 					accumulator -= timestep;
 				}
 			}
 
 			{ // SCOPE TO CALCULATE MVP MATRIX AND DRAW AN OBJECT //
 
-				// identity model matrix
-				// can use it to move the object with glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
-				// the vec3 you're sending in is basically the displacement vector, telling how much the object moves in each direction
-				// for multiple objects, we will need a separate model matrix for each one since it converts from "object" coordinates to "world" coordinates
-				glm::mat4 model(1.0f);
-				/* DO ANY MODEL MATRIX TRANSFORMATIONS */
-				// translate, then rotate, then scale.  VERY IMPORTANT
-				model = glm::translate(model, object.position * env.pixelRatio);
-				//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 0, 1)); // rotate the square 45 degrees
-				//model = glm::scale(model, glm::vec3(2, 2, 1)); // double the size of the square
+				camera.recalculateView();
 
-				// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-				// NOTE: even though matrices are quick to run on the GPU, we want to be doing these kinds of calculations on the CPU because they DO NOT need to run for every vertex.
-				//		 Only put things in the shader that *need* to run for every single vertex
-				glm::mat4 mvp = projection * model;
+				// render each object
+				for (Body& body : env.bodyList) {
+					// identity model matrix
+					glm::mat4 model(1.0f);
+					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
+					// translate, then rotate, then scale.  VERY IMPORTANT
+					model = glm::translate(model, body.position * PIXEL_RATIO);
+					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
+					model = glm::scale(model, body.scale);
 
-				// set the matrix uniform for the mvp matrix so it updates every frame
-				shader.setUniformMat4f("u_MVP", mvp);
+					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
+					glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
 
-				// call the renderer to draw something
-				// send in a vertex array, an index buffer, and a shader
-				// in a more traditional setup, we would be using a material instead of a shader
-				// a material is a shader AND its associated uniforms
-				//	ImGui nonsense butting in here
-				// if statement allows us to toggle whether the object is drawn or not
-				// since we're only dealing with one object, this is the easiest way to go about it FOR NOW
-				if (drawObject)
+					// set the matrix uniform for the mvp matrix so it updates every frame
+					shader.setUniformMat4f("u_MVP", mvp);
+
+					// infinite mass is gray!
+					if (body.mass == 0) {
+						body.color.a = 0.4f;
+						shader.setUniform4f("u_Color", body.color);
+					}
+					else {
+						body.color.a = 1.0f;
+						shader.setUniform4f("u_Color", body.color);
+					}
+
+					// call the renderer to draw something
+					// send in a vertex array, an index buffer, and a shader
+					// in a more traditional setup, we would be using a material instead of a shader
+					// a material is a shader AND its associated uniforms
 					renderer.draw(va, ib, shader);
+				}
 
 			} // end of mvp matrix scope
 
-			// sending r in as red to animate the color
-			// this should actually be done before the draw, but whatevs
-			//shader.setUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-			// change r to animate the color of the object
-// 			if (r > 1.0)
-// 				increment = -0.01f;
-// 			else if (r < 0.0f)
-// 				increment = 0.01f;
-//			r += increment;
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			xpos -= halfWidth;
+			ypos = halfHeight - ypos;
 
-			// Text at the top of the ImGui window
+// 			if (!doPhysics && !isPaused && createObject) {
+// 				// Cannot press this button if the simulation is running or paused
+// 				Shape shape;
+// 				Body object(&shape, (((xpos * camera.cZoom) + camera.cPosition.x) / env.pixelRatio), (((ypos * camera.cZoom) + camera.cPosition.y) / env.pixelRatio));
+// 				env.addBody(&object);
+// 				createObject = false;
+// 			}
+
+			// IMGUI WINDOWS //
+
+			// Forces next window to be a width of 300px and height of 400px upon launch of application
+			// Users can still resize it afterwards
+			// TODO: throw the sizes to a variable outside of the render loop
+			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
+
+			// TODO: Potentially throw all created windows into GuiUtils for structure
+			// Window to manage environment objects
 			ImGui::Begin("Control Panel");
 
-			// Buttons to create/clear the object
-			// Resets the object to the "default" position and allows it to be drawn
-			if (ImGui::Button("Create Object")) {
-				object.position = translation;
-				physics::resetObject(object);
-				drawObject = true;
+			if (ImGui::BeginTabBar("Control Panel Tabs")) {
+				// Creates a new object at the center of the screen
+				if (ImGui::BeginTabItem("Object Manager")) {
+					if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+						if (!doPhysics && !beginPhysics) {
+							float xPosition = camera.cPosition.x / PIXEL_RATIO;
+							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
+							Menu::addUserObject(env, xPosition, yPosition);
+						}
+						else
+							activateAlert = true;
+					}
+					// Removes all objects in the current environment
+					if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+						if (!doPhysics && !beginPhysics) {
+							// Cannot press this button if the simulation is running or paused
+							doPhysics = false;
+
+							// TODO: throw this into a helper function
+							// We'll need this for our premade experiments
+							env.bodyList.clear();
+							startPositions.clear();
+							startVelocities.clear();
+							env.addBody(&floor);
+							env.addBody(&leftWall);
+						}
+						else
+							activateAlert = true;
+					}
+
+					Menu::createAllObjectMenus(env);
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Environment")) {
+					if (ImGui::GetWindowWidth() / 3.0f < 100.0f)
+						ImGui::PushItemWidth(100.0f);
+					else
+						ImGui::PushItemWidth(ImGui::GetWindowWidth() / 3.0f);
+
+					ImGui::InputFloat("Width (m)", &env.width);
+					ImGui::InputFloat("Height (m)", &env.height);
+					ImGui::InputFloat("Gravity", &env.gravity);
+
+					if (&env.width < 0)
+						env.width = 0;
+					if (&env.height < 0)
+						env.height = 0;
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Properties")) {
+					ImGui::Text("TODO: Implement this :b");
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Experiments")) {
+					if (ImGui::TreeNode("Classic Experiment Title Here")) {
+						
+						ImGui::TextWrapped("There are two boxes. They're exactly the same and held at the same height.");
+						ImGui::TextWrapped("One falls, but the other is slightly pushed when it falls. Which box touches the ground first?");
+					
+						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+							// TODO: throw this into a helper function
+							// We'll need this for our premade experiments
+							env.bodyList.clear();
+							startPositions.clear();
+							startVelocities.clear();
+							env.addBody(&floor);
+							env.addBody(&leftWall);
+
+							// Replace with functions that are based off center of camera
+							float obj1xPosition = (windowCenter.x - 100.0f) / PIXEL_RATIO;
+							float obj2xPosition = (windowCenter.x + 100.0f) / PIXEL_RATIO;
+							float yPosition = windowCenter.y / PIXEL_RATIO;
+
+							Shape shape;
+							Body object1(&shape, obj1xPosition, yPosition);
+							Body object2(&shape, obj2xPosition, yPosition);
+							object2.velocity.x = 5.0f;
+							env.addBody(&object1);
+							env.addBody(&object2);
+						}
+
+						ImGui::TreePop();
+					}
+					if (ImGui::TreeNode("TODO")) {
+						ImGui::TextWrapped("Throw the premade experiments into an expandable file where we can just append them.");
+						ImGui::TextWrapped("Or something like that.");
+
+						ImGui::TreePop();
+					}
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Help")) {
+					ImGui::Text("TODO: Implement this :b");
+					ImGui::EndTabItem();
+				}
 			}
-			// Removes the ability for the object to be drawn
-			if (ImGui::Button("Delete Object")) {
-				drawObject = false;
+			ImGui::EndTabBar();
+
+			// std::cout << ImGui::IsWindowHovered() << std::endl;
+
+			ImGui::End(); // End of Control Panel Window
+
+			// Forces window to a width of 200px and height of 100px upon launch of application
+			// Users can still resize it afterwards
+			// TODO: throw the sizes to a variable outside of the render loop
+			ImGui::SetNextWindowSize(ImVec2(MIN_SIMULATORMANAGER_WIDTH, MIN_SIMULATORMANAGER_HEIGHT), ImGuiCond_FirstUseEver);
+
+			// Window with buttons to manage the set up experiment
+			ImGui::Begin("Simulation Manager");
+			// TODO: Mess with the style of the buttons when they're disabled
+			// Begins simulation and stores initial objects
+
+			if (!doPhysics) {
+				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					// Cannot press this button if the simulation is running or paused
+					if (!beginPhysics) {
+
+						// Physics pre-calculations
+						for (Body& body : env.bodyList) {
+							// save object starting positions and velocities
+							startPositions.push_back(body.position);
+							startVelocities.push_back(body.velocity);
+							// Incoming storage manager POG?
+
+							// while we're looping objects, go ahead and recalculate some important values
+							body.init();
+							// calculate the force of gravitation for the object into a vector and apply it
+							glm::vec3 gravity(0, body.mass * env.gravity, 0);
+							body.force -= gravity;
+						}
+						env.generatePairs();
+						beginPhysics = true;
+					}
+
+					// Physics happens here
+					frameStart = glfwGetTime();
+					startTime = glfwGetTime();
+					// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
+					doPhysics = true;
+				}
+			}
+			else {
+				if (ImGui::Button("Pause", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					// Pauses simulation if it's running
+					doPhysics = false;
+				}
+			}
+
+			// Stops and resets objects as they were at the start of the simulation
+			if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+				if (doPhysics || beginPhysics) {
+					int count = 0;
+					for (Body& body : env.bodyList) {
+						body.position = startPositions[count];
+						body.velocity = startVelocities[count];
+						count++;
+
+						// clear forces!
+						body.force = glm::vec3(0.0f);
+					}
+					startPositions.clear();
+					startVelocities.clear();
+					doPhysics = false;
+					beginPhysics = false;
+				}
+			}
+
+			ImGui::End(); // End of Simulation Manager Window
+
+			// Alert handling
+			if (activateAlert)
+				ImGui::OpenPopup("Error?");
+
+			ImGui::SetNextWindowSize(ImVec2(MIN_SIMULATORMANAGER_WIDTH, MIN_SIMULATORMANAGER_HEIGHT), ImGuiCond_FirstUseEver);
+			// This is already abstracted, I just need to adjust it to be used
+			if (ImGui::BeginPopupModal("Error?", &activateAlert)) {
+				ImGui::TextWrapped("Cannot mess with Control Panel when simulator is running.");
 				doPhysics = false;
+
+				if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					activateAlert = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
 			}
 
-			// Sliders to mess with horizontal and vertical position(s) of the object
-			ImGui::Text("Object Horizontal Position");
-			ImGui::SliderFloat("X Pos", &object.position.x, 0.5f, env.width - 0.5f);
-			ImGui::Text("Object Vertical Position");
-			ImGui::SliderFloat("Y Pos", &object.position.y, 0.5f, env.height - 0.5f);
-			ImGui::Text("Object Horizontal Velocity");
-			ImGui::SliderFloat("X Vel", &object.velocity.x, -50.0f, 50.0f);
-			ImGui::Text("Object Vertical Velocity");
-			ImGui::SliderFloat("Y Vel", &object.velocity.y, -50.0f, 50.0f);
-
-			// Buttons to actually conduct default experiment
-			if (ImGui::Button("Play Simulation")) {
-				// Physics happens here
-				frameStart = glfwGetTime();
-				startTime = glfwGetTime();
-				physics::applyGravity(object, env);
-				doPhysics = true;
-			}
-			if (ImGui::Button("Stop/Reset Simulation")) {
-				object.position = translation;
-				std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;
-				physics::resetObject(object);
-				doPhysics = false;
-			}
-
-			ImGui::End();
-			// Marks end of this ImGui window
+			// End of all ImGui windows
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();

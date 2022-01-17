@@ -4,13 +4,13 @@
 #define ENVIRONMENT_H
 
 #include <list>
+#include <vector>
 
 struct Body;
+struct Pair;
 
 class Environment {
 public:
-	/// the vertical size of the environment, measured in meters (m)
-	float height;
 	/// the horizontal size of the environment, measured in meters (m)
 	float width;
 	/// the vertical size of the environment, measured in meters (m)
@@ -23,10 +23,11 @@ public:
 	/// the list of bodies (objects) within the physics environment
 	std::list <Body> bodyList;
 
-	/// the ratio of windowHeight / environmentHeight, used for converting meters to pixels before rendering
-	float pixelRatio;
+	/// contains the possible collision pairs
+	std::vector <Pair> pairs;
 
-	Environment(float eHeight, float eWidth, float eGravity, float eTimestep);
+
+	Environment(float eWidth, float eHeight, float eGravity, float eTimestep);
 
 	/**
 	 * Adds a body to the environment to be rendered and included in physics calculations.
@@ -38,6 +39,11 @@ public:
 	 * Removes a body from the environment.
 	 */
 	void removeBody(Body* body);
+
+	/**
+	 * Broad phase, generate all possible non-duplicate pairs of bodies in the environment
+	 */
+	void generatePairs();
 
 	/**
 	 * Advances all objects in the environment 

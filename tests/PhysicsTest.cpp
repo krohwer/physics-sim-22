@@ -42,25 +42,32 @@ int main() {
 
 	env.addBody(&object);
 
+	cout << env.bodyList.size() << endl;
+
+	env.removeBody(&object);
+
+	cout << env.bodyList.size() << endl;
+
 	// initial time
 	cout << "Time Elapsed: " << totalTime << endl;
 	cout << "Mass: " << object.mass << endl;
-	printVectors(env);
+	//printVectors(env);
 	cout << endl;
 
 	glm::vec3 force(10.0f, 0, 0);
 
 	// run a test for 5 seconds and print the object vectors at each step
-	for (int i = 0; i < 5; i++)
-	{
-		totalTime += deltaTime;
-		env.step();
-		cout << "Time Elapsed: " << totalTime << endl;
-		
-		printVectors(env);
+// 	for (int i = 0; i < 5; i++)
+// 	{
+// 		totalTime += deltaTime;
+// 		env.step();
+// 		cout << "Time Elapsed: " << totalTime << endl;
+// 		
+// 		printVectors(env);
+// 
+// 		cout << endl;
+// 	}
 
-		cout << endl;
-	}
 
 	getchar();
 

@@ -3,40 +3,36 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include <algorithm>
 #include <glm/glm.hpp>
 #include "PhysicsObject.h"
+#include "Shape.h"
+#include "Manifold.h"
 
-struct Manifold;
-struct Body;
-
-/// detect a collision between two axis aligned bounding boxes
-bool AABBvsAABB(Manifold *man);
-
-// CIRCLES
-
-struct Circle {
-	float radius;
-	glm::vec3 position;
+struct Pair {
+	Body* A;
+	Body* B;
 };
 
-// detect a collision between two circles
-bool CirclevsCircle(Manifold* man);
+//float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B);
 
-void resolveCollision(Body a, Body b) {
-	glm::vec3 relativeVelocity = b.velocity - a.velocity;
-	//float veloctyAlongNormal = glm::dot(relativeVelocity, normal);
+//void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex);
 
-	//float epsilon = std::min()
-}
+//int Clip(glm::vec3 n, float c, glm::vec3* face);
 
-//typedef void (*CollisionCallback)(Manifold* m, Body* a, Body* b);
+/// detect a collision between two polygons
+//void PolygonvsPolygon(Manifold* m);
 
-//extern CollisionCallback Dispatch[Shape::eCount][Shape::eCount];
+/// detect a collision between two bounding boxes
+void BoxvsBox(Manifold *manifold);
 
-void CircletoCircle(Manifold* m, Body* a, Body* b);
-void CircletoPolygon(Manifold* m, Body* a, Body* b);
-void PolygontoCircle(Manifold* m, Body* a, Body* b);
-void PolygontoPolygon(Manifold* m, Body* a, Body* b);
+/// detect a collision between two balls
+void BallvsBall(Manifold* manifold);
+
+void BoxvsBall(Manifold* manifold);
+void BallvsBox(Manifold* manifold);
+
+typedef void (*collisionCallback)(Manifold* man);
+
+extern collisionCallback Dispatch[2][2];
 
 #endif
