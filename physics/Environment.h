@@ -5,8 +5,8 @@
 
 #include <list>
 #include <vector>
+#include "PhysicsObject.h"
 
-struct Body;
 struct Pair;
 
 class Environment {
@@ -19,6 +19,11 @@ public:
 	float gravity;
 	/// the constant amount of time that passes between each physics update
 	float timestep;
+
+	/// x-Axis for the environment
+	Body xAxis;
+	/// y-Axis for the environment
+	Body yAxis;
 
 	/// the list of bodies (objects) within the physics environment
 	std::list <Body> bodyList;

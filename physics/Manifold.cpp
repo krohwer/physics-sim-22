@@ -26,7 +26,6 @@ void Manifold::ApplyImpulse() {
 		float gdt = gravity * timestep;
 		if (lenSqr(relativeVelocity) < (gdt * gdt) + EPSILON) {
 			epsilon = 0.0f;
-			std::cout << "STATIC" << std::endl;
 		}
 
 		// calculate inverse mass sum and impulse scalar j

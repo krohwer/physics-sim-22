@@ -29,7 +29,8 @@ struct Shape;
  * Stores the *unique* object data required for both physics calculations and OpenGL rendering.
  */
 struct Body {
-	// constructor
+	// constructors
+	Body();
 	Body(Shape* s, float x, float y);
 
 	/// position stores where the object is in relation to the origin. Each component measured in meters (m)

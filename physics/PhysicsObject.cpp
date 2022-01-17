@@ -25,6 +25,26 @@ Body::Body(Shape* s, float x, float y) {
 	computeInertia();
 }
 
+Body::Body() {
+	position = glm::vec3(0.0f, 0.0f, 0.0f);
+	velocity = glm::vec3(0.0f);
+	force = glm::vec3(0.0f);
+
+	rotation = 0.0f;
+	angularVelocity = 0.0f;
+	torque = 0.0f;
+
+	scale = glm::vec3(1.0f);
+	color = glm::vec4(1.0f);
+
+	mass = 10.0f;
+	momentOfInertia = 0.0f;
+	restitution = 0.2f;
+
+	computeInverseMass();
+	computeInertia();
+}
+
 void Body::applyForce(glm::vec3 f) {
 	if (!(inverseMass == 0.0f))
 		force += f;

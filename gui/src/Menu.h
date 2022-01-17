@@ -25,13 +25,11 @@ namespace Menu {
 	}
 
 	void createAllObjectMenus(Environment& env) {
-		int objectNumber = -1;
+		int objectNumber = 1;
 		for (Body& body : env.bodyList) {
-			if (objectNumber > 0) {
-				// Dummy is used for selective line padding
-				ImGui::Dummy(ImVec2(0.0f, 2.5f));
-				GuiUtils::createSingleObjectMenu(env, body, objectNumber);
-			}
+			// Dummy is used for selective line padding
+			ImGui::Dummy(ImVec2(0.0f, 2.5f));
+			GuiUtils::createSingleObjectMenu(env, body, objectNumber);
 			objectNumber++;
 		}
 	}

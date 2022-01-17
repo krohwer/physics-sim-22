@@ -11,7 +11,9 @@ constexpr auto MaxVertexCount = 4;
 
 struct Shape {
 	// constructors
-	Shape() {}
+	Shape() {
+		SetBox();
+	}
 
 	Shape(glm::vec3 vertexArray[]) {
 		if (sizeof(vertexArray) <= MaxVertexCount)
