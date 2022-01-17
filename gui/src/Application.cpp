@@ -4,7 +4,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "GuiUtils.h"
+#include "Menu.h"
 
 #include <GLFW/glfw3.h> // also uses glew 2.1.0 in precompiled header
 #include <glm/glm.hpp> // glm version 9.9.8
@@ -144,7 +144,12 @@ int main(void)
 
 		// Setup for ImGui Window variables
 		bool doPhysics = false;
-		bool isPaused = false;
+		bool beginPhysics = false;
+		const float MIN_CONTROLPANEL_WIDTH = 350.0f;
+		const float MIN_CONTROLPANEL_HEIGHT = 400.0f;
+		const float MIN_SIMULATORMANAGER_WIDTH = 200.0f;
+		const float MIN_SIMULATORMANAGER_HEIGHT = 100.0f;
+		bool activateAlert = false;
 
 		// timing variables
 		float accumulator = 0;
@@ -254,69 +259,154 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
-			// Forces next window to be a width of 500px and height of 600px upon launch of application
+			// Forces next window to be a width of 300px and height of 400px upon launch of application
 			// Users can still resize it afterwards
 			// TODO: throw the sizes to a variable outside of the render loop
-			ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
 
 			// TODO: Potentially throw all created windows into GuiUtils for structure
 			// Window to manage environment objects
 			ImGui::Begin("Control Panel");
 
-			// Creates a new object at the center of the screen
-			if (ImGui::Button("Create Object")) {
-				if (!doPhysics && !isPaused) {
-					// Cannot press this button if the simulation is running or paused
-					Shape shape;
-					Body object(&shape, (camera.cPosition.x / PIXEL_RATIO), (camera.cPosition.y  / PIXEL_RATIO));
-					env.addBody(&object);
-				}
-			}
-			// Removes all objects in the current environment
-			if (ImGui::Button("Delete All Objects")) {
-				if (!doPhysics && !isPaused) {
-					// Cannot press this button if the simulation is running or paused
-					doPhysics = false;
-					env.bodyList.clear();
-					startPositions.clear();
-					startVelocities.clear();
-					env.addBody(&floor);
-					env.addBody(&leftWall);
-				}
-			}
+			if (ImGui::BeginTabBar("Control Panel Tabs")) {
+				// Creates a new object at the center of the screen
+				if (ImGui::BeginTabItem("Object Manager")) {
+					if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+						if (!doPhysics && !beginPhysics) {
+							float xPosition = camera.cPosition.x / PIXEL_RATIO;
+							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
+							Menu::addUserObject(env, xPosition, yPosition);
+						}
+						else
+							activateAlert = true;
+					}
+					// Removes all objects in the current environment
+					if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+						if (!doPhysics && !beginPhysics) {
+							// Cannot press this button if the simulation is running or paused
+							doPhysics = false;
 
-			gui_utils::createAllObjectMenus(env);
+							// TODO: throw this into a helper function
+							// We'll need this for our premade experiments
+							env.bodyList.clear();
+							startPositions.clear();
+							startVelocities.clear();
+							env.addBody(&floor);
+							env.addBody(&leftWall);
+						}
+						else
+							activateAlert = true;
+					}
+
+					Menu::createAllObjectMenus(env);
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Environment")) {
+					if (ImGui::GetWindowWidth() / 3.0f < 100.0f)
+						ImGui::PushItemWidth(100.0f);
+					else
+						ImGui::PushItemWidth(ImGui::GetWindowWidth() / 3.0f);
+
+					ImGui::InputFloat("Width (m)", &env.width);
+					ImGui::InputFloat("Height (m)", &env.height);
+					ImGui::InputFloat("Gravity", &env.gravity);
+
+					if (&env.width < 0)
+						env.width = 0;
+					if (&env.height < 0)
+						env.height = 0;
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Properties")) {
+					ImGui::Text("TODO: Implement this :b");
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Experiments")) {
+					if (ImGui::TreeNode("Classic Experiment Title Here")) {
+						
+						ImGui::TextWrapped("There are two boxes. They're exactly the same and held at the same height.");
+						ImGui::TextWrapped("One falls, but the other is slightly pushed when it falls. Which box touches the ground first?");
+					
+						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+							// TODO: throw this into a helper function
+							// We'll need this for our premade experiments
+							env.bodyList.clear();
+							startPositions.clear();
+							startVelocities.clear();
+							env.addBody(&floor);
+							env.addBody(&leftWall);
+
+							// Replace with functions that are based off center of camera
+							float obj1xPosition = (windowCenter.x - 100.0f) / env.pixelRatio;
+							float obj2xPosition = (windowCenter.x + 100.0f) / env.pixelRatio;
+							float yPosition = windowCenter.y / env.pixelRatio;
+
+							Shape shape;
+							Body object1(&shape, obj1xPosition, yPosition);
+							Body object2(&shape, obj2xPosition, yPosition);
+							object2.velocity.x = 5.0f;
+							env.addBody(&object1);
+							env.addBody(&object2);
+						}
+
+						ImGui::TreePop();
+					}
+					if (ImGui::TreeNode("TODO")) {
+						ImGui::TextWrapped("Throw the premade experiments into an expandable file where we can just append them.");
+						ImGui::TextWrapped("Or something like that.");
+
+						ImGui::TreePop();
+					}
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Help")) {
+					ImGui::Text("TODO: Implement this :b");
+					ImGui::EndTabItem();
+				}
+			}
+			ImGui::EndTabBar();
+
+			// std::cout << ImGui::IsWindowHovered() << std::endl;
 
 			ImGui::End(); // End of Control Panel Window
 
-			// Forces window to a width of 700px and height of 400px upon launch of application
+			// Forces window to a width of 200px and height of 100px upon launch of application
 			// Users can still resize it afterwards
 			// TODO: throw the sizes to a variable outside of the render loop
-			ImGui::SetNextWindowSize(ImVec2(700, 400), ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowSize(ImVec2(MIN_SIMULATORMANAGER_WIDTH, MIN_SIMULATORMANAGER_HEIGHT), ImGuiCond_FirstUseEver);
 
 			// Window with buttons to manage the set up experiment
 			ImGui::Begin("Simulation Manager");
-
 			// TODO: Mess with the style of the buttons when they're disabled
 			// Begins simulation and stores initial objects
-			if (ImGui::Button("Start Simulation")) {
-				if (!doPhysics && !isPaused) {
-					// Cannot press this button if the simulation is running or paused
 
-					// Physics pre-calculations
-					for (Body& body : env.bodyList) {
-						// save object starting positions and velocities
-						startPositions.push_back(body.position);
-						startVelocities.push_back(body.velocity);
-						// Incoming storage manager POG?
+			if (!doPhysics) {
+				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					if (!beginPhysics) {
+						// Cannot press this button if the simulation is running or paused
 
-						// while we're looping objects, go ahead and recalculate some important values
-						body.init();
-						// calculate the force of gravitation for the object into a vector and apply it
-						glm::vec3 gravity(0, body.mass * env.gravity, 0);
-						body.force -= gravity;
+						// Physics pre-calculations
+						for (Body& body : env.bodyList) {
+							// save object starting positions and velocities
+							startPositions.push_back(body.position);
+							startVelocities.push_back(body.velocity);
+							// Incoming storage manager POG?
+
+							// while we're looping objects, go ahead and recalculate some important values
+							body.init();
+							// calculate the force of gravitation for the object into a vector and apply it
+							glm::vec3 gravity(0, body.mass * env.gravity, 0);
+							body.force -= gravity;
+						}
+						env.generatePairs();
+						beginPhysics = true;
 					}
-					env.generatePairs();
 
 					// Physics happens here
 					frameStart = glfwGetTime();
@@ -325,29 +415,16 @@ int main(void)
 					doPhysics = true;
 				}
 			}
-
-			// Will pause/resume simulation once it's been started
-			if (ImGui::Button("Pause/Resume Simulation")) {
-				// Cannot press this button if the simulation was not started
-				if (doPhysics) {
+			else {
+				if (ImGui::Button("Pause", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 					// Pauses simulation if it's running
-					/*std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;*/
 					doPhysics = false;
-					isPaused = true;
-				}
-				else if (isPaused) {
-					// Reset start time and continue the physics simulation
-					frameStart = glfwGetTime();
-					startTime = glfwGetTime();
-					doPhysics = true;
-					isPaused = false;
 				}
 			}
 
 			// Stops and resets objects as they were at the start of the simulation
-			if (ImGui::Button("Stop/Reset Simulation")) {
-				if (doPhysics || isPaused) {
-					/*std::cout << "Time elapsed: " << glfwGetTime() - startTime << std::endl;*/
+			if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+				if (doPhysics || beginPhysics) {
 					int count = 0;
 					for (Body& body : env.bodyList) {
 						body.position = startPositions[count];
@@ -360,11 +437,28 @@ int main(void)
 					startPositions.clear();
 					startVelocities.clear();
 					doPhysics = false;
-					isPaused = false;
+					beginPhysics = false;
 				}
 			}
 
 			ImGui::End(); // End of Simulation Manager Window
+
+			// Alert handling
+			if (activateAlert)
+				ImGui::OpenPopup("Error?");
+
+			ImGui::SetNextWindowSize(ImVec2(MIN_SIMULATORMANAGER_WIDTH, MIN_SIMULATORMANAGER_HEIGHT), ImGuiCond_FirstUseEver);
+			// This is already abstracted, I just need to adjust it to be used
+			if (ImGui::BeginPopupModal("Error?", &activateAlert)) {
+				ImGui::TextWrapped("Cannot mess with Control Panel when simulator is running.");
+				doPhysics = false;
+
+				if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					activateAlert = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
 
 			// End of all ImGui windows
 
