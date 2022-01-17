@@ -25,7 +25,7 @@ namespace Menu {
 	}
 
 	void createAllObjectMenus(Environment& env) {
-		int objectNumber = -2;
+		int objectNumber = -1;
 		for (Body& body : env.bodyList) {
 			if (objectNumber > 0) {
 				// Dummy is used for selective line padding
