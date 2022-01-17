@@ -23,9 +23,10 @@ void Manifold::ApplyImpulse() {
 		// calculate the restitution
 		epsilon = std::min(A->restitution, B->restitution);
 		// if an object's relative velocity is only due to gravity over the timestep, we want a resting collision with no restitution
-		float gdt = GRAVITY * timestep;
+		float gdt = gravity * timestep;
 		if (lenSqr(relativeVelocity) < (gdt * gdt) + EPSILON) {
 			epsilon = 0.0f;
+			std::cout << "STATIC" << std::endl;
 		}
 
 		// calculate inverse mass sum and impulse scalar j

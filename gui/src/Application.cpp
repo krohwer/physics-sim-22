@@ -157,7 +157,7 @@ int main(void)
 		float startTime = (float)glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(2000.0f, 1000.0f, GRAVITY, timestep);
+		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
 
 		// create walls
 		Shape leftWallShape;
@@ -342,9 +342,9 @@ int main(void)
 							env.addBody(&leftWall);
 
 							// Replace with functions that are based off center of camera
-							float obj1xPosition = (windowCenter.x - 100.0f) / env.pixelRatio;
-							float obj2xPosition = (windowCenter.x + 100.0f) / env.pixelRatio;
-							float yPosition = windowCenter.y / env.pixelRatio;
+							float obj1xPosition = (windowCenter.x - 100.0f) / PIXEL_RATIO;
+							float obj2xPosition = (windowCenter.x + 100.0f) / PIXEL_RATIO;
+							float yPosition = windowCenter.y / PIXEL_RATIO;
 
 							Shape shape;
 							Body object1(&shape, obj1xPosition, yPosition);
@@ -388,8 +388,8 @@ int main(void)
 
 			if (!doPhysics) {
 				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+					// Cannot press this button if the simulation is running or paused
 					if (!beginPhysics) {
-						// Cannot press this button if the simulation is running or paused
 
 						// Physics pre-calculations
 						for (Body& body : env.bodyList) {

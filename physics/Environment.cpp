@@ -51,7 +51,7 @@ void Environment::step() {
 	// check pairs for broad phase
 	for (Pair& pair : pairs) {
 		// create manifolds, check for collisions, and solve
-		Manifold manifold(pair.A, pair.B);
+		Manifold manifold(pair.A, pair.B, gravity);
 		Dispatch[(int)pair.A->shape->type][(int)pair.B->shape->type](&manifold);
 		if (manifold.contactCount) {
 			manifold.ApplyImpulse();

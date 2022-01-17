@@ -9,9 +9,10 @@ struct Body;
 
 struct Manifold
 {
-	Manifold(Body* a, Body* b) {
+	Manifold(Body* a, Body* b, float eGravity) {
 		A = a;
 		B = b;
+		gravity = eGravity;
 	}
 
 // 	void Solve();                 // Generate contact information
@@ -31,6 +32,8 @@ struct Manifold
 	 * Corrects infinite mass objects so that they do not move
 	 */
  	void InfiniteMassCorrection();
+
+	float gravity;
 
 	Body* A;
 	Body* B;

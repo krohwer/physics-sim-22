@@ -7,13 +7,11 @@
 
 // conversion factor from meters to pixels
 #define PIXEL_RATIO 100.0f
+#define DEFAULT_GRAVITY 9.81f
 
 // physics timing constants
 const float physicsFPS = 200;
 const float timestep = 1 / physicsFPS;
-
-// gravity constant
-const float GRAVITY = 9.81f;
 
 // rounding tolerance value
 const float EPSILON = 0.0001f;
