@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
+#include "StorageManager.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -172,10 +173,8 @@ int main(void)
 		env.addBody(&floor);
 		env.addBody(&leftWall);
 
-		// Vectors to store all object starting positions and velocities
-		std::vector<glm::vec3> startPositions;
-		std::vector<float> startSpeeds;
-		std::vector<float> startDirections;
+		// Initialize the storage manager
+		StorageManager storage;
 
 		// RENDER LOOP //
 
@@ -290,9 +289,7 @@ int main(void)
 							// TODO: throw this into a helper function
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
-							startPositions.clear();
-							startSpeeds.clear();
-							startDirections.clear();
+							storage.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
 						}
@@ -338,9 +335,7 @@ int main(void)
 							// TODO: throw this into a helper function
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
-							startPositions.clear();
-							startSpeeds.clear();
-							startDirections.clear();
+							storage.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
 
@@ -397,9 +392,7 @@ int main(void)
 						// Physics pre-calculations
 						for (Body& body : env.bodyList) {
 							// save object starting positions and velocities
-							startPositions.push_back(body.position);
-							startSpeeds.push_back(body.vSpeed);
-							startDirections.push_back(body.vDirection);
+							storage.save(body);
 							// Incoming storage manager POG?
 
 							// while we're looping objects, go ahead and recalculate some important values
@@ -431,17 +424,13 @@ int main(void)
 				if (doPhysics || beginPhysics) {
 					int count = 0;
 					for (Body& body : env.bodyList) {
-						body.position = startPositions[count];
-						body.vSpeed = startSpeeds[count];
-						body.vDirection = startDirections[count];
+						storage.restore(body, count);
 						// clear forces!
 						body.force = glm::vec3(0.0f);
 
 						count++;
 					}
-					startPositions.clear();
-					startSpeeds.clear();
-					startDirections.clear();
+					storage.clear();
 					doPhysics = false;
 					beginPhysics = false;
 				}
