@@ -7,6 +7,14 @@
 #include "PhysicsObject.h"
 #include "PhysicsMath.h"
 
+Manifold::Manifold(Body* a, Body* b, float eGravity) {
+	A = a;
+	B = b;
+	gravity = eGravity;
+	normal = glm::vec3(0.0f);
+	contacts[0] = {};
+}
+
 void Manifold::ApplyImpulse() {
 
 	// if both objects have infinite mass, basically just ignore the collision
