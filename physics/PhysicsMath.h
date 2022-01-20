@@ -7,7 +7,12 @@
 
 // conversion factor from meters to pixels
 #define PIXEL_RATIO 100.0f
+// default value for gravity
 #define DEFAULT_GRAVITY 9.81f
+
+#define PI 3.14159f
+#define toRadians PI / 180.0f
+#define toDegrees 180.0f / PI
 
 // physics timing constants
 const float physicsFPS = 200;

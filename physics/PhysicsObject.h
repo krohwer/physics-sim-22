@@ -37,6 +37,9 @@ struct Body {
 	/// velocity stores the speed of an object and in what direction. Each component measured in meters/second (m/s)
 	glm::vec3 velocity;
 
+	float vDirection;
+	float vSpeed;
+
 	/// rotation stores the angle of counter-clockwise rotation about the Z AXIS measured in radians
 	float rotation;
 	/// the rotational speed of the object
@@ -106,6 +109,17 @@ struct Body {
 	 * initializes the object to prepare for simulation start
 	 */
 	void init();
+
+	/**
+	 * Recalculate the speed and direction of velocity
+	 */
+	void computeVelocityVector();
+
+	/**
+	 * Recalculates the vector components of the velocity
+	 */
+	void computeVelocityComponents();
+
 };
 
 inline bool operator==(const Body& lhs, const Body& rhs)

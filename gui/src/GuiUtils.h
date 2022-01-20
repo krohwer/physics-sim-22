@@ -21,8 +21,8 @@ namespace GuiUtils {
 		std::string xPositionText = "Object " + std::to_string(objectNumber) + " X Position";
 		std::string yPositionText = "Object " + std::to_string(objectNumber) + " Y Position";
 		/*std::string velocityText = "Object " + std::to_string(objectNumber) + " Velocity";*/
-		std::string xVelocityText = "Object " + std::to_string(objectNumber) + " X Velocity";
-		std::string yVelocityText = "Object " + std::to_string(objectNumber) + " Y Velocity";
+		std::string SpeedText = "Object " + std::to_string(objectNumber) + " Speed";
+		std::string DirectionText = "Object " + std::to_string(objectNumber) + " Direction";
 		std::string massText = "Object " + std::to_string(objectNumber) + " Mass";
 		std::string xScaleText = "Object " + std::to_string(objectNumber) + " Width";
 		std::string yScaleText = "Object " + std::to_string(objectNumber) + " Height";
@@ -56,8 +56,8 @@ namespace GuiUtils {
 			object.position.y = 0.5f * object.scale.y;
 
 			ImGui::Dummy(ImVec2(0.0f, 10.0f));
-			ImGui::InputFloat(xVelocityText.c_str(), &object.velocity.x);
-			ImGui::InputFloat(yVelocityText.c_str(), &object.velocity.y);
+			ImGui::InputFloat(SpeedText.c_str(), &object.vSpeed);
+			ImGui::InputFloat(DirectionText.c_str(), &object.vDirection);
 
 			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 			ImGui::InputFloat(massText.c_str(), &object.mass);

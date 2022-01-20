@@ -8,6 +8,9 @@ Body::Body(Shape* s, float x, float y) {
 	shape->body = this;
 	position = glm::vec3(x, y, 0.0f);
 	velocity = glm::vec3(0.0f);
+	vDirection = 0.0f;
+	vSpeed = 0.0f;
+
 	force = glm::vec3(0.0f);
 
 	rotation = 0.0f;
@@ -40,6 +43,7 @@ void Body::step(float deltaTime) {
 
 	// infinite mass check
 	if (!(inverseMass == 0.0f)) {
+	
 		// update the current position
 		// s = s0 + v0t +1/2at^2 for x, y, and z
 		// a = f/m
@@ -61,6 +65,8 @@ void Body::step(float deltaTime) {
 
 		// update the angular velocity
 		angularVelocity += torque * inverseInertia * deltaTime;
+
+		computeVelocityVector();
 
 		// TODO: might force compliance with terminal velocity and drag, who knows
 	}
@@ -93,6 +99,25 @@ void Body::computeInertia() {
 void Body::init() {
 	computeInverseMass();
 	computeInertia();
+	computeVelocityComponents();
 	shape->scaleX(scale);
 	shape->scaleY(scale);
+}
+
+void Body::computeVelocityVector() {
+	vSpeed = length(velocity);
+	if (vSpeed > 0) {
+		vDirection = acos(glm::dot(glm::vec3(1.0f, 0.0f, 0.0f), velocity) / vSpeed);
+		if (velocity.y < 0)
+			vDirection *= -1;
+		vDirection *= toDegrees;
+	}
+	else {
+		vDirection = 0.0f;
+	}
+}
+
+void Body::computeVelocityComponents() {
+	velocity.x = vSpeed * cos(vDirection * toRadians);
+	velocity.y = vSpeed * sin(vDirection * toRadians);
 }

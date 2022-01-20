@@ -26,7 +26,10 @@ void Manifold::ApplyImpulse() {
 		float gdt = gravity * timestep;
 		if (lenSqr(relativeVelocity) < (gdt * gdt) + EPSILON) {
 			epsilon = 0.0f;
-			std::cout << "STATIC" << std::endl;
+		}
+		else {
+			// report an impact
+			std::cout << "Collision" << std::endl;
 		}
 
 		// calculate inverse mass sum and impulse scalar j
@@ -73,6 +76,8 @@ void Manifold::ApplyImpulse() {
 			B->velocity += B->inverseMass * frictionImpluse;
 		}
 	}
+	A->computeVelocityVector();
+	B->computeVelocityVector();
 	// positional correction
 	PositionalCorrection();
 }
@@ -88,4 +93,7 @@ void Manifold::PositionalCorrection() {
 void Manifold::InfiniteMassCorrection() {
 	A->velocity = glm::vec3(0.0f);
 	B->velocity = glm::vec3(0.0f);
+
+	A->computeVelocityVector();
+	B->computeVelocityVector();
 }
