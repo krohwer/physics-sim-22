@@ -7,7 +7,12 @@
 
 // conversion factor from meters to pixels
 #define PIXEL_RATIO 100.0f
+// default value for gravity
 #define DEFAULT_GRAVITY 9.81f
+
+#define PI 3.14159f
+#define toRadians PI / 180.0f
+#define toDegrees 180.0f / PI
 
 // physics timing constants
 const float physicsFPS = 200;
@@ -24,7 +29,10 @@ struct mat22 {
 	float m00, m01,
 		  m10, m11;
 
-	mat22() {}
+	mat22() {
+		m00 = 0.0f; m01 = 0.0f;
+		m10 = 0.0f; m11 = 0.0f;
+	}
 
 	mat22(float xx, float xy, float yx, float yy) {
 		m00 = xx; m01 = xy;

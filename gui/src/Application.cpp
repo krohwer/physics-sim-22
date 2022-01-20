@@ -174,7 +174,8 @@ int main(void)
 
 		// Vectors to store all object starting positions and velocities
 		std::vector<glm::vec3> startPositions;
-		std::vector<glm::vec3> startVelocities;
+		std::vector<float> startSpeeds;
+		std::vector<float> startDirections;
 
 		// RENDER LOOP //
 
@@ -290,7 +291,8 @@ int main(void)
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
 							startPositions.clear();
-							startVelocities.clear();
+							startSpeeds.clear();
+							startDirections.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
 						}
@@ -337,7 +339,8 @@ int main(void)
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
 							startPositions.clear();
-							startVelocities.clear();
+							startSpeeds.clear();
+							startDirections.clear();
 							env.addBody(&floor);
 							env.addBody(&leftWall);
 
@@ -349,7 +352,7 @@ int main(void)
 							Shape shape;
 							Body object1(&shape, obj1xPosition, yPosition);
 							Body object2(&shape, obj2xPosition, yPosition);
-							object2.velocity.x = 5.0f;
+							object2.vSpeed = 5.0f;
 							env.addBody(&object1);
 							env.addBody(&object2);
 						}
@@ -395,7 +398,8 @@ int main(void)
 						for (Body& body : env.bodyList) {
 							// save object starting positions and velocities
 							startPositions.push_back(body.position);
-							startVelocities.push_back(body.velocity);
+							startSpeeds.push_back(body.vSpeed);
+							startDirections.push_back(body.vDirection);
 							// Incoming storage manager POG?
 
 							// while we're looping objects, go ahead and recalculate some important values
@@ -428,14 +432,16 @@ int main(void)
 					int count = 0;
 					for (Body& body : env.bodyList) {
 						body.position = startPositions[count];
-						body.velocity = startVelocities[count];
-						count++;
-
+						body.vSpeed = startSpeeds[count];
+						body.vDirection = startDirections[count];
 						// clear forces!
 						body.force = glm::vec3(0.0f);
+
+						count++;
 					}
 					startPositions.clear();
-					startVelocities.clear();
+					startSpeeds.clear();
+					startDirections.clear();
 					doPhysics = false;
 					beginPhysics = false;
 				}

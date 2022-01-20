@@ -11,7 +11,9 @@ constexpr auto MaxVertexCount = 4;
 
 struct Shape {
 	// constructors
-	Shape() {}
+	Shape() {
+		SetBox();
+	}
 
 	Shape(glm::vec3 vertexArray[]) {
 		if (sizeof(vertexArray) <= MaxVertexCount)
@@ -22,6 +24,7 @@ struct Shape {
 		for (int i = 0; i < m_vertexCount; i++) {
 			m_vertices[i] = vertexArray[i];
 		}
+		type = Type::POLYGON;
 	}
 
 	/// Enumerated type for the shape type
