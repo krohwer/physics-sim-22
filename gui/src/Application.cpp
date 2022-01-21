@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
+#include "StorageManager.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -159,9 +160,8 @@ int main(void)
 		// Physics environment setup
 		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
 
-		// Vectors to store all object starting positions and velocities
-		std::vector<glm::vec3> startPositions;
-		std::vector<glm::vec3> startVelocities;
+		// Initialize the storage manager
+		StorageManager storage;
 
 		// RENDER LOOP //
 
@@ -274,8 +274,7 @@ int main(void)
 							// TODO: throw this into a helper function
 							// We'll need this for our pre-made experiments
 							env.bodyList.clear();
-							startPositions.clear();
-							startVelocities.clear();
+							storage.clear();
 						}
 						else
 							activateAlert = true;
@@ -319,8 +318,7 @@ int main(void)
 							// TODO: throw this into a helper function
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
-							startPositions.clear();
-							startVelocities.clear();
+							storage.clear();
 
 							// Replace with functions that are based off center of camera
 							float obj1xPosition = (windowCenter.x - 100.0f) / PIXEL_RATIO;
@@ -329,7 +327,7 @@ int main(void)
 
 							env.addBody(obj1xPosition, yPosition);
 							Body* object2 = env.addBody(obj2xPosition, yPosition);
-							object2->velocity.x = 5.0f;
+							object2->vSpeed = 5.0f;
 						}
 
 						ImGui::TreePop();
@@ -376,8 +374,7 @@ int main(void)
 						// Physics pre-calculations
 						for (Body& body : env.bodyList) {
 							// save object starting positions and velocities
-							startPositions.push_back(body.position);
-							startVelocities.push_back(body.velocity);
+							storage.save(body);
 							// Incoming storage manager POG?
 
 							// while we're looping objects, go ahead and recalculate some important values
@@ -409,15 +406,13 @@ int main(void)
 				if (doPhysics || beginPhysics) {
 					int count = 0;
 					for (Body& body : env.bodyList) {
-						body.position = startPositions[count];
-						body.velocity = startVelocities[count];
-						count++;
-
+						storage.restore(body, count);
 						// clear forces!
 						body.force = glm::vec3(0.0f);
+
+						count++;
 					}
-					startPositions.clear();
-					startVelocities.clear();
+					storage.clear();
 					doPhysics = false;
 					beginPhysics = false;
 				}

@@ -9,11 +9,7 @@ struct Body;
 
 struct Manifold
 {
-	Manifold(Body* a, Body* b, float eGravity) {
-		A = a;
-		B = b;
-		gravity = eGravity;
-	}
+	Manifold(Body* a, Body* b, float eGravity);
 
 // 	void Solve();                 // Generate contact information
 // 	void Initialize();            // Precalculations for impulse solving
