@@ -23,8 +23,12 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 	xAxis.scale = glm::vec3(width, 1.0f, 1.0f);
 }
 
-void Environment::addBody(Body* body) {
-	bodyList.push_back(*body);
+Body* Environment::addBody(float xPosition, float yPosition) {
+	Shape shape;
+	Body body(&shape, xPosition, yPosition);
+	bodyList.push_back(body);
+
+	return &bodyList.back();
 }
 
 void Environment::removeBody(Body* body) {
@@ -33,33 +37,34 @@ void Environment::removeBody(Body* body) {
 
 void Environment::generatePairs() {
 	pairs.clear();
+	if (!bodyList.empty()) {
+		// pair all objects with the environment
+		for (Body& body : bodyList) {
+			Body* X = &xAxis;
+			Body* Y = &yAxis;
+			Body* B = &body;
+			Pair pair;
+			pair.A = X;
+			pair.B = B;
+			pairs.push_back(pair);
+			pair.A = Y;
+			pairs.push_back(pair);
 
-	// pair all objects with the environment
-	for (Body& body : bodyList) {
-		Body* X = &xAxis;
-		Body* Y = &yAxis;
-		Body* B = &body;
-		Pair pair;
-		pair.A = X;
-		pair.B = B;
-		pairs.push_back(pair);
-		pair.A = Y;
-		pairs.push_back(pair);
+		}
 
-	}
+		for (std::list<Body>::iterator i = bodyList.begin(); i != std::prev(bodyList.end()); ++i) {
+			Body* A = &(*i);	// 0_o thanks for being weird iterators
+			for (std::list<Body>::iterator j = std::next(i); j != bodyList.end(); ++j) {
+				Body* B = &(*j);
 
-	for (std::list<Body>::iterator i = bodyList.begin(); i != std::prev(bodyList.end()); ++i) {
-		Body* A = &(*i);	// 0_o thanks for being weird iterators
-		for (std::list<Body>::iterator j = std::next(i); j != bodyList.end(); ++j) {
-			Body* B = &(*j);
+				// only create and add the pair if at most 1 of the objects has infinite mass
+				if (!(A->mass == 0.0f && B->mass == 0.0f)) {
+					Pair pair;
+					pair.A = A;
+					pair.B = B;
 
-			// only create and add the pair if at most 1 of the objects has infinite mass
-			if (!(A->mass == 0.0f && B->mass == 0.0f)) {
-				Pair pair;
-				pair.A = A;
-				pair.B = B;
-
-				pairs.push_back(pair);
+					pairs.push_back(pair);
+				}
 			}
 		}
 	}

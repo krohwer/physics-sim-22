@@ -260,7 +260,7 @@ int main(void)
 						if (!doPhysics && !beginPhysics) {
 							float xPosition = camera.cPosition.x / PIXEL_RATIO;
 							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
-							Menu::addUserObject(env, xPosition, yPosition);
+							env.addBody(xPosition, yPosition);
 						}
 						else
 							activateAlert = true;
@@ -327,12 +327,9 @@ int main(void)
 							float obj2xPosition = (windowCenter.x + 100.0f) / PIXEL_RATIO;
 							float yPosition = windowCenter.y / PIXEL_RATIO;
 
-							Shape shape;
-							Body object1(&shape, obj1xPosition, yPosition);
-							Body object2(&shape, obj2xPosition, yPosition);
-							object2.velocity.x = 5.0f;
-							env.addBody(&object1);
-							env.addBody(&object2);
+							env.addBody(obj1xPosition, yPosition);
+							Body* object2 = env.addBody(obj2xPosition, yPosition);
+							object2->velocity.x = 5.0f;
 						}
 
 						ImGui::TreePop();

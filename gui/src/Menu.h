@@ -16,13 +16,6 @@
 #include <string>
 
 namespace Menu {
-	// This isn't supposed to be here, I know, but it's here for now
-	void addUserObject(Environment& env, float xPosition, float yPosition) {
-		// Cannot press this button if the simulation is running or paused
-		Shape shape;
-		Body object(&shape, xPosition, yPosition);
-		env.addBody(&object);
-	}
 
 	void createAllObjectMenus(Environment& env) {
 		int objectNumber = 1;
