@@ -160,19 +160,6 @@ int main(void)
 		// Physics environment setup
 		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
 
-		// create walls
-		Shape leftWallShape;
-		Body leftWall(&leftWallShape, -0.5f, (0.5f * env.height));
-		leftWall.mass = 0.0f;
-		leftWall.scale = glm::vec3(1.0f, env.height, 1.0f);
-		Shape floorShape;
-		Body floor(&floorShape, (0.5f * env.width), -0.5);
-		floor.mass = 0.0f;
-		floor.scale = glm::vec3(env.width, 1.0f, 1.0f);
-
-		env.addBody(&floor);
-		env.addBody(&leftWall);
-
 		// Initialize the storage manager
 		StorageManager storage;
 
@@ -209,21 +196,19 @@ int main(void)
 
 				camera.recalculateView();
 
+				// render the axes
+				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
+
+				renderer.setMVP(shader, camera, env.xAxis);
+				renderer.draw(va, ib, shader);
+				renderer.setMVP(shader, camera, env.yAxis);
+				renderer.draw(va, ib, shader);
+
 				// render each object
 				for (Body& body : env.bodyList) {
-					// identity model matrix
-					glm::mat4 model(1.0f);
-					/* DO ANY MODEL MATRIX TRANSFORMATIONS */
-					// translate, then rotate, then scale.  VERY IMPORTANT
-					model = glm::translate(model, body.position * PIXEL_RATIO);
-					model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
-					model = glm::scale(model, body.scale);
 
-					// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
-					glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
-
-					// set the matrix uniform for the mvp matrix so it updates every frame
-					shader.setUniformMat4f("u_MVP", mvp);
+					// set the MVP for the object
+					renderer.setMVP(shader, camera, body);
 
 					// infinite mass is gray!
 					if (body.mass == 0) {
@@ -242,7 +227,7 @@ int main(void)
 					renderer.draw(va, ib, shader);
 				}
 
-			} // end of mvp matrix scope
+			} // end of MVP matrix scope
 
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
@@ -275,7 +260,7 @@ int main(void)
 						if (!doPhysics && !beginPhysics) {
 							float xPosition = camera.cPosition.x / PIXEL_RATIO;
 							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
-							Menu::addUserObject(env, xPosition, yPosition);
+							env.addBody(xPosition, yPosition);
 						}
 						else
 							activateAlert = true;
@@ -287,11 +272,9 @@ int main(void)
 							doPhysics = false;
 
 							// TODO: throw this into a helper function
-							// We'll need this for our premade experiments
+							// We'll need this for our pre-made experiments
 							env.bodyList.clear();
 							storage.clear();
-							env.addBody(&floor);
-							env.addBody(&leftWall);
 						}
 						else
 							activateAlert = true;
@@ -336,20 +319,15 @@ int main(void)
 							// We'll need this for our premade experiments
 							env.bodyList.clear();
 							storage.clear();
-							env.addBody(&floor);
-							env.addBody(&leftWall);
 
 							// Replace with functions that are based off center of camera
 							float obj1xPosition = (windowCenter.x - 100.0f) / PIXEL_RATIO;
 							float obj2xPosition = (windowCenter.x + 100.0f) / PIXEL_RATIO;
 							float yPosition = windowCenter.y / PIXEL_RATIO;
 
-							Shape shape;
-							Body object1(&shape, obj1xPosition, yPosition);
-							Body object2(&shape, obj2xPosition, yPosition);
-							object2.vSpeed = 5.0f;
-							env.addBody(&object1);
-							env.addBody(&object2);
+							env.addBody(obj1xPosition, yPosition);
+							Body* object2 = env.addBody(obj2xPosition, yPosition);
+							object2->vSpeed = 5.0f;
 						}
 
 						ImGui::TreePop();
@@ -388,6 +366,10 @@ int main(void)
 				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 					// Cannot press this button if the simulation is running or paused
 					if (!beginPhysics) {
+
+						// initialize the axes
+						env.xAxis.init();
+						env.yAxis.init();
 
 						// Physics pre-calculations
 						for (Body& body : env.bodyList) {
