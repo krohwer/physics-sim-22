@@ -96,6 +96,9 @@ struct Body {
 	 */
 	void step(float deltaTime);
 
+	/**
+	 * Calculates and returns the bounding box for the object
+	 */
 	AABB getAABB();
 
 	/**

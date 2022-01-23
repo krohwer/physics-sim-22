@@ -310,18 +310,17 @@ int main(void)
 				}
 
 				if (ImGui::BeginTabItem("Experiments")) {
-					if (ImGui::TreeNode("Classic Experiment Title Here")) {
+					if (ImGui::TreeNode("Projectile Motion")) {
 						
-						ImGui::TextWrapped("There are two boxes. They're exactly the same and held at the same height.");
-						ImGui::TextWrapped("One falls, but the other is slightly pushed when it falls. Which box touches the ground first?");
+						ImGui::TextWrapped("Two identical boxes are held at the same height.");
+						ImGui::TextWrapped("One falls straight down, and the other is projected horizontally.");
+						ImGui::TextWrapped("Which one hits the ground first?");
 					
 						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-							// TODO: throw this into a helper function
-							// We'll need this for our premade experiments
 							env.bodyList.clear();
 							storage.clear();
 
-							Experiment::load(env, camera, "save.txt");
+							Experiment::load(env, camera, "sampleExp.klx");
 						}
 
 						ImGui::TreePop();
