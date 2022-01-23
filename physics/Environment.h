@@ -41,6 +41,12 @@ public:
 	Body* addBody(float xPosition, float yPosition);
 
 	/**
+	 * Adds a body to the environment to be rendered and included in physics calculations.
+	 * INITIALIZES ALL VALUES
+	 */
+	Body* addBody(float attributes[8]);
+
+	/**
 	 * Removes a body from the environment.
 	 */
 	void removeBody(Body* body);
@@ -54,6 +60,11 @@ public:
 	 * Advances all objects in the environment 
 	 */
 	void step();
+
+	/**
+	 * Recalculates the axes based on the environment variables
+	 */
+	void computeAxes();
 };
 
 #endif

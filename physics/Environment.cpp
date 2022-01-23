@@ -31,6 +31,20 @@ Body* Environment::addBody(float xPosition, float yPosition) {
 	return &bodyList.back();
 }
 
+Body* Environment::addBody(float attr[8]) {
+	Shape shape;
+	Body body(&shape, attr[0], attr[1]);
+	body.vSpeed = attr[2];
+	body.vDirection = attr[3];
+	body.mass = attr[4];
+	body.restitution = attr[5];
+	body.scale.x = attr[6];
+	body.scale.y = attr[7];
+	bodyList.push_back(body);
+
+	return &bodyList.back();
+}
+
 void Environment::removeBody(Body* body) {
 	bodyList.remove(*body);
 }
@@ -83,4 +97,11 @@ void Environment::step() {
 			manifold.ApplyImpulse();
 		}
 	}
+}
+
+void Environment::computeAxes() {
+	xAxis.scale.x = width;
+	xAxis.position.x = 0.5f * width;
+	yAxis.scale.y = height;
+	yAxis.position.y = 0.5f * height;
 }

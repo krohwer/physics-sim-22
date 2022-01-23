@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "StorageManager.h"
+#include "ExperimentManager.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -320,14 +321,7 @@ int main(void)
 							env.bodyList.clear();
 							storage.clear();
 
-							// Replace with functions that are based off center of camera
-							float obj1xPosition = (windowCenter.x - 100.0f) / PIXEL_RATIO;
-							float obj2xPosition = (windowCenter.x + 100.0f) / PIXEL_RATIO;
-							float yPosition = windowCenter.y / PIXEL_RATIO;
-
-							env.addBody(obj1xPosition, yPosition);
-							Body* object2 = env.addBody(obj2xPosition, yPosition);
-							object2->vSpeed = 5.0f;
+							Experiment::load(env, camera, "save.txt");
 						}
 
 						ImGui::TreePop();
