@@ -14,5 +14,7 @@ public:
 	Renderer();
 	void clear() const;
 	void setMVP(Shader& shader, const Camera& camera, const Body& body);
+	void setLineMVP(Shader& shader, const Camera& camera, const Body& body);
 	void draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+	void drawLine(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 };
