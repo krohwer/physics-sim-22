@@ -298,17 +298,15 @@ int main(void)
 						ImGui::TextWrapped("Which one hits the ground first?");
 					
 						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-							env.bodyList.clear();
-							storage.clear();
+							if (!doPhysics && !beginPhysics) {
+								env.bodyList.clear();
+								storage.clear();
 
-							Experiment::load(env, camera, "sampleExp.klx");
+								Experiment::load(env, camera, "sampleExp.klx");
+							}
+							else
+								activateAlert = true;
 						}
-
-						ImGui::TreePop();
-					}
-					if (ImGui::TreeNode("TODO")) {
-						ImGui::TextWrapped("Throw the premade experiments into an expandable file where we can just append them.");
-						ImGui::TextWrapped("Or something like that.");
 
 						ImGui::TreePop();
 					}
@@ -401,8 +399,10 @@ int main(void)
 			Menu::makeAlert("WARNING", "Cannot mess with Control Panel when simulator is running.");
 
 			if (GuiUtils::deleteObject) {
-				std::list<Body>::iterator i = env.bodyList.begin();
-				env.bodyList.erase(i);
+				if (!doPhysics && !beginPhysics) {
+					std::list<Body>::iterator i = env.bodyList.begin();
+					env.bodyList.erase(i);
+				}
 				GuiUtils::deleteObject = false;
 			}
 
