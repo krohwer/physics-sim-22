@@ -69,7 +69,7 @@ void Renderer::drawLine(const VertexArray& va, const IndexBuffer& ib, const Shad
 	va.bind();
 	ib.bind();
 
-	glLineWidth(5.0f);
+	glLineWidth(4.0f);
 	// drawing in triangles for now, then the number of INDICES (not vertices), and the data type of the indices.
 	glDrawElements(GL_LINES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
 }

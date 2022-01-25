@@ -82,39 +82,26 @@ int main(void)
 			-50.0f,  50.0f	// 3
 		};
 
-		float line[] = {
-			-50.0f, 0.0f,
-			 50.0f, 0.0f
-		};
-
 		// this is an index buffer.  It tells OpenGL how to draw a square without storing duplicate vertices
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0
-		};
-		unsigned int lineIndices[] = {
-			0, 1
 		};
 
 		// INITIAL VERTEX ARRAY OBJECT AND BUFFER CREATION //
 
 		// create and bind our vertex array object
 		VertexArray va;
-		VertexArray lineArray;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-		VertexBuffer lineBuffer(line, 2 * 2 * sizeof(float));
 
 		VertexBufferLayout layout;
-		VertexBufferLayout lineLayout;
 		// this can be expanded on later and include many types including vec2s or vec3s when it comes to positions
 		layout.push<float>(2);	// this means we have 2 floats for a vertex
-		lineLayout.push<float>(2);
 		va.addBuffer(vb, layout);
-		lineArray.addBuffer(lineBuffer, lineLayout);
+
 
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
-		IndexBuffer lineIndexBuffer(lineIndices, 2);
 
 		// CREATE CAMERA //
 		float halfWidth = (float)windowWidth / 2.0f;
@@ -143,11 +130,8 @@ int main(void)
 
 		// unbind the buffers, to test use of vertex array object
 		va.unbind();
-		lineArray.unbind();
 		vb.unbind();
-		lineBuffer.unbind();
 		ib.unbind();
-		lineIndexBuffer.unbind();
 		shader.unbind();
 
 		// create a renderer
@@ -213,11 +197,19 @@ int main(void)
 				// render the axes
 				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
 
+				unsigned int lineIndices[] = {
+					3, 2
+				};
+				IndexBuffer xb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.xAxis);
-				renderer.drawLine(lineArray, lineIndexBuffer, shader);
+				renderer.drawLine(va, xb, shader);
+				lineIndices[0] = 1;
+				lineIndices[1] = 2;
+				IndexBuffer yb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.yAxis);
-				renderer.drawLine(lineArray, lineIndexBuffer, shader);
+				renderer.drawLine(va, yb, shader);
 
+				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
 
@@ -239,6 +231,14 @@ int main(void)
 					// in a more traditional setup, we would be using a material instead of a shader
 					// a material is a shader AND its associated uniforms
 					renderer.draw(va, ib, shader);
+					if (i == GuiUtils::highlight) {
+						shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+						unsigned int test[] = {
+							0, 1, 1, 2, 2, 3, 3, 0
+						};
+						renderer.drawLine(va, IndexBuffer(test, 8), shader);
+					}
+					i++;
 				}
 
 			} // end of MVP matrix scope

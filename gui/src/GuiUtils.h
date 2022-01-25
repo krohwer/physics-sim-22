@@ -16,6 +16,7 @@
 
 namespace GuiUtils {
 
+	int highlight;
 	bool deleteObject;
 
 	void exitPopupButton() {
@@ -87,6 +88,9 @@ namespace GuiUtils {
 		// TODO: Allow objects to be collapsible menu toggles
 		if (ImGui::TreeNode(title.c_str())) {
 
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
+
 			// Allows us to make the width smaller for the input fields
 			// Scales to be a third of the size of the window, but no less than 100 px
 			if (ImGui::GetWindowWidth() / 4.0f < 75.0f)
@@ -95,27 +99,41 @@ namespace GuiUtils {
 				ImGui::PushItemWidth(ImGui::GetWindowWidth() / 4.0f);
 
 			// Dummy is used for selective line padding
-			
+
 			ImGui::InputFloat(xPositionText.c_str(), &object.position.x);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 			ImGui::InputFloat(yPositionText.c_str(), &object.position.y);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 
 			ImGui::Dummy(ITEM_SPACING);
 			ImGui::InputFloat(SpeedText.c_str(), &object.vSpeed);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 			ImGui::InputFloat(DirectionText.c_str(), &object.vDirection);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 
 			ImGui::Dummy(ITEM_SPACING);
 			ImGui::InputFloat(massText.c_str(), &object.mass);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 
 			ImGui::Dummy(ITEM_SPACING);
 			ImGui::InputFloat(xScaleText.c_str(), &object.scale.x);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 			ImGui::InputFloat(yScaleText.c_str(), &object.scale.y);
+			if (ImGui::IsItemFocused())
+				highlight = objectNumber;
 
 			ImGui::Dummy(ITEM_SPACING);
 			// TODO: Find a work around to "reset" the whole menu after an object is deleted
 			float buttonWidth = ImGui::GetContentRegionAvailWidth() * 0.9f;
- 			if (ImGui::Button(deleteText.c_str(), ImVec2(buttonWidth, 0.0f))) {
+			if (ImGui::Button(deleteText.c_str(), ImVec2(buttonWidth, 0.0f))) {
 				deleteObject = true;
- 	 		}
+			}
 
 			// Boundary checking for x position input
 			if (object.position.x < 0.5f * object.scale.x)
@@ -126,6 +144,8 @@ namespace GuiUtils {
 
 			ImGui::TreePop();
 		}
+		else if (highlight == objectNumber)
+			highlight = -1;
 	}
 };
 
