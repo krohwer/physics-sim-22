@@ -195,7 +195,7 @@ int main(void)
 				camera.recalculateView();
 
 				// render the axes
-				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
+				shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f);
 
 				unsigned int lineIndices[] = {
 					3, 2
@@ -209,6 +209,16 @@ int main(void)
 				renderer.setMVP(shader, camera, env.yAxis);
 				renderer.drawLine(va, yb, shader);
 
+				// this works, but it bogs down the renderer real bad. I think we should consider batch rendering for this,
+				// the loop is too slow
+// 				glm::vec3 position(0.5f, 0.0f, 0.0f);
+// 				while (position.x < env.width) {
+// 					renderer.setLineMVP(shader, camera, position, 0.0f);
+// 					renderer.drawLine(va, yb, shader);
+// 					position.x++;
+// 				}
+
+				// object index for highlighting
 				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
@@ -233,10 +243,10 @@ int main(void)
 					renderer.draw(va, ib, shader);
 					if (i == GuiUtils::highlight) {
 						shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-						unsigned int test[] = {
+						unsigned int outline[] = {
 							0, 1, 1, 2, 2, 3, 3, 0
 						};
-						renderer.drawLine(va, IndexBuffer(test, 8), shader);
+						renderer.drawLine(va, IndexBuffer(outline, 8), shader);
 					}
 					i++;
 				}

@@ -14,7 +14,7 @@ public:
 	Renderer();
 	void clear() const;
 	void setMVP(Shader& shader, const Camera& camera, const Body& body);
-	void setLineMVP(Shader& shader, const Camera& camera, const Body& body);
+	void setLineMVP(Shader& shader, const Camera& camera, const glm::vec3& position, const float& rotation);
 	void draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 	void drawLine(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 };

@@ -31,14 +31,13 @@ void Renderer::setMVP(Shader& shader, const Camera& camera, const Body& body) {
 	shader.setUniformMat4f("u_MVP", mvp);
 }
 
-void Renderer::setLineMVP(Shader& shader, const Camera& camera, const Body& body) {
+void Renderer::setLineMVP(Shader& shader, const Camera& camera, const glm::vec3& position, const float& rotation) {
 	// identity model matrix
 	glm::mat4 model(1.0f);
 	/* DO ANY MODEL MATRIX TRANSFORMATIONS */
 	// translate, then rotate, then scale.  VERY IMPORTANT
-	model = glm::translate(model, body.position * PIXEL_RATIO);
-	model = glm::rotate(model, body.rotation, glm::vec3(0, 0, 1));
-	model = glm::scale(model, body.scale);
+	model = glm::translate(model, position * PIXEL_RATIO);
+	model = glm::rotate(model, rotation, glm::vec3(0, 0, 1));
 
 	// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
 	glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
