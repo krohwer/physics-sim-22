@@ -17,7 +17,7 @@
 namespace GuiUtils {
 
 	int highlight;
-	bool deleteObject;
+	unsigned short deleteObject = 0;
 
 	void exitPopupButton() {
 		if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
@@ -132,7 +132,7 @@ namespace GuiUtils {
 			// TODO: Find a work around to "reset" the whole menu after an object is deleted
 			float buttonWidth = ImGui::GetContentRegionAvailWidth() * 0.9f;
 			if (ImGui::Button(deleteText.c_str(), ImVec2(buttonWidth, 0.0f))) {
-				deleteObject = true;
+				deleteObject = objectNumber;
 			}
 
 			// Boundary checking for x position input

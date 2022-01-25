@@ -417,10 +417,11 @@ int main(void)
 
 			Menu::makeAlert("WARNING", "Cannot mess with Control Panel when simulator is running.");
 
-			if (GuiUtils::deleteObject) {
+			if (GuiUtils::deleteObject > 0) {
 				std::list<Body>::iterator i = env.bodyList.begin();
+				std::advance(i, GuiUtils::deleteObject - 1);
 				env.bodyList.erase(i);
-				GuiUtils::deleteObject = false;
+				GuiUtils::deleteObject = 0;
 			}
 
 			// End of all ImGui windows
