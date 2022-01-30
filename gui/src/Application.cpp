@@ -241,14 +241,41 @@ int main(void)
 					// in a more traditional setup, we would be using a material instead of a shader
 					// a material is a shader AND its associated uniforms
 					renderer.draw(va, ib, shader);
+					
+					// draw highlight
 					if (i == GuiUtils::highlight) {
-						shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+						shader.setUniform4f("u_Color", 1.0f, 0.7f, 0.0f, 1.0f);
 						unsigned int outline[] = {
 							0, 1, 1, 2, 2, 3, 3, 0
 						};
 						renderer.drawLine(va, IndexBuffer(outline, 8), shader);
 					}
 					i++;
+
+					// draw velocity line
+					if (body.vSpeed > 0) {
+						shader.setUniform4f("u_Color", 0.0f, 0.7f, 0.1f, 1.0f);
+						float velocityLine[4] = {};
+						velocityLine[0] = 0.0f; velocityLine[1] = 0.0f;
+						if (doPhysics) {
+							velocityLine[2] = body.velocity.x * 10;
+							velocityLine[3] = body.velocity.y * 10;
+						}
+						else {
+							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10;
+							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10;
+						}
+						unsigned int velocityLineIndices[] = {
+							0, 1
+						};
+						VertexArray velocityLineArray;
+						VertexBuffer velocityLineBuffer(velocityLine, 2 * 2 * sizeof(float));
+						velocityLineArray.addBuffer(velocityLineBuffer, layout);
+
+						renderer.setLineMVP(shader, camera, body.position);
+						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader);
+					}
+
 				}
 
 			} // end of MVP matrix scope
