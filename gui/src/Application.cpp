@@ -306,6 +306,12 @@ int main(void)
 			// TODO: Potentially throw all created windows into GuiUtils for structure
 			// Window to manage environment objects
 			ImGui::Begin("Control Panel");
+			if (ImGui::IsWindowFocused()) {
+				disableCamera = true;
+			}
+			else {
+				disableCamera = false;
+			}
 
 			if (ImGui::BeginTabBar("Control Panel Tabs")) {
 				// Creates a new object at the center of the screen
