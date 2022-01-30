@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "StorageManager.h"
+#include "ExperimentManager.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
