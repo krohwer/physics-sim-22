@@ -50,7 +50,6 @@ void Menu::createMenuBar() {
 				if (!(env->bodyList.empty())) {
 					// initializing axes and storing starting positions if this is the first time the Simulator starts
 					if (!*hasSimStarted) {
-
 						// initialize the axes
 						env->xAxis.init();
 						env->yAxis.init();
