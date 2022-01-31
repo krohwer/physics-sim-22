@@ -148,7 +148,6 @@ int main(void)
 		// Setup for ImGui Window variables
 		bool doPhysics = false;
 		bool beginPhysics = false;
-		bool activateAlert = false;
 
 		// timing variables
 		float accumulator = 0;
@@ -160,6 +159,8 @@ int main(void)
 
 		// Initialize the storage manager
 		StorageManager storage;
+
+		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
 
 		// RENDER LOOP //
 
@@ -295,177 +296,11 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
-			Menu::createMenuBar(env, doPhysics, beginPhysics);
+			menu.createMenuBar();
 
-			// Forces next window to be a width of 300px and height of 400px upon launch of application
-			// Users can still resize it afterwards
-			// TODO: throw the sizes to a variable outside of the render loop
-			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
-			ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 50), ImGuiCond_FirstUseEver);
+			menu.createControlPanel();
 
-			// TODO: Potentially throw all created windows into GuiUtils for structure
-			// Window to manage environment objects
-			ImGui::Begin("Control Panel");
-			if (ImGui::IsWindowFocused()) {
-				disableCamera = true;
-			}
-			else {
-				disableCamera = false;
-			}
-
-			if (ImGui::BeginTabBar("Control Panel Tabs")) {
-				// Creates a new object at the center of the screen
-				if (ImGui::BeginTabItem("Object Manager")) {
-					if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-						if (!doPhysics && !beginPhysics) {
-							float xPosition = camera.cPosition.x / PIXEL_RATIO;
-							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
-							env.addBody(xPosition, yPosition);
-						}
-						else
-							activateAlert = true;
-					}
-					// Removes all objects in the current environment
-					if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-						if (!doPhysics && !beginPhysics) {
-							// Cannot press this button if the simulation is running or paused
-							doPhysics = false;
-
-							// TODO: throw this into a helper function
-							// We'll need this for our pre-made experiments
-							env.bodyList.clear();
-							storage.clear();
-						}
-						else
-							activateAlert = true;
-					}
-
-					Menu::createAllObjectMenus(env);
-
-					ImGui::EndTabItem();
-				}
-
-				/*if (ImGui::BeginTabItem("Properties")) {
-					ImGui::Text("TODO: Implement this :b");
-					ImGui::EndTabItem();
-				}*/
-
-				if (ImGui::BeginTabItem("Experiments")) {
-					if (ImGui::TreeNode("Projectile Motion")) {
-						
-						ImGui::TextWrapped("Two identical boxes are held at the same height.");
-						ImGui::TextWrapped("One falls straight down, and the other is projected horizontally.");
-						ImGui::TextWrapped("Which one hits the ground first?");
-					
-						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-							env.bodyList.clear();
-							storage.clear();
-
-							Experiment::load(env, camera, "sampleExp.klx");
-						}
-
-						ImGui::TreePop();
-					}
-					if (ImGui::TreeNode("TODO")) {
-						ImGui::TextWrapped("Throw the premade experiments into an expandable file where we can just append them.");
-						ImGui::TextWrapped("Or something like that.");
-
-						ImGui::TreePop();
-					}
-					ImGui::EndTabItem();
-				}
-			}
-			ImGui::EndTabBar();
-
-			// std::cout << ImGui::IsWindowHovered() << std::endl;
-
-			ImGui::End(); // End of Control Panel Window
-
-			// Forces window to a width of 200px and height of 100px upon launch of application
-			// Users can still resize it afterwards
-			// TODO: throw the sizes to a variable outside of the render loop
-
-			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, ALERTMESSAGE_HEIGHT), ImGuiCond_FirstUseEver);
-			ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT + 50), ImGuiCond_FirstUseEver);
-			// Window with buttons to manage the set up experiment
-			ImGui::Begin("Simulation Manager");
-			// TODO: Mess with the style of the buttons when they're disabled
-			// Begins simulation and stores initial objects
-
-			if (!doPhysics) {
-				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-					if (!env.bodyList.empty()) {
-						// Cannot press this button if the simulation is running or paused
-						if (!beginPhysics) {
-
-							// initialize the axes
-							env.xAxis.init();
-							env.yAxis.init();
-
-							// Physics pre-calculations
-							for (Body& body : env.bodyList) {
-								// save object starting positions and velocities
-								storage.save(body);
-								// Incoming storage manager POG?
-
-								// while we're looping objects, go ahead and recalculate some important values
-								body.init();
-								// calculate the force of gravitation for the object into a vector and apply it
-								glm::vec3 gravity(0, body.mass * env.gravity, 0);
-								body.force -= gravity;
-							}
-							env.generatePairs();
-							beginPhysics = true;
-						}
-
-						// Physics happens here
-						frameStart = glfwGetTime();
-						startTime = glfwGetTime();
-						// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
-						doPhysics = true;
-					}
-				}
-			}
-			else {
-				if (ImGui::Button("Pause", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-					// Pauses simulation if it's running
-					doPhysics = false;
-				}
-			}
-
-			// Stops and resets objects as they were at the start of the simulation
-			if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-				if (doPhysics || beginPhysics) {
-					int count = 0;
-					for (Body& body : env.bodyList) {
-						storage.restore(body, count);
-						// clear forces!
-						body.force = glm::vec3(0.0f);
-
-						count++;
-					}
-					storage.clear();
-					doPhysics = false;
-					beginPhysics = false;
-				}
-			}
-
-			ImGui::End(); // End of Simulation Manager Window
-
-			// Alert handling
-			if (activateAlert) {
-				ImGui::OpenPopup("WARNING");
-				activateAlert = false;
-			}
-
-			Menu::makeAlert("WARNING", "Cannot mess with Control Panel when simulator is running.");
-
-			if (GuiUtils::deleteObject > 0) {
-				std::list<Body>::iterator i = env.bodyList.begin();
-				std::advance(i, GuiUtils::deleteObject - 1);
-				env.bodyList.erase(i);
-				GuiUtils::deleteObject = 0;
-			}
+			menu.cleanUp();
 
 			// End of all ImGui windows
 
