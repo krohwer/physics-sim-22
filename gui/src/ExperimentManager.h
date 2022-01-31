@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include "pch.h"
 #include "Environment.h"
 #include "Shape.h"
 #include "PhysicsObject.h"

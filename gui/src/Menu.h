@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.h"
+
 #ifndef MENUS_H
 #define MENUS_H
 
@@ -7,7 +9,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "GuiUtils.h"
+#include "Camera.h"
+#include "StorageManager.h"
 #include "Environment.h"
 #include "Shape.h"
 #include "PhysicsObject.h"
@@ -15,95 +18,57 @@
 #include <iostream>
 #include <string>
 
-#define MIN_CONTROLPANEL_WIDTH 300
-#define MIN_CONTROLPANEL_HEIGHT 400
+#define ITEM_SPACING ImVec2(0.0f, 2.5f)
+
+#define ENVSETTINGS_WIDTH 300
+#define ENVSETTINGS_HEIGHT 130
 
 #define ALERTMESSAGE_WIDTH 300
 #define ALERTMESSAGE_HEIGHT 110
 
-namespace Menu {
+#define MIN_CONTROLPANEL_WIDTH 300
+#define MIN_CONTROLPANEL_HEIGHT 400
 
+struct Menu {
+public:
+	// TODO: COMMENTS
+	Environment *env;
+	StorageManager *storage;
+	Camera *camera;
+
+	bool *isPhysicsActive;
+	bool *hasSimStarted;
+
+	float *frameStart;
+	float *startTime;
+
+	bool activateErrorAlert;
 	std::string errorMessage;
 
-	void makeAlert(std::string windowName, std::string alertMessage) {
-		ImVec2 menuDimensions = { ALERTMESSAGE_WIDTH , ALERTMESSAGE_HEIGHT};
-		ImVec2 menuPosition = { (1600 - ALERTMESSAGE_WIDTH) / 2 , (900 - ALERTMESSAGE_HEIGHT) / 2 };
+	unsigned short deleteObject;
 
-		ImGui::SetNextWindowSize(menuDimensions);
-		ImGui::SetNextWindowPos(menuPosition);
+	Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPhysicsActive, bool* hasSimStarted, float* frameStart, float* startTime);
 
-		if (ImGui::BeginPopupModal(windowName.c_str(), NULL, ImGuiWindowFlags_NoResize)) {
-			ImGui::TextWrapped("Simulator is active.");
-			ImGui::TextWrapped(alertMessage.c_str());
-			ImGui::Dummy(ITEM_SPACING);
-			if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-	}
+	void createMenuBar();
 
-	void createMenuBar(Environment& env, bool isPhysicsActive, bool hasSimStarted) {
-		bool activateEnvironmentWindow = false;
-		/*bool activateExperimentLoader = false;*/
-		bool activateHelpWindow = false;
-		bool failedAccess = false;
+	void createControlPanel();
 
-		if (ImGui::BeginMainMenuBar()) {
+	void cleanUp();
 
-			if (ImGui::BeginMenu("Environment")) {
-				if (ImGui::MenuItem("Configure Environment Settings")) {
-					if (!isPhysicsActive && !hasSimStarted)
-						activateEnvironmentWindow = true;
-					else {
-						failedAccess = true;
-						errorMessage = "Cannot edit Environment at this time.";
-					}
-				}
-				ImGui::EndMenu();
-			} // end of Environment Menu
+private:
+	// TODO: COMMENTS
+	void createAllObjectMenus();
 
-			//if (ImGui::BeginMenu("Experiments")) {
-			//	if (ImGui::MenuItem("Load Experiment")) {
-			//		if (!isPhysicsActive && !hasSimStarted)
-			//			activateExperimentLoader = true;
-			//		else {
-			//			failedAccess = true;
-			//			errorMessage = "Cannot load experiments at this time.";
-			//		}
-			//	}
-			//	ImGui::EndMenu();
-			//} // end of Experiments Menu
+	void makeAlert(std::string windowName, std::string alertMessage);
+		
+	void environmentMenu();
 
-			if (ImGui::MenuItem("Help")) {
-				// TODO: Implement actual Help window
-				activateHelpWindow = true;
-			}
+	void helpWindow();
 
-			ImGui::EndMainMenuBar();
-		}
+	void exitPopupButton();
 
-		if (activateEnvironmentWindow)
-			ImGui::OpenPopup("Environment Settings");
-		if (activateHelpWindow)
-			ImGui::OpenPopup("Help");
-		if (failedAccess)
-			ImGui::OpenPopup("ERROR");
+	void createSingleObjectMenu(Body& object, int objectNumber);
 
-		GuiUtils::environmentMenu(env);
-		GuiUtils::helpWindow();
-		makeAlert("ERROR", errorMessage);
-	}
-
-	void createAllObjectMenus(Environment& env) {
-		int objectNumber = 1;
-		for (Body& body : env.bodyList) {
-			// Dummy is used for selective line padding
-			ImGui::Dummy(ITEM_SPACING);
-			GuiUtils::createSingleObjectMenu(env, body, objectNumber);
-			objectNumber++;
-		}
-	}
 };
 
 #endif
