@@ -14,6 +14,7 @@ Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPh
 	activateErrorAlert = false;
 	errorMessage = "ERROR OCCURRED";
 	deleteObject = 0;
+	highlight = -1;
 }
 
 void Menu::createMenuBar() {
@@ -126,6 +127,8 @@ void Menu::createControlPanel() {
 
 	ImGui::Begin("Control Panel");
 
+	disableCameraIfFocused();
+
 	if (ImGui::BeginTabBar("Control Panel Tabs")) {
 		if (ImGui::BeginTabItem("Object Manager")) {
 			// Creates an object at the center of the screen
@@ -219,6 +222,9 @@ void Menu::makeAlert(std::string windowName, std::string alertMessage) {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal(windowName.c_str(), NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
+
 		ImGui::TextWrapped("Simulator is active.");
 		ImGui::TextWrapped(alertMessage.c_str());
 		ImGui::Dummy(ITEM_SPACING);
@@ -237,6 +243,8 @@ void Menu::environmentMenu() {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal("Environment Settings", NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
 
 		ImGui::InputFloat("Width (m)", &env->width);
 		ImGui::InputFloat("Height (m)", &env->height);
@@ -262,6 +270,8 @@ void Menu::helpWindow() {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal("Help", NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
 
 		ImGui::TextWrapped("Stuff here");
 
@@ -298,6 +308,9 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 	// TODO: Allow objects to be collapsible menu toggles
 	if (ImGui::TreeNode(title.c_str())) {
 
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
+
 		// Allows us to make the width smaller for the input fields
 		// Scales to be a third of the size of the window, but no less than 100 px
 		if (ImGui::GetWindowWidth() / 4.0f < 75.0f)
@@ -308,18 +321,32 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 		// Dummy is used for selective line padding
 
 		ImGui::InputFloat(xPositionText.c_str(), &object.position.x);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 		ImGui::InputFloat(yPositionText.c_str(), &object.position.y);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(SpeedText.c_str(), &object.vSpeed);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 		ImGui::InputFloat(DirectionText.c_str(), &object.vDirection);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(massText.c_str(), &object.mass);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(xScaleText.c_str(), &object.scale.x);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 		ImGui::InputFloat(yScaleText.c_str(), &object.scale.y);
+		if (ImGui::IsItemFocused())
+			highlight = objectNumber;
 
 		ImGui::Dummy(ITEM_SPACING);
 		// TODO: Find a work around to "reset" the whole menu after an object is deleted
@@ -336,5 +363,16 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 			object.position.y = 0.5f * object.scale.y;
 
 		ImGui::TreePop();
+	}
+	else if (highlight == objectNumber)
+		highlight = -1;
+}
+
+void Menu::disableCameraIfFocused() {
+	if (ImGui::IsWindowFocused()) {
+		camera->disabled = true;
+	}
+	else {
+		camera->disabled = false;
 	}
 }

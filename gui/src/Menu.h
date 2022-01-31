@@ -46,6 +46,7 @@ public:
 	std::string errorMessage;
 
 	unsigned short deleteObject;
+	int highlight;
 
 	Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPhysicsActive, bool* hasSimStarted, float* frameStart, float* startTime);
 
@@ -68,6 +69,8 @@ private:
 	void exitPopupButton();
 
 	void createSingleObjectMenu(Body& object, int objectNumber);
+
+	void disableCameraIfFocused();
 
 };
 

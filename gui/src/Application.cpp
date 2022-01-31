@@ -99,6 +99,7 @@ int main(void)
 		layout.push<float>(2);	// this means we have 2 floats for a vertex
 		va.addBuffer(vb, layout);
 
+
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
 
@@ -195,13 +196,31 @@ int main(void)
 				camera.recalculateView();
 
 				// render the axes
-				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
+				shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f);
 
+				unsigned int lineIndices[] = {
+					3, 2
+				};
+				IndexBuffer xb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.xAxis);
-				renderer.draw(va, ib, shader);
+				renderer.drawLine(va, xb, shader);
+				lineIndices[0] = 1;
+				lineIndices[1] = 2;
+				IndexBuffer yb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.yAxis);
-				renderer.draw(va, ib, shader);
+				renderer.drawLine(va, yb, shader);
 
+				// this works, but it bogs down the renderer real bad. I think we should consider batch rendering for this,
+				// the loop is too slow
+// 				glm::vec3 position(0.5f, 0.0f, 0.0f);
+// 				while (position.x < env.width) {
+// 					renderer.setLineMVP(shader, camera, position, 0.0f);
+// 					renderer.drawLine(va, yb, shader);
+// 					position.x++;
+// 				}
+
+				// object index for highlighting
+				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
 
@@ -223,6 +242,41 @@ int main(void)
 					// in a more traditional setup, we would be using a material instead of a shader
 					// a material is a shader AND its associated uniforms
 					renderer.draw(va, ib, shader);
+					
+					// draw highlight
+					if (i == menu.highlight) {
+						shader.setUniform4f("u_Color", 1.0f, 0.7f, 0.0f, 1.0f);
+						unsigned int outline[] = {
+							0, 1, 1, 2, 2, 3, 3, 0
+						};
+						renderer.drawLine(va, IndexBuffer(outline, 8), shader);
+					}
+					i++;
+
+					// draw velocity line
+					if (body.vSpeed > 0) {
+						shader.setUniform4f("u_Color", 0.0f, 0.7f, 0.1f, 1.0f);
+						float velocityLine[4] = {};
+						velocityLine[0] = 0.0f; velocityLine[1] = 0.0f;
+						if (doPhysics) {
+							velocityLine[2] = body.velocity.x * 10;
+							velocityLine[3] = body.velocity.y * 10;
+						}
+						else {
+							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10;
+							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10;
+						}
+						unsigned int velocityLineIndices[] = {
+							0, 1
+						};
+						VertexArray velocityLineArray;
+						VertexBuffer velocityLineBuffer(velocityLine, 2 * 2 * sizeof(float));
+						velocityLineArray.addBuffer(velocityLineBuffer, layout);
+
+						renderer.setLineMVP(shader, camera, body.position);
+						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader);
+					}
+
 				}
 
 			} // end of MVP matrix scope

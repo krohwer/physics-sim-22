@@ -31,6 +31,20 @@ void Renderer::setMVP(Shader& shader, const Camera& camera, const Body& body) {
 	shader.setUniformMat4f("u_MVP", mvp);
 }
 
+void Renderer::setLineMVP(Shader& shader, const Camera& camera, const glm::vec3& position) {
+	// identity model matrix
+	glm::mat4 model(1.0f);
+	/* DO ANY MODEL MATRIX TRANSFORMATIONS */
+	// translate, then rotate, then scale.  VERY IMPORTANT
+	model = glm::translate(model, position * PIXEL_RATIO);
+
+	// multiply the model, view, and projection matrices in reverse order to create the mvp.  We're kinda ignoring the view matrix since we'll use a static camera
+	glm::mat4 mvp = camera.projectionMatrix * camera.viewMatrix * model;
+
+	// set the mvp uniform
+	shader.setUniformMat4f("u_MVP", mvp);
+}
+
 void Renderer::draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const {
 
 	// bind the shader
@@ -42,4 +56,18 @@ void Renderer::draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 
 	// drawing in triangles for now, then the number of INDICES (not vertices), and the data type of the indices.
 	glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
+}
+
+void Renderer::drawLine(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const {
+
+	// bind the shader
+	shader.bind();
+	// before drawing, bind the vertex array, and the index buffer
+	// using a VAO in this way is helpful for rendering multiple objects
+	va.bind();
+	ib.bind();
+
+	glLineWidth(4.0f);
+	// drawing in triangles for now, then the number of INDICES (not vertices), and the data type of the indices.
+	glDrawElements(GL_LINES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
 }

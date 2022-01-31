@@ -14,6 +14,8 @@ Camera::Camera(float left, float right, float bottom, float top) {
 	cPosition = glm::vec3(right, top, 0.0f);
 	cVelocity = glm::vec3(0.0f);
 	cZoom = 1.0f;
+
+	disabled = false;
 }
 
 void Camera::recalculateView() {
