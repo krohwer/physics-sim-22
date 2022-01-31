@@ -70,6 +70,8 @@ private:
 
 	void createSingleObjectMenu(Body& object, int objectNumber);
 
+	void disableCameraIfFocused();
+
 };
 
 #endif

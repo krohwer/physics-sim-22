@@ -127,6 +127,8 @@ void Menu::createControlPanel() {
 
 	ImGui::Begin("Control Panel");
 
+	disableCameraIfFocused();
+
 	if (ImGui::BeginTabBar("Control Panel Tabs")) {
 		if (ImGui::BeginTabItem("Object Manager")) {
 			// Creates an object at the center of the screen
@@ -220,6 +222,9 @@ void Menu::makeAlert(std::string windowName, std::string alertMessage) {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal(windowName.c_str(), NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
+
 		ImGui::TextWrapped("Simulator is active.");
 		ImGui::TextWrapped(alertMessage.c_str());
 		ImGui::Dummy(ITEM_SPACING);
@@ -238,6 +243,8 @@ void Menu::environmentMenu() {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal("Environment Settings", NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
 
 		ImGui::InputFloat("Width (m)", &env->width);
 		ImGui::InputFloat("Height (m)", &env->height);
@@ -263,6 +270,8 @@ void Menu::helpWindow() {
 	ImGui::SetNextWindowPos(menuPosition);
 
 	if (ImGui::BeginPopupModal("Help", NULL, ImGuiWindowFlags_NoResize)) {
+
+		disableCameraIfFocused();
 
 		ImGui::TextWrapped("Stuff here");
 
@@ -357,4 +366,13 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 	}
 	else if (highlight == objectNumber)
 		highlight = -1;
+}
+
+void Menu::disableCameraIfFocused() {
+	if (ImGui::IsWindowFocused()) {
+		camera->disabled = true;
+	}
+	else {
+		camera->disabled = false;
+	}
 }

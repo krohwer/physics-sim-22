@@ -244,7 +244,7 @@ int main(void)
 					renderer.draw(va, ib, shader);
 					
 					// draw highlight
-					if (i == GuiUtils::highlight) {
+					if (i == menu.highlight) {
 						shader.setUniform4f("u_Color", 1.0f, 0.7f, 0.0f, 1.0f);
 						unsigned int outline[] = {
 							0, 1, 1, 2, 2, 3, 3, 0

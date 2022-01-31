@@ -15,7 +15,7 @@ bool createObject = false;
 bool disableCamera = false;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (!disableCamera) {
+	if (!cameraInput->disabled) {
 		if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A) {
 			if (action == GLFW_PRESS)
 				cameraInput->cVelocity.x -= CAM_SPEED;
@@ -44,7 +44,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (!disableCamera) {
+	if (!cameraInput->disabled) {
 		if (yoffset > 0) {
 			cameraInput->cZoom *= 0.9f;
 		}
