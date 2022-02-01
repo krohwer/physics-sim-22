@@ -155,7 +155,7 @@ int main(void)
 		float startTime = (float)glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
+		Environment env = Environment(1000.0f, 500.0f, DEFAULT_GRAVITY, timestep);
 
 		// Initialize the storage manager
 		StorageManager storage;
@@ -195,20 +195,40 @@ int main(void)
 
 				camera.recalculateView();
 
+				// render workspace
+
+				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
+
+				float workspace[] = {
+					0.0f, 0.0f,	// 0
+					env.width * PIXEL_RATIO, 0.0f,	// 1
+					env.width * PIXEL_RATIO, env.height * PIXEL_RATIO,	// 2
+					0.0f, env.height * PIXEL_RATIO	// 3
+				};
+				VertexArray ws;
+				VertexBuffer wsb(workspace, 4 * 2 * sizeof(float));
+
+				shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+				ws.addBuffer(wsb, layout);
+				renderer.draw(ws, ib, shader);
+
+
 				// render the axes
-				shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f);
 
 				unsigned int lineIndices[] = {
 					3, 2
 				};
 				IndexBuffer xb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.xAxis);
-				renderer.drawLine(va, xb, shader);
+				//shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f);
+				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
+				renderer.drawLine(va, xb, shader, 3.0f);
 				lineIndices[0] = 1;
 				lineIndices[1] = 2;
 				IndexBuffer yb(lineIndices, 2);
 				renderer.setMVP(shader, camera, env.yAxis);
-				renderer.drawLine(va, yb, shader);
+				//shader.setUniform4f("u_Color", 0.0f, 0.9f, 0.2f, 1.0f);
+				renderer.drawLine(va, yb, shader, 3.0f);
 
 				// this works, but it bogs down the renderer real bad. I think we should consider batch rendering for this,
 				// the loop is too slow
@@ -245,17 +265,17 @@ int main(void)
 					
 					// draw highlight
 					if (i == menu.highlight) {
-						shader.setUniform4f("u_Color", 1.0f, 0.7f, 0.0f, 1.0f);
+						shader.setUniform4f("u_Color", 0.0f, 0.31f, 0.435f, 1.0f);
 						unsigned int outline[] = {
 							0, 1, 1, 2, 2, 3, 3, 0
 						};
-						renderer.drawLine(va, IndexBuffer(outline, 8), shader);
+						renderer.drawLine(va, IndexBuffer(outline, 8), shader, 4.0f);
 					}
 					i++;
 
 					// draw velocity line
 					if (body.vSpeed > 0) {
-						shader.setUniform4f("u_Color", 0.0f, 0.7f, 0.1f, 1.0f);
+						shader.setUniform4f("u_Color", 0.745f, 0.106f, 0.012f, 1.0f);
 						float velocityLine[4] = {};
 						velocityLine[0] = 0.0f; velocityLine[1] = 0.0f;
 						if (doPhysics) {
@@ -274,7 +294,7 @@ int main(void)
 						velocityLineArray.addBuffer(velocityLineBuffer, layout);
 
 						renderer.setLineMVP(shader, camera, body.position);
-						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader);
+						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader, 4.0f);
 					}
 
 				}

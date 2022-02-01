@@ -12,16 +12,17 @@ Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPh
 	this->startTime = startTime;
 
 	activateErrorAlert = false;
+	activateEnvironmentWindow = false;
+	activateHelpWindow = false;
 	errorMessage = "ERROR OCCURRED";
 	deleteObject = 0;
 	highlight = -1;
 }
 
 void Menu::createMenuBar() {
-	bool activateEnvironmentWindow = false;
-	bool activateHelpWindow = false;
 
 	if (ImGui::BeginMainMenuBar()) {
+		disableCameraIfFocused();
 		if (ImGui::BeginMenu("Environment")) {
 			if (ImGui::MenuItem("Configure Environment Settings")) {
 				if (!*isPhysicsActive && !*hasSimStarted)
@@ -121,7 +122,6 @@ void Menu::createMenuBar() {
 }  // end of createMenuBar()
 
 void Menu::createControlPanel() {
-	std::string controlPanelErrorMessage = "Cannot use Control Panel when simulator is running.";
 	ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 50), ImGuiCond_FirstUseEver);
 
@@ -140,7 +140,7 @@ void Menu::createControlPanel() {
 				}
 				else {
 					activateErrorAlert = true;
-					errorMessage = controlPanelErrorMessage;
+					errorMessage = CONTROLPANEL_ERRORMESSAGE;
 				}
 			} // end of Create Object button
 
@@ -152,7 +152,7 @@ void Menu::createControlPanel() {
 				}
 				else {
 					activateErrorAlert = true;
-					errorMessage = controlPanelErrorMessage;
+					errorMessage = CONTROLPANEL_ERRORMESSAGE;
 				}
 			} // end of Delete All Objects button
 
@@ -244,8 +244,6 @@ void Menu::environmentMenu() {
 
 	if (ImGui::BeginPopupModal("Environment Settings", NULL, ImGuiWindowFlags_NoResize)) {
 
-		disableCameraIfFocused();
-
 		ImGui::InputFloat("Width (m)", &env->width);
 		ImGui::InputFloat("Height (m)", &env->height);
 		ImGui::InputFloat("Gravity", &env->gravity);
@@ -254,6 +252,7 @@ void Menu::environmentMenu() {
 			env->width = 0;
 		if (env->height < 0)
 			env->height = 0;
+		env->computeAxes();
 
 		ImGui::Dummy(ITEM_SPACING);
 		exitPopupButton();
@@ -271,8 +270,6 @@ void Menu::helpWindow() {
 
 	if (ImGui::BeginPopupModal("Help", NULL, ImGuiWindowFlags_NoResize)) {
 
-		disableCameraIfFocused();
-
 		ImGui::TextWrapped("Stuff here");
 
 		ImGui::Dummy(ITEM_SPACING);
@@ -287,6 +284,8 @@ void Menu::helpWindow() {
 
 void Menu::exitPopupButton() {
 	if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+		activateEnvironmentWindow = false;
+		activateHelpWindow = false;
 		ImGui::CloseCurrentPopup();
 	}
 }
@@ -352,7 +351,13 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 		// TODO: Find a work around to "reset" the whole menu after an object is deleted
 		float buttonWidth = ImGui::GetContentRegionAvailWidth() * 0.9f;
 		if (ImGui::Button(deleteText.c_str(), ImVec2(buttonWidth, 0.0f))) {
-			deleteObject = objectNumber;
+			if (!*isPhysicsActive && !*hasSimStarted) {
+				deleteObject = objectNumber;
+			}
+			else {
+				activateErrorAlert = true;
+				errorMessage = CONTROLPANEL_ERRORMESSAGE;
+			}
 		}
 
 		// Boundary checking for x position input
@@ -369,7 +374,7 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 }
 
 void Menu::disableCameraIfFocused() {
-	if (ImGui::IsWindowFocused()) {
+	if (ImGui::IsWindowFocused() || activateEnvironmentWindow || activateHelpWindow) {
 		camera->disabled = true;
 	}
 	else {

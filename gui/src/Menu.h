@@ -29,6 +29,8 @@
 #define MIN_CONTROLPANEL_WIDTH 300
 #define MIN_CONTROLPANEL_HEIGHT 400
 
+#define CONTROLPANEL_ERRORMESSAGE "Cannot use Control Panel when simulator is running."
+
 struct Menu {
 public:
 	// TODO: COMMENTS
@@ -43,6 +45,8 @@ public:
 	float *startTime;
 
 	bool activateErrorAlert;
+	bool activateEnvironmentWindow;
+	bool activateHelpWindow;
 	std::string errorMessage;
 
 	unsigned short deleteObject;
