@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Menu.h"
+#include "ExperimentManager.h"
 #include <GLFW/glfw3.h>
 
 Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPhysicsActive, bool* hasSimStarted, float* frameStart, float* startTime) {
@@ -22,9 +23,27 @@ Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPh
 void Menu::createMenuBar() {
 
 	if (ImGui::BeginMainMenuBar()) {
+
 		disableCameraIfFocused();
+
+		if (ImGui::BeginMenu("Experiments")) {
+			if (ImGui::MenuItem("Open Experiment...")) {
+				if (!*isPhysicsActive && !*hasSimStarted) {
+					std::string filepath = Experiment::openFile("Kinetic Labs Experiment (*.klx)\0*.klx\0");
+					if (!filepath.empty()) {
+						Experiment::load(*env, *camera, filepath);
+					}
+				}
+				else {
+					activateErrorAlert = true;
+					errorMessage = "Cannot load experiments at this time.";
+				}
+			}
+			ImGui::EndMenu();
+		} // end of Experiments Menu
+
 		if (ImGui::BeginMenu("Environment")) {
-			if (ImGui::MenuItem("Configure Environment Settings")) {
+			if (ImGui::MenuItem("Configure Environment Settings...")) {
 				if (!*isPhysicsActive && !*hasSimStarted)
 					activateEnvironmentWindow = true;
 				else {
@@ -34,18 +53,6 @@ void Menu::createMenuBar() {
 			}
 			ImGui::EndMenu();
 		} // end of Environment Window in Menu Bar
-
-		//if (ImGui::BeginMenu("Experiments")) {
-		//	if (ImGui::MenuItem("Load Experiment")) {
-		//		if (!isPhysicsActive && !hasSimStarted)
-		//			activateExperimentLoader = true;
-		//		else {
-		//			failedAccess = true;
-		//			errorMessage = "Cannot load experiments at this time.";
-		//		}
-		//	}
-		//	ImGui::EndMenu();
-		//} // end of Experiments Menu
 
 		if (!*isPhysicsActive) {
 			if (ImGui::MenuItem("Play")) {
@@ -103,7 +110,7 @@ void Menu::createMenuBar() {
 			}
 		} // end of Reset menu item
 
-		if (ImGui::MenuItem("Help")) {
+		if (ImGui::MenuItem("Help...")) {
 			// TODO: Implement actual Help Window
 			activateHelpWindow = true;
 		} // end of Help Menu Item
@@ -160,7 +167,7 @@ void Menu::createControlPanel() {
 			ImGui::EndTabItem();
 		} // end of Object Manager tab item
 
-		if (ImGui::BeginTabItem("Experiments")) {
+		if (ImGui::BeginTabItem("Sample Experiments")) {
 			if (ImGui::TreeNode("Classic Projectile Motion")) {
 				ImGui::TextWrapped("There are two boxes. They're exactly the same and held at the same height.");
 				ImGui::TextWrapped("One falls, the other is slightly pushed to the right when it falls. Which box touches the ground first?");
