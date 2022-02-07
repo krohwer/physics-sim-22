@@ -259,7 +259,6 @@ int main(void)
 				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
-
 					// set the MVP for the object
 					renderer.setMVP(shader, camera, body);
 

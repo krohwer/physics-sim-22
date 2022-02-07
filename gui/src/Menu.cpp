@@ -27,10 +27,24 @@ void Menu::createMenuBar() {
 		disableCameraIfFocused();
 
 		if (ImGui::BeginMenu("Experiments")) {
+			if (ImGui::MenuItem("Save Experiment...")) {
+				if (!*isPhysicsActive && !*hasSimStarted) {
+					std::string filepath = Experiment::saveFile("Kinetic Labs Experiment (*.klx)\0*.klx\0");
+					if (!filepath.empty()) {
+						Experiment::save(*env, *camera, filepath);
+					}
+				}
+				else {
+					activateErrorAlert = true;
+					errorMessage = "Cannot save experiments at this time.";
+				}
+			}
 			if (ImGui::MenuItem("Open Experiment...")) {
 				if (!*isPhysicsActive && !*hasSimStarted) {
 					std::string filepath = Experiment::openFile("Kinetic Labs Experiment (*.klx)\0*.klx\0");
 					if (!filepath.empty()) {
+						env->bodyList.clear();
+						storage->clear();
 						Experiment::load(*env, *camera, filepath);
 					}
 				}
