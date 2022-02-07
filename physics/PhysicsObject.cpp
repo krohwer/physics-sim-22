@@ -18,7 +18,7 @@ Body::Body(Shape* s, float x, float y) {
 	torque = 0.0f;
 
 	scale = glm::vec3(1.0f);
-	color = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f);
+	color = glm::vec4(0.384f, 0.71f, 0.851f, 1.0f);
 	//color = glm::vec4(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), 1.0f);
 
 	mass = 10.0f;

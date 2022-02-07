@@ -13,6 +13,10 @@
 
 namespace Experiment {
 
+	std::string saveFile(const char* filter);
+	std::string openFile(const char* filter);
+	
+	void save(Environment& env, Camera& cam, std::string fileName);
 	void load(Environment& env, Camera& cam, std::string fileName);
 
 }

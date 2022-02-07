@@ -8,6 +8,12 @@
 Renderer::Renderer() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// gray
+	//glClearColor(0.584f, 0.59f, 0.62f, 1.0f);
+	// white
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	// solid gray
+	glClearColor(0.85f, 0.85f, 0.85f, 1.0f);
 }
 
 void Renderer::clear() const {
@@ -58,7 +64,7 @@ void Renderer::draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 	glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::drawLine(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const {
+void Renderer::drawLine(const VertexArray& va, const IndexBuffer& ib, const Shader& shader, float thickness) const {
 
 	// bind the shader
 	shader.bind();
@@ -67,7 +73,7 @@ void Renderer::drawLine(const VertexArray& va, const IndexBuffer& ib, const Shad
 	va.bind();
 	ib.bind();
 
-	glLineWidth(4.0f);
+	glLineWidth(thickness);
 	// drawing in triangles for now, then the number of INDICES (not vertices), and the data type of the indices.
 	glDrawElements(GL_LINES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
 }
