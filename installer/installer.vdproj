@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A724EDD860B54047BDB230F1A6846F32"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_AC9DDDCFD4374F798ECD651FE1B5B317"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -40,6 +34,12 @@
         "Entry"
         {
         "MsmKey" = "8:_B510BAA24219423898C3CFD62F6B4392"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -170,26 +170,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A724EDD860B54047BDB230F1A6846F32"
-            {
-            "SourcePath" = "8:..\\gui\\kl_icon.ico"
-            "TargetName" = "8:kl_icon.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_304DE6B3817848BE99E6849FC050387D"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AC9DDDCFD4374F798ECD651FE1B5B317"
             {
             "SourcePath" = "8:..\\gui\\Experiments\\ProjectileMotionSample.klx"
@@ -216,6 +196,26 @@
             "TargetName" = "8:kl_icon.png"
             "Tag" = "8:"
             "Folder" = "8:_28BFCF8209E946D0AED24FD823A493BD"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_FEDB1812CA8443138200A7DA172FA4AF"
+            {
+            "SourcePath" = "8:..\\gui\\kl_icon.ico"
+            "TargetName" = "8:kl_icon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_304DE6B3817848BE99E6849FC050387D"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -348,7 +348,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:Kinetics Lab educational physics simulator"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:_A724EDD860B54047BDB230F1A6846F32"
+        "ARPPRODUCTICON" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -462,7 +462,7 @@
             "Target" = "8:_DD8294AF308A4446B2C5E3E8B7FA6863"
             "Folder" = "8:_15424E0FAD5C4B8E906D73E5CD1699CF"
             "WorkingFolder" = "8:_304DE6B3817848BE99E6849FC050387D"
-            "Icon" = "8:_A724EDD860B54047BDB230F1A6846F32"
+            "Icon" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
             "Feature" = "8:"
             }
         }
