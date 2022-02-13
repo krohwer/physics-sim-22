@@ -161,6 +161,7 @@ int main(void)
 		StorageManager storage;
 
 		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		menu.initializeStyle();
 
 		// RENDER LOOP //
 

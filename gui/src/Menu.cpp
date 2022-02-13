@@ -19,6 +19,17 @@ Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPh
 	highlight = -1;
 }
 
+void Menu::initializeStyle() {
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	
+	colors[ImGuiCol_MenuBarBg]        = BLUE_SOLID;
+	
+	colors[ImGuiCol_TitleBg]          = MID_GRAY_SOLID;
+	colors[ImGuiCol_TitleBgActive]    = BLUE_SOLID;
+	colors[ImGuiCol_TitleBgCollapsed] = MID_GRAY_T;
+	colors[ImGuiCol_WindowBg]         = MID_GRAY_T;
+}
+
 void Menu::createMenuBar() {
 
 	if (ImGui::BeginMainMenuBar()) {
@@ -123,7 +134,7 @@ void Menu::createMenuBar() {
 
 void Menu::createControlPanel() {
 	ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 50), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 19), ImGuiCond_FirstUseEver);
 
 	ImGui::Begin("Control Panel");
 
@@ -160,6 +171,7 @@ void Menu::createControlPanel() {
 			ImGui::EndTabItem();
 		} // end of Object Manager tab item
 
+		// move to menu bar
 		if (ImGui::BeginTabItem("Experiments")) {
 			if (ImGui::TreeNode("Classic Projectile Motion")) {
 				ImGui::TextWrapped("There are two boxes. They're exactly the same and held at the same height.");
