@@ -20,7 +20,14 @@ Camera::Camera(float left, float right, float bottom, float top) {
 
 void Camera::recalculateView() {
 	if (!disabled) {
-		cPosition += cVelocity * cZoom;
+		if (cPosition.x > 0 || cVelocity.x > 0)
+			cPosition.x += cVelocity.x * cZoom;
+		else
+			cPosition.x = 0.0f;
+		if (cPosition.y > 0 || cVelocity.y > 0)
+			cPosition.y += cVelocity.y * cZoom;
+		else
+			cPosition.y = 0.0f;
 		projectionMatrix = glm::ortho(cLeft * cZoom, cRight * cZoom, cBottom * cZoom, cTop * cZoom, -1.0f, 1.0f);
 	}
 	glm::mat4 transform = glm::translate(glm::mat4(1.0f), cPosition);
