@@ -49,7 +49,7 @@
   <ItemGroup>
     <None Include="resources\shaders\Fragment.shader" />
     <None Include="resources\shaders\Vertex.shader" />
-    <None Include="sampleExp.klx" />
+    <None Include="Experiments\ProjectileMotionSample.klx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -94,5 +94,10 @@
     <ClInclude Include="src\ExperimentManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="kl_icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

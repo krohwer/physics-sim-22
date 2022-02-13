@@ -246,14 +246,19 @@ int main(void)
 				//shader.setUniform4f("u_Color", 0.0f, 0.9f, 0.2f, 1.0f);
 				renderer.drawLine(va, yb, shader, 3.0f);
 
-				// this works, but it bogs down the renderer real bad. I think we should consider batch rendering for this,
-				// the loop is too slow
-// 				glm::vec3 position(0.5f, 0.0f, 0.0f);
-// 				while (position.x < env.width) {
-// 					renderer.setLineMVP(shader, camera, position, 0.0f);
-// 					renderer.drawLine(va, yb, shader);
-// 					position.x++;
-// 				}
+				// render tick marks
+				glm::vec3 position(0.5f, -0.5f, 0.0f);
+				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
+					renderer.setLineMVP(shader, camera, position);
+					renderer.drawLine(va, yb, shader, 3.0f);
+					position.x++;
+				}
+				position = glm::vec3(-0.5f, 0.5f, 0.0f);
+				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
+					renderer.setLineMVP(shader, camera, position);
+					renderer.drawLine(va, xb, shader, 3.0f);
+					position.y++;
+				}
 
 				// object index for highlighting
 				int i = 1;

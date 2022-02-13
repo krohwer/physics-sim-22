@@ -21,6 +21,7 @@ std::string Experiment::saveFile(const char* filter) {
 	ofn.nMaxFile = sizeof(szFile);
 	ofn.lpstrFilter = filter;
 	ofn.nFilterIndex = 1;
+	ofn.lpstrInitialDir = "Experiments";
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 	if (GetSaveFileNameA(&ofn) == TRUE)
 		return ofn.lpstrFile;
@@ -37,6 +38,7 @@ std::string Experiment::openFile(const char* filter) {
 	ofn.nMaxFile = sizeof(szFile);
 	ofn.lpstrFilter = filter;
 	ofn.nFilterIndex = 1;
+	ofn.lpstrInitialDir = "Experiments";
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 	if (GetOpenFileNameA(&ofn) == TRUE)
 		return ofn.lpstrFile;
