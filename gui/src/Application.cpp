@@ -10,6 +10,9 @@
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
@@ -58,6 +61,19 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	// Loading icon image
+	int width, height;
+	int channels;
+	unsigned char* pixels = stbi_load("resources/icon/kl_icon.png", &width, &height, &channels, 4);
+
+	// Changing window icon
+	GLFWimage images[1];
+	images[0].width = width;
+	images[0].height = height;
+	images[0].pixels = pixels;
+
+	glfwSetWindowIcon(window, 1, images);
+	
 	// waits for 1 screen update to swap the interval, results in basically vsync!
 	glfwSwapInterval(1);
 
@@ -244,7 +260,6 @@ int main(void)
 				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
-
 					// set the MVP for the object
 					renderer.setMVP(shader, camera, body);
 

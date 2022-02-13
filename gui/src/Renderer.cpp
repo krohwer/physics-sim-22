@@ -8,12 +8,12 @@
 Renderer::Renderer() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// Dark gray
-	glClearColor(0.584f, 0.59f, 0.62f, 1.0f);
+	// gray
+	//glClearColor(0.584f, 0.59f, 0.62f, 1.0f);
 	// white
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	// solid gray
-	//glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
+	glClearColor(0.85f, 0.85f, 0.85f, 1.0f);
 }
 
 void Renderer::clear() const {
