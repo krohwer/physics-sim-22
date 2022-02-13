@@ -247,18 +247,46 @@ int main(void)
 				renderer.drawLine(va, yb, shader, 3.0f);
 
 				// render tick marks
-				glm::vec3 position(0.5f, -0.5f, 0.0f);
-				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
-					renderer.setLineMVP(shader, camera, position);
-					renderer.drawLine(va, yb, shader, 3.0f);
-					position.x++;
-				}
-				position = glm::vec3(-0.5f, 0.5f, 0.0f);
-				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
-					renderer.setLineMVP(shader, camera, position);
-					renderer.drawLine(va, xb, shader, 3.0f);
-					position.y++;
-				}
+				float rulerHeight = -1.0f * PIXEL_RATIO * camera.cZoom;
+				float meterMarks[] = {
+					// x
+					0.0f, 0.0f,	// 0
+					0.0f * PIXEL_RATIO, rulerHeight * 1.5f,	// 1
+					1.0f * PIXEL_RATIO, 0.0f,			// 2
+					1.0f * PIXEL_RATIO, rulerHeight,	// 3
+					2.0f * PIXEL_RATIO, 0.0f,			// 4
+					2.0f * PIXEL_RATIO, rulerHeight,	// 5
+
+					// y
+					0.0f, 0.0f,	// 0
+					rulerHeight * 1.5f, 0.0f * PIXEL_RATIO, // 1
+					0.0f,		 1.0f * PIXEL_RATIO, 	// 2
+					rulerHeight, 1.0f * PIXEL_RATIO, 	// 3
+					0.0f,		 2.0f * PIXEL_RATIO, 	// 2
+					rulerHeight, 2.0f * PIXEL_RATIO, 	// 3
+				};
+				VertexArray marks;
+				VertexBuffer marksBuffer(meterMarks, 12 * 2 * sizeof(float));
+				unsigned int marksIndices[] = {
+					0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+				};
+				IndexBuffer marksIndexBuffer(marksIndices, 12);
+				marks.addBuffer(marksBuffer, layout);
+				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
+				renderer.drawLine(marks, marksIndexBuffer, shader, 3.0f);
+
+// 				glm::vec3 position(0.5f, -0.5f, 0.0f);
+// 				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
+// 					renderer.setLineMVP(shader, camera, position);
+// 					renderer.drawLine(va, yb, shader, 3.0f);
+// 					position.x++;
+// 				}
+// 				position = glm::vec3(-0.5f, 0.5f, 0.0f);
+// 				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
+// 					renderer.setLineMVP(shader, camera, position);
+// 					renderer.drawLine(va, xb, shader, 3.0f);
+// 					position.y++;
+// 				}
 
 				// object index for highlighting
 				int i = 1;

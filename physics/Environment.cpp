@@ -14,13 +14,13 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 
 	// create axes
 	Shape yAxisShape;
-	yAxis = Body(&yAxisShape, -0.5f, (0.5f * height - 1.0f));
+	yAxis = Body(&yAxisShape, -0.5f, (0.5f * height));
 	yAxis.mass = 0.0f;
-	yAxis.scale = glm::vec3(1.0f, height + 2.0f, 1.0f);
+	yAxis.scale = glm::vec3(1.0f, height, 1.0f);
 	Shape xAxisShape;
-	xAxis = Body(&xAxisShape, (0.5f * width - 1.0f), -0.5);
+	xAxis = Body(&xAxisShape, (0.5f * width), -0.5);
 	xAxis.mass = 0.0f;
-	xAxis.scale = glm::vec3(width + 2.0f, 1.0f, 1.0f);
+	xAxis.scale = glm::vec3(width, 1.0f, 1.0f);
 }
 
 Body* Environment::addBody(float xPosition, float yPosition) {
