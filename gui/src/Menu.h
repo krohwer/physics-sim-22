@@ -18,8 +18,6 @@
 #include <iostream>
 #include <string>
 
-// Window and Item Sizing
-
 #define ITEM_SPACING ImVec2(0.0f, 2.5f)
 
 #define ENVSETTINGS_WIDTH 300
@@ -30,14 +28,6 @@
 
 #define MIN_CONTROLPANEL_WIDTH 300
 #define MIN_CONTROLPANEL_HEIGHT 400
-
-// Colors
-
-#define BLUE_SOLID ImVec4(0.0f, 0.15f, 0.235f, 1.0f)
-#define MID_GRAY_SOLID ImVec4(0.2f, 0.2f, 0.2f, 1.0f)
-#define MID_GRAY_T ImVec4(0.2f, 0.2f, 0.2f, 0.5f)
-
-// Other
 
 #define CONTROLPANEL_ERRORMESSAGE "Cannot use Control Panel when simulator is running."
 
@@ -63,8 +53,6 @@ public:
 	int highlight;
 
 	Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPhysicsActive, bool* hasSimStarted, float* frameStart, float* startTime);
-
-	void initializeStyle();
 
 	void createMenuBar();
 
