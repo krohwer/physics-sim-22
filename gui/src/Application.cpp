@@ -230,7 +230,6 @@ int main(void)
 
 
 				// render the axes
-
 				unsigned int lineIndices[] = {
 					3, 2
 				};
@@ -295,7 +294,7 @@ int main(void)
 					// set the MVP for the object
 					renderer.setMVP(shader, camera, body);
 
-					// infinite mass is gray!
+					// infinite mass is lower opacity!
 					if (body.mass == 0) {
 						body.color.a = 0.4f;
 						shader.setUniform4f("u_Color", body.color);
@@ -322,17 +321,16 @@ int main(void)
 					i++;
 
 					// draw velocity line
-					if (body.vSpeed > 0) {
+					if (body.vSpeed > 0.01) {
 						shader.setUniform4f("u_Color", 0.745f, 0.106f, 0.012f, 1.0f);
 						float velocityLine[4] = {};
-						velocityLine[0] = 0.0f; velocityLine[1] = 0.0f;
 						if (doPhysics) {
 							velocityLine[2] = body.velocity.x * 10;
 							velocityLine[3] = body.velocity.y * 10;
 						}
 						else {
-							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10;
-							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10;
+							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10; // x
+							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10; // y
 						}
 						unsigned int velocityLineIndices[] = {
 							0, 1
@@ -345,7 +343,7 @@ int main(void)
 						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader, 4.0f);
 					}
 
-				}
+				} // end of body loop
 
 			} // end of MVP matrix scope
 
@@ -381,7 +379,9 @@ int main(void)
 
 			/* Poll for and process events */
 			glfwPollEvents();
-		}
+
+		} // end of render loop
+
 	} // end of GL scope
 
 	// Delete things related to ImGUI
