@@ -186,6 +186,7 @@ int main(void)
 		StorageManager storage;
 
 		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		menu.initializeStyle();
 
 		// RENDER LOOP //
 
@@ -432,11 +433,13 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
+			ImGui::PushFont(menu.fontMedium);
 			menu.createMenuBar();
-
+			
 			menu.createControlPanel();
 
 			menu.cleanUp();
+			ImGui::PopFont();
 
 			// End of all ImGui windows
 
