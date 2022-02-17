@@ -105,7 +105,7 @@ inline float clamp(float min, float max, float value) {
 
 	if (value < min)
 		clampedValue = min;
-	if (value > max)
+	else if (value > max)
 		clampedValue = max;
 
 	return clampedValue;

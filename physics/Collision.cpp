@@ -110,14 +110,14 @@ void BoxvsBall(Manifold* manifold) {
 
 	glm::vec3 normal = n - closest;
 	float distance = lenSqr(normal);
-	normal = normalize(normal);
 	float r = b->radius;
 
 	// if the circle is inside the box or the distance is less than the radius, there is a collision
 	if (!(distance > r * r && !inside)) {
 
-		// Avoided sqrt until we needed
+		// Avoided sqrt and normalize until we needed
 		distance = sqrt(distance);
+		normal = normalize(normal);
 
 		// Collision normal needs to be flipped to point outside if circle was
 		// inside the AABB
@@ -152,8 +152,14 @@ void BallvsBox(Manifold* manifold) {
 	float y_extent = (bbox.max.y - bbox.min.y) / 2;
 
 	// Clamp point to edges of the AABB
-	closest.x = clamp(-x_extent, x_extent, closest.x);
-	closest.y = clamp(-y_extent, y_extent, closest.y);
+	if (closest.x < -x_extent)
+		closest.x -= (-x_extent);
+	else if (closest.x > x_extent)
+		closest.x -= x_extent;
+	if (closest.y < -y_extent)
+		closest.y -= (-y_extent);
+	else if (closest.y > y_extent)
+		closest.y -= y_extent;
 
 	bool inside = false;
 
@@ -180,14 +186,14 @@ void BallvsBox(Manifold* manifold) {
 
 	glm::vec3 normal = closest;
 	float distance = lenSqr(normal);
-	normal = normalize(normal);
 	float r = a->radius;
 
 	// if the circle is inside the box or the distance is less than the radius, there is a collision
 	if (!(distance > r * r && !inside)) {
 
-		// Avoided sqrt until we needed
+		// Avoided sqrt and normalize until we needed
 		distance = sqrt(distance);
+		normal = normalize(normal);
 
 		// Collision normal needs to be flipped to point outside if circle was
 		// inside the AABB
@@ -212,21 +218,23 @@ void BallvsBall(Manifold* manifold) {
 	glm::vec3 n = b->position - a->position;
 
 	//float r = a->radius + b->radius;
-	float r = 1.0f;
+	float r = a->radius + b->radius;
 	r *= r;
+	float distance = lenSqr(n);
 
 	// check if the circles in the manifold are actually colliding
-	if (r < (n.x * n.x) + (n.y * n.y) + (n.z * n.z)) {
+	if (r < distance) {
 		// if they aren't, do nothing!
 	}
 	else {
 		// if they are colliding
 
 		// safely do a square root for the distance between the objects
-		float distance = length(n);
+		distance = sqrt(distance);
 
 		if (distance != 0) {
 			manifold->penetration = r - distance;
+			manifold->normal = normalize(n);
 		}
 		// set the contactCount to 1 to indicate a collision
 		manifold->contactCount = 1;
