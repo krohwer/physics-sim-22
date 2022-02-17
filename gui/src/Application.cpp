@@ -86,6 +86,8 @@ int main(void)
 
 	{ // this is a scope to prevent errors when we end our GL context by calling our destructors at end of scope
 
+		const int MAX_RULER_MARKS = 30;
+
 		// each line is a vertex position in the form x, y
 		// since we have a projection matrix set up now, 0,0 is the bottom left of the screen
 		// NOTE: we want to define these vertex positions as centered around 0,0 for our object coordinates
@@ -103,12 +105,18 @@ int main(void)
 			0, 1, 2,
 			2, 3, 0
 		};
+		unsigned int axesIndices[] = {
+			0, 1, 0, 3
+		};
+		unsigned int marksIndices[MAX_RULER_MARKS * 2];
 
 		// INITIAL VERTEX ARRAY OBJECT AND BUFFER CREATION //
 
 		// create and bind our vertex array object
 		VertexArray va;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+
+		VertexBuffer marksBuffer;
 
 		VertexBufferLayout layout;
 		// this can be expanded on later and include many types including vec2s or vec3s when it comes to positions
@@ -118,6 +126,7 @@ int main(void)
 
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
+		IndexBuffer axesIB(axesIndices, 4);
 
 		// CREATE CAMERA //
 		float halfWidth = (float)windowWidth / 2.0f;
@@ -177,6 +186,7 @@ int main(void)
 		StorageManager storage;
 
 		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		menu.initializeStyle();
 
 		// RENDER LOOP //
 
@@ -211,7 +221,7 @@ int main(void)
 
 				camera.recalculateView();
 
-				// render workspace
+				// render workspace and axes
 
 				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
 
@@ -226,39 +236,127 @@ int main(void)
 
 				shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
 				ws.addBuffer(wsb, layout);
-				renderer.draw(ws, ib, shader);
+				renderer.draw(ws, ib, shader); // workspace background
 
-
-				// render the axes
-
-				unsigned int lineIndices[] = {
-					3, 2
-				};
-				IndexBuffer xb(lineIndices, 2);
-				renderer.setMVP(shader, camera, env.xAxis);
-				//shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f);
+				//shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f); // X COLOR
+				//shader.setUniform4f("u_Color", 0.0f, 0.9f, 0.2f, 1.0f); // Y COLOR
 				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
-				renderer.drawLine(va, xb, shader, 3.0f);
-				lineIndices[0] = 1;
-				lineIndices[1] = 2;
-				IndexBuffer yb(lineIndices, 2);
-				renderer.setMVP(shader, camera, env.yAxis);
-				//shader.setUniform4f("u_Color", 0.0f, 0.9f, 0.2f, 1.0f);
-				renderer.drawLine(va, yb, shader, 3.0f);
+				renderer.drawLine(ws, axesIB, shader, 3.0f); // axes
 
 				// render tick marks
-				glm::vec3 position(0.5f, -0.5f, 0.0f);
-				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
-					renderer.setLineMVP(shader, camera, position);
-					renderer.drawLine(va, yb, shader, 3.0f);
-					position.x++;
+				// TODO: Batch render
+				float rulerHeight = -1.0f * PIXEL_RATIO * camera.cZoom;
+				float meterMarks[MAX_RULER_MARKS * 2 * 2];
+// 				float meterMarks[] = {
+// 					// x
+// 					0.0f, 0.0f,	// 0
+// 					0.0f * PIXEL_RATIO, rulerHeight * 1.5f,	// 1
+// 					1.0f * PIXEL_RATIO, 0.0f,			// 2
+// 					1.0f * PIXEL_RATIO, rulerHeight,	// 3
+// 					2.0f * PIXEL_RATIO, 0.0f,			// 4
+// 					2.0f * PIXEL_RATIO, rulerHeight,	// 5
+// 
+// 					// y
+// 					0.0f, 0.0f,	// 0
+// 					rulerHeight * 1.5f, 0.0f * PIXEL_RATIO, // 1
+// 					0.0f,		 1.0f * PIXEL_RATIO, 	// 2
+// 					rulerHeight, 1.0f * PIXEL_RATIO, 	// 3
+// 					0.0f,		 2.0f * PIXEL_RATIO, 	// 2
+// 					rulerHeight, 2.0f * PIXEL_RATIO, 	// 3
+// 				};
+				float xMark = 0.0f;
+				float yMark = 0.0f;
+				int markIndex = 0;
+				int markCounter = 0;
+ 				bool xAxisInView = camera.cPosition.y - halfHeight * camera.cZoom < 0;
+ 				bool yAxisInView = camera.cPosition.x - halfWidth * camera.cZoom < 0;
+ 				bool xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
+				bool yMarkInView = yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO;
+
+				while (markCounter < MAX_RULER_MARKS - 1 && (xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO || yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO)) {
+					xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
+					if (xAxisInView && xMarkInView && xMark < env.width) {
+						meterMarks[markIndex] = xMark * PIXEL_RATIO;
+						meterMarks[markIndex + 1] = 0.0f;
+
+						meterMarks[markIndex + 2] = xMark * PIXEL_RATIO;
+						if (xMark == 0.0f)
+							meterMarks[markIndex + 3] = rulerHeight * 1.5;
+						else
+							meterMarks[markIndex + 3] = rulerHeight;
+						markIndex += 4;
+						markCounter++;
+					}
+					xMark++;
+
+					yMarkInView = yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO;
+					if (yAxisInView && yMarkInView && yMark < env.height) {
+						meterMarks[markIndex] = 0.0f;
+						meterMarks[markIndex + 1] = yMark * PIXEL_RATIO;
+
+						if (yMark == 0.0f)
+							meterMarks[markIndex + 2] = rulerHeight * 1.5;
+						else
+							meterMarks[markIndex + 2] = rulerHeight;
+						meterMarks[markIndex + 3] = yMark * PIXEL_RATIO;
+						markIndex += 4;
+						markCounter++;
+					}
+					yMark++;
 				}
-				position = glm::vec3(-0.5f, 0.5f, 0.0f);
-				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
-					renderer.setLineMVP(shader, camera, position);
-					renderer.drawLine(va, xb, shader, 3.0f);
-					position.y++;
+// 				while (xAxisInView && markIndex < MAX_RULER_MARKS * 2 * 2 && xMark < env.width && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO) {
+// 					if (xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO) {
+// 						meterMarks[markIndex] = xMark * PIXEL_RATIO;
+// 						meterMarks[markIndex + 1] = 0.0f;
+// 
+// 						meterMarks[markIndex + 2] = xMark * PIXEL_RATIO;
+// 						if (xMark == 0.0f)
+// 							meterMarks[markIndex + 3] = rulerHeight * 1.5;
+// 						else
+// 							meterMarks[markIndex + 3] = rulerHeight;
+// 						markIndex += 4;
+// 					}
+// 					xMark++;
+// 				}
+// 				while (yAxisInView && markIndex < MAX_RULER_MARKS * 2 * 2 && yMark < env.height && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO) {
+// 					if (yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO) {
+// 						meterMarks[markIndex] = 0.0f;
+// 						meterMarks[markIndex + 1] = yMark * PIXEL_RATIO;
+// 
+// 						if (yMark == 0.0f)
+// 							meterMarks[markIndex + 2] = rulerHeight * 1.5;
+// 						else
+// 							meterMarks[markIndex + 2] = rulerHeight;
+// 						meterMarks[markIndex + 3] = yMark * PIXEL_RATIO;
+// 						markIndex += 4;
+// 					}
+// 					yMark++;
+// 				}
+				VertexArray marks;
+				marksBuffer.bind();
+				glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(meterMarks), meterMarks);
+				//VertexBuffer marksBuffer(meterMarks, markIndex * sizeof(float));
+				for (int j = 0; j < markIndex / 2; j += 2) {
+					marksIndices[j] = j;
+					marksIndices[j + 1] = j + 1;
 				}
+				IndexBuffer marksIndexBuffer(marksIndices, markIndex / 2);
+				marks.addBuffer(marksBuffer, layout);
+				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
+				renderer.drawLine(marks, marksIndexBuffer, shader, 3.0f);
+
+// 				glm::vec3 position(0.5f, -0.5f, 0.0f);
+// 				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
+// 					renderer.setLineMVP(shader, camera, position);
+// 					renderer.drawLine(va, yb, shader, 3.0f);
+// 					position.x++;
+// 				}
+// 				position = glm::vec3(-0.5f, 0.5f, 0.0f);
+// 				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
+// 					renderer.setLineMVP(shader, camera, position);
+// 					renderer.drawLine(va, xb, shader, 3.0f);
+// 					position.y++;
+// 				}
 
 				// object index for highlighting
 				int i = 1;
@@ -267,7 +365,7 @@ int main(void)
 					// set the MVP for the object
 					renderer.setMVP(shader, camera, body);
 
-					// infinite mass is gray!
+					// infinite mass is lower opacity!
 					if (body.mass == 0) {
 						body.color.a = 0.4f;
 						shader.setUniform4f("u_Color", body.color);
@@ -294,17 +392,16 @@ int main(void)
 					i++;
 
 					// draw velocity line
-					if (body.vSpeed > 0) {
+					if (body.vSpeed > 0.01) {
 						shader.setUniform4f("u_Color", 0.745f, 0.106f, 0.012f, 1.0f);
 						float velocityLine[4] = {};
-						velocityLine[0] = 0.0f; velocityLine[1] = 0.0f;
 						if (doPhysics) {
 							velocityLine[2] = body.velocity.x * 10;
 							velocityLine[3] = body.velocity.y * 10;
 						}
 						else {
-							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10;
-							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10;
+							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10; // x
+							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10; // y
 						}
 						unsigned int velocityLineIndices[] = {
 							0, 1
@@ -317,7 +414,7 @@ int main(void)
 						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader, 4.0f);
 					}
 
-				}
+				} // end of body loop
 
 			} // end of MVP matrix scope
 
@@ -336,11 +433,13 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
+			ImGui::PushFont(menu.fontMedium);
 			menu.createMenuBar();
-
+			
 			menu.createControlPanel();
 
 			menu.cleanUp();
+			ImGui::PopFont();
 
 			// End of all ImGui windows
 
@@ -353,7 +452,9 @@ int main(void)
 
 			/* Poll for and process events */
 			glfwPollEvents();
-		}
+
+		} // end of render loop
+
 	} // end of GL scope
 
 	// Delete things related to ImGUI
