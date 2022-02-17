@@ -61,6 +61,8 @@ void Experiment::save(Environment& env, Camera& cam, std::string fileName) {
 		exp << cam.cPosition.x << DELIMITER << cam.cPosition.y << DELIMITER << cam.cZoom << std::endl;
 
 		for (Body& body : env.bodyList) {
+			// write shape
+			exp << (float)body.shape->type << DELIMITER;
 			// write x and y position
 			exp << body.position.x << DELIMITER << body.position.y << DELIMITER;
 			// write velocity data
@@ -125,7 +127,7 @@ void Experiment::load(Environment& env, Camera& cam, std::string fileName) {
 		// read object data
 		while (getline(exp, line)) {
 			// parse object data
-			float attributes[8] = {};
+			float attributes[9] = {};
 			std::stringstream sstream(line);
 			std::string value;
 			int i = 0;

@@ -78,6 +78,8 @@ struct Body {
 	/// scale stores the amount to scale the object along each axis. Z should remain 1.0f
 	glm::vec3 scale;
 
+	float radius;
+
 	/**
 	 * Applies a force vector to the object
 	 */
@@ -89,7 +91,7 @@ struct Body {
 	 * @param impulse - 
 	 * @param contactVector - 
 	 */
-	void applyImpulse(glm::vec3 impulse, glm::vec3 contactVector);
+	//void applyImpulse(glm::vec3 impulse, glm::vec3 contactVector);
 
 	/**
 	 * applies the equations of motion over the time deltaTime

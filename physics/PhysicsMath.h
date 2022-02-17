@@ -99,6 +99,18 @@ inline glm::vec3 CrossProduct(float scalar, glm::vec3 a) {
 	return glm::vec3(-scalar * a.y, scalar * a.x, 0.0f);
 }
 
+// restricts a value within a min and max
+inline float clamp(float min, float max, float value) {
+	float clampedValue = value;
+
+	if (value < min)
+		clampedValue = min;
+	if (value > max)
+		clampedValue = max;
+
+	return clampedValue;
+}
+
 // Comparison with tolerance of EPSILON
 inline bool Equal(float a, float b)
 {

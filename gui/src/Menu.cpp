@@ -210,17 +210,30 @@ void Menu::createControlPanel() {
 	if (ImGui::BeginTabBar("Control Panel Tabs")) {
 		if (ImGui::BeginTabItem("Object Manager")) {
 			// Creates an object at the center of the screen
-			if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+			if (ImGui::Button("Create Box", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 				if (!*isPhysicsActive && !*hasSimStarted) {
 					float xPosition = camera->cPosition.x / PIXEL_RATIO;
 					float yPosition = camera->cPosition.y / PIXEL_RATIO;
-					env->addBody(xPosition, yPosition);
+					env->addBody(0.0f, xPosition, yPosition);
 				}
 				else {
 					activateErrorAlert = true;
 					errorMessage = CONTROLPANEL_ERRORMESSAGE;
 				}
-			} // end of Create Object button
+			} // end of Create Box button
+
+			// Creates an object at the center of the screen
+			if (ImGui::Button("Create Ball", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+				if (!*isPhysicsActive && !*hasSimStarted) {
+					float xPosition = camera->cPosition.x / PIXEL_RATIO;
+					float yPosition = camera->cPosition.y / PIXEL_RATIO;
+					env->addBody(1.0f, xPosition, yPosition);
+				}
+				else {
+					activateErrorAlert = true;
+					errorMessage = CONTROLPANEL_ERRORMESSAGE;
+				}
+			} // end of Create Ball button
 
 			deleteButtonStyling();
 			// Removes all objects in the current environment

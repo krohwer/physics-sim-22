@@ -23,23 +23,23 @@ Environment::Environment(float eWidth, float eHeight, float eGravity, float eTim
 	xAxis.scale = glm::vec3(width, 1.0f, 1.0f);
 }
 
-Body* Environment::addBody(float xPosition, float yPosition) {
-	Shape shape;
+Body* Environment::addBody(float shapeInt, float xPosition, float yPosition) {
+	Shape shape(shapeInt);
 	Body body(&shape, xPosition, yPosition);
 	bodyList.push_back(body);
 
 	return &bodyList.back();
 }
 
-Body* Environment::addBody(float attr[8]) {
-	Shape shape;
-	Body body(&shape, attr[0], attr[1]);
-	body.vSpeed = attr[2];
-	body.vDirection = attr[3];
-	body.mass = attr[4];
-	body.restitution = attr[5];
-	body.scale.x = attr[6];
-	body.scale.y = attr[7];
+Body* Environment::addBody(float attr[9]) {
+	Shape shape(attr[0]);
+	Body body(&shape, attr[1], attr[2]);
+	body.vSpeed = attr[3];
+	body.vDirection = attr[4];
+	body.mass = attr[5];
+	body.restitution = attr[6];
+	body.scale.x = attr[7];
+	body.scale.y = attr[8];
 	bodyList.push_back(body);
 
 	return &bodyList.back();

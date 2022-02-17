@@ -18,6 +18,7 @@ Body::Body(Shape* s, float x, float y) {
 	torque = 0.0f;
 
 	scale = glm::vec3(1.0f);
+	radius = 0.5f;
 	color = glm::vec4(0.384f, 0.71f, 0.851f, 1.0f);
 	//color = glm::vec4(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), 1.0f);
 
@@ -39,6 +40,7 @@ Body::Body() {
 	torque = 0.0f;
 
 	scale = glm::vec3(1.0f);
+	radius = 0.5f;
 	color = glm::vec4(0.9f);
 
 	mass = 10.0f;
@@ -54,10 +56,10 @@ void Body::applyForce(glm::vec3 f) {
 		force += f;
 }
 
-void Body::applyImpulse(glm::vec3 impulse, glm::vec3 contactVector) {
-	velocity += inverseMass * impulse;
-	angularVelocity += (1.0f / momentOfInertia) * glm::cross(contactVector, impulse).z;
-}
+// void Body::applyImpulse(glm::vec3 impulse, glm::vec3 contactVector) {
+// 	velocity += inverseMass * impulse;
+// 	angularVelocity += (1.0f / momentOfInertia) * glm::cross(contactVector, impulse).z;
+// }
 
 void Body::step(float deltaTime) {
 	float dtSquared = deltaTime * deltaTime;
@@ -121,8 +123,8 @@ void Body::init() {
 	computeInverseMass();
 	computeInertia();
 	computeVelocityComponents();
-	shape->scaleX(scale);
-	shape->scaleY(scale);
+// 	shape->scaleX(scale);
+// 	shape->scaleY(scale);
 }
 
 void Body::computeVelocityVector() {

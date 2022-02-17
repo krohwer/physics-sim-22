@@ -38,13 +38,13 @@ public:
 	 * Adds a body to the environment to be rendered and included in physics calculations.
 	 * Also initializes values such as the inverse mass
 	 */
-	Body* addBody(float xPosition, float yPosition);
+	Body* addBody(float shapeInt, float xPosition, float yPosition);
 
 	/**
 	 * Adds a body to the environment to be rendered and included in physics calculations.
 	 * INITIALIZES ALL VALUES
 	 */
-	Body* addBody(float attributes[8]);
+	Body* addBody(float attributes[9]);
 
 	/**
 	 * Removes a body from the environment.
