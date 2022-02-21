@@ -435,9 +435,8 @@ int main(void)
 
 			ImGui::PushFont(menu.fontMedium);
 			menu.createMenuBar();
-			
+			menu.createSimulatorManager();
 			menu.createControlPanel();
-
 			menu.cleanUp();
 			ImGui::PopFont();
 

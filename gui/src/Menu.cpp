@@ -17,12 +17,32 @@ Menu::Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPh
 	fontMedium = io.Fonts->AddFontFromFileTTF("resources/fonts/Rubik-Medium.ttf", 15.0f);
 	fontSmall = io.Fonts->AddFontFromFileTTF("resources/fonts/Rubik-Medium.ttf", 13.0f);
 
-	activateErrorAlert = false;
 	activateEnvironmentWindow = false;
 	activateHelpWindow = false;
+	activateErrorAlert = false;
 	errorMessage = "ERROR OCCURRED";
+	errorAlertHeight = 0.0f;
+
 	deleteObject = 0;
 	highlight = -1;
+
+	// setting up and appending all help items for help menu
+	HelpItem camControls = HelpItem("resources/help-images/controls.png", "Camera", "\tUse the WASD or arrow keys to move the environment field of view.\n\tUse the mouse wheel to zoom in and out.");
+	HelpItem controlPanel = HelpItem("resources/help-images/cp_buttons.png", "Control Panel", "\tPress the 'Create Object' button to create an object at the center of the screen.\n\tPress the 'Delete All Objects' button to clear all objects on the screen.");
+	HelpItem objManager = HelpItem("resources/help-images/obj_menu.png", "Object Manager", "\tX Position: changes the horizontal position of the object in meters.\n\tY Position: changes the vertical position of the object in meters.\n\tSpeed: changes the initial speed of the objects in meters per second.\n\tAngle: changes the angle of the object in degrees.\n\tMass: changes the mass of the object in kilograms.\n\tWidth: changes the width of the object in meters.\n\tHeight: changes the height of the object in meters.");
+	HelpItem envSettings = HelpItem("resources/help-images/env_window.png", "Environment Settings", "\tAdjust the width and or height of the Environment in meters.\n\tAdjust the rate of gravity of the Environment.");
+	HelpItem expManager = HelpItem("resources/help-images/exp_options.png", "Experiments", "\tOpen any previously made Kinetics Lab experiments.\n\tSave the currently set up experiment on screen.\n\tOpen a sample experiment provided by the developers of Kinetics Lab.");
+	HelpItem simManager = HelpItem("resources/help-images/sim_buttons.png", "Simulator Manager", "\tClick 'Play' to begin the simulation.\n\tClick 'Pause' to pause the simulation.\n\tClick 'Reset' to set the simulation back to its starting setup.");
+
+	helpItems.push_back(camControls);
+	helpItems.push_back(controlPanel);
+	helpItems.push_back(objManager);
+	helpItems.push_back(envSettings);
+	helpItems.push_back(expManager);
+	helpItems.push_back(simManager);
+
+	itemDisplayed = helpItems.begin();
+	index = 0;
 }
 
 void Menu::initializeStyle() {	
@@ -36,7 +56,7 @@ void Menu::initializeStyle() {
 	colors[ImGuiCol_WindowBg]             = MID_GRAY_T;
 
 	colors[ImGuiCol_PopupBg]              = DARK_GRAY_T;
-	colors[ImGuiCol_ModalWindowDimBg]     = DARK_T;
+	colors[ImGuiCol_ModalWindowDimBg]     = WHITE_T;
 	colors[ImGuiCol_FrameBg]              = MID_GRAY_T;
 	colors[ImGuiCol_FrameBgActive]        = LIGHT_BLUE;
 	colors[ImGuiCol_FrameBgHovered]       = LIGHTEST_BLUE;
@@ -57,66 +77,10 @@ void Menu::initializeStyle() {
 
 void Menu::createMenuBar() {
 	// make a little taller
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 6.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 8.0f));
 	if (ImGui::BeginMainMenuBar()) {
 
 		disableCameraIfFocused();
-
-		if (!*isPhysicsActive) {
-			if (ImGui::MenuItem("Play")) {
-				if (!(env->bodyList.empty())) {
-					// initializing axes and storing starting positions if this is the first time the Simulator starts
-					if (!*hasSimStarted) {
-						// initialize the axes
-						env->xAxis.init();
-						env->yAxis.init();
-
-						// Physics pre-calculations
-						for (Body& body : env->bodyList) {
-							// save object starting positions and velocities
-							storage->save(body);
-
-							// while we're looping objects, go ahead and recalculate some important values
-							body.init();
-							// calculate the force of gravitation for the object into a vector and apply it
-							glm::vec3 gravity(0, body.mass * env->gravity, 0);
-							body.force -= gravity;
-						}
-						env->generatePairs();
-						*hasSimStarted = true;
-					} // end of hasSimStarted check
-
-					// Physics happens here
-					*frameStart = glfwGetTime();
-					*startTime = glfwGetTime();
-					
-					*isPhysicsActive = true;
-				}
-			}
-		}
-		else {
-			if (ImGui::MenuItem("Pause")) {
-				// Pauses simulation if it's running
-				*isPhysicsActive = false;
-			}
-		} // end of Play / Pause menu item
-
-		// Stops and resets objects to their initial state at the start of the simulation
-		if (ImGui::MenuItem("Reset")) {
-			if (*isPhysicsActive || *hasSimStarted) {
-				int count = 0;
-				for (Body& body : env->bodyList) {
-					storage->restore(body, count);
-					// clear forces!
-					body.force = glm::vec3(0.0f);
-
-					count++;
-				}
-				storage->clear();
-				*isPhysicsActive = false;
-				*hasSimStarted = false;
-			}
-		} // end of Reset menu item
 
 		if (ImGui::BeginMenu("Experiments")) {
 			if (ImGui::MenuItem("Open")) {
@@ -131,6 +95,7 @@ void Menu::createMenuBar() {
 				else {
 					activateErrorAlert = true;
 					errorMessage = "Cannot load experiments at this time.";
+					errorAlertHeight = MIN_ALERTMESSAGE_HEIGHT;
 				}
 			} // end of Open Experiment Menu Item
 			if (ImGui::MenuItem("Save As...")) {
@@ -143,6 +108,7 @@ void Menu::createMenuBar() {
 				else {
 					activateErrorAlert = true;
 					errorMessage = "Cannot save experiments at this time.";
+					errorAlertHeight = MIN_ALERTMESSAGE_HEIGHT;
 				}
 			} // end of Save Experiment Menu Item
 
@@ -159,6 +125,7 @@ void Menu::createMenuBar() {
 					else {
 						activateErrorAlert = true;
 						errorMessage = "Cannot load experiment at this time.";
+						errorAlertHeight = MIN_ALERTMESSAGE_HEIGHT;
 					}
 				}
 				ImGui::EndMenu();
@@ -173,6 +140,7 @@ void Menu::createMenuBar() {
 				else {
 					activateErrorAlert = true;
 					errorMessage = "Cannot edit Environment at this time.";
+					errorAlertHeight = MIN_ALERTMESSAGE_HEIGHT;
 				}
 			}
 			ImGui::EndMenu();
@@ -181,7 +149,13 @@ void Menu::createMenuBar() {
 
 		if (ImGui::BeginMenu("Help")) {
 			if (ImGui::MenuItem("Getting Started"))
-				activateHelpWindow = true;
+				if(!*isPhysicsActive && !*hasSimStarted)
+					activateHelpWindow = true;
+				else {
+					activateErrorAlert = true;
+					errorMessage = "Cannot access at this time.";
+					errorAlertHeight = MIN_ALERTMESSAGE_HEIGHT;
+				}
 			ImGui::EndMenu();
 		} // end of Help Menu Item
 
@@ -199,57 +173,124 @@ void Menu::createMenuBar() {
 
 }  // end of createMenuBar()
 
-void Menu::createControlPanel() {
-	ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT));
-	ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 27));
+void Menu::createSimulatorManager() {
+	ImGui::PushFont(fontLarge);
+	ImGui::SetNextWindowSize(ImVec2(200.0f, 150.0f));
+	ImGui::SetNextWindowPos(ImVec2((1600 - 200.0f) / 2, 31.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 3.5f));
+	ImGui::Begin("Simulator Manager", NULL, ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoBackground);
 
-	ImGui::Begin("Control Panel", NULL, ImGuiWindowFlags_NoResize);
+	if (!*isPhysicsActive) {
+		if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth() / 2 - 5.0f, 35.0f))) {
+			if (!(env->bodyList.empty())) {
+				// initializing axes and storing starting positions if this is the first time the Simulator starts
+				if (!*hasSimStarted) {
+					// initialize the axes
+					env->xAxis.init();
+					env->yAxis.init();
+
+					// Physics pre-calculations
+					for (Body& body : env->bodyList) {
+						// save object starting positions and velocities
+						storage->save(body);
+
+						// while we're looping objects, go ahead and recalculate some important values
+						body.init();
+						// calculate the force of gravitation for the object into a vector and apply it
+						glm::vec3 gravity(0, body.mass * env->gravity, 0);
+						body.force -= gravity;
+					}
+					env->generatePairs();
+					*hasSimStarted = true;
+				} // end of hasSimStarted check
+
+				// Physics happens here
+				*frameStart = glfwGetTime();
+				*startTime = glfwGetTime();
+
+				*isPhysicsActive = true;
+			}
+		}
+	}
+	else {
+		if (ImGui::Button("Pause", ImVec2(ImGui::GetContentRegionAvailWidth() / 2 - 5.0f, 35.0f))) {
+			// Pauses simulation if it's running
+			*isPhysicsActive = false;
+		}
+	} // end of Play / Pause menu item
+
+	ImGui::SameLine();
+
+	// Stops and resets objects to their initial state at the start of the simulation
+	if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionAvailWidth(), 35.0f))) {
+		if (*isPhysicsActive || *hasSimStarted) {
+			int count = 0;
+			for (Body& body : env->bodyList) {
+				storage->restore(body, count);
+				// clear forces!
+				body.force = glm::vec3(0.0f);
+
+				count++;
+			}
+			storage->clear();
+			*isPhysicsActive = false;
+			*hasSimStarted = false;
+		}
+	} // end of Reset menu item
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopFont();
+}
+
+void Menu::createControlPanel() {
+	ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 31.0f), ImGuiCond_FirstUseEver);
+
+	ImGui::Begin("Control Panel");
 
 	disableCameraIfFocused();
 
-	if (ImGui::BeginTabBar("Control Panel Tabs")) {
-		if (ImGui::BeginTabItem("Object Manager")) {
-			// Creates an object at the center of the screen
-			if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-				if (!*isPhysicsActive && !*hasSimStarted) {
-					float xPosition = camera->cPosition.x / PIXEL_RATIO;
-					float yPosition = camera->cPosition.y / PIXEL_RATIO;
-					env->addBody(xPosition, yPosition);
-				}
-				else {
-					activateErrorAlert = true;
-					errorMessage = CONTROLPANEL_ERRORMESSAGE;
-				}
-			} // end of Create Object button
+	// Creates an object at the center of the screen
+	if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+		if (!*isPhysicsActive && !*hasSimStarted) {
+			float xPosition = camera->cPosition.x / PIXEL_RATIO;
+			float yPosition = camera->cPosition.y / PIXEL_RATIO;
+			env->addBody(xPosition, yPosition);
+		}
+		else {
+			activateErrorAlert = true;
+			errorMessage = CONTROLPANEL_ERRORMESSAGE;
+			errorAlertHeight = MAX_ALERTMESSAGE_HEIGHT;
+		}
+	} // end of Create Object button
 
-			deleteButtonStyling();
-			// Removes all objects in the current environment
-			if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-				if (!*isPhysicsActive && !*hasSimStarted) {
-					env->bodyList.clear();
-					storage->clear();
-				}
-				else {
-					activateErrorAlert = true;
-					errorMessage = CONTROLPANEL_ERRORMESSAGE;
-				}
-			} // end of Delete All Objects button
+	deleteButtonStyling();
+	// Removes all objects in the current environment
+	if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
+		if (!*isPhysicsActive && !*hasSimStarted) {
+			env->bodyList.clear();
+			storage->clear();
+		}
+		else {
+			activateErrorAlert = true;
+			errorMessage = CONTROLPANEL_ERRORMESSAGE;
+			errorAlertHeight = MAX_ALERTMESSAGE_HEIGHT;
+		}
+	} // end of Delete All Objects button
 
-			ImGui::PushStyleColor(ImGuiCol_Text, DARK_SOLID);
-			createAllObjectMenus();
-			popMultipleStyleColors(5);
+	ImGui::PushStyleColor(ImGuiCol_Text, BLACK);
+	createAllObjectMenus();
+	popMultipleStyleColors(4);
 
-			ImGui::EndTabItem();
-		} // end of Object Manager tab item
-	}
-	ImGui::EndTabBar();
 	ImGui::End();
 } // end of createControlPanel
 
 void Menu::createAllObjectMenus() {
 	int objectNumber = 1;
 	for (Body& body : env->bodyList) {
-		// Dummy is used for selective line padding
 		ImGui::Dummy(ITEM_SPACING);
 		createSingleObjectMenu(body, objectNumber);
 		objectNumber++;
@@ -262,7 +303,7 @@ void Menu::cleanUp() {
 		activateErrorAlert = false;
 	}
 
-	makeAlert("ERROR", errorMessage);
+	makeAlert("ERROR", errorMessage, errorAlertHeight);
 
 	if (deleteObject > 0) {
 		std::list<Body>::iterator i = env->bodyList.begin();
@@ -274,38 +315,37 @@ void Menu::cleanUp() {
 
 // PRIVATE HELPER FUNCTIONS
 
-void Menu::makeAlert(std::string windowName, std::string alertMessage) {
-	ImVec2 menuDimensions = { ALERTMESSAGE_WIDTH , ALERTMESSAGE_HEIGHT };
-	ImVec2 menuPosition = { (1600 - ALERTMESSAGE_WIDTH) / 2 , (900 - ALERTMESSAGE_HEIGHT) / 2 };
-
-	ImGui::SetNextWindowSize(menuDimensions);
-	ImGui::SetNextWindowPos(menuPosition);
+void Menu::makeAlert(std::string windowName, std::string alertMessage, float alertWindowHeight) {
+	ImGui::SetNextWindowSize(ImVec2(ALERTMESSAGE_WIDTH, alertWindowHeight));
+	ImGui::SetNextWindowPos(ImVec2((1600 - ALERTMESSAGE_WIDTH) / 2, (900 - alertWindowHeight) / 2));
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, MID_GRAY_SOLID);
 
 	if (ImGui::BeginPopupModal(windowName.c_str(), NULL, ImGuiWindowFlags_NoResize)) {
 
 		disableCameraIfFocused();
 
+		ImGui::PushStyleColor(ImGuiCol_Text, BLACK);
 		ImGui::TextWrapped("Simulator is active.");
 		ImGui::TextWrapped(alertMessage.c_str());
+		ImGui::PopStyleColor();
+
 		ImGui::Dummy(ITEM_SPACING);
 		if (ImGui::Button("OK", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
+	ImGui::PopStyleColor();
 }
 
 void Menu::environmentMenu() {
-	ImVec2 menuDimensions = { ENVSETTINGS_WIDTH , ENVSETTINGS_HEIGHT };
-	ImVec2 menuPosition = { (1600 - ENVSETTINGS_WIDTH) / 2 , (900 - ENVSETTINGS_HEIGHT) / 2 };
-
-	ImGui::SetNextWindowSize(menuDimensions);
-	ImGui::SetNextWindowPos(menuPosition);
+	ImGui::SetNextWindowSize(ENVSETTINGS_DIMENSIONS);
+	ImGui::SetNextWindowPos(ENVSETTINGS_POSITION);
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, MID_GRAY_SOLID);
 	ImGui::PushFont(fontLarge);
 
 	if (ImGui::BeginPopupModal("Environment Settings", NULL, ImGuiWindowFlags_NoResize)) {
-		ImGui::PushStyleColor(ImGuiCol_Text, DARK_SOLID);
+		ImGui::PushStyleColor(ImGuiCol_Text, BLACK);
 		ImGui::PushFont(fontMedium);
 		ImGui::InputFloat("Width (m)", &env->width);
 		ImGui::InputFloat("Height (m)", &env->height);
@@ -329,49 +369,68 @@ void Menu::environmentMenu() {
 }
 
 void Menu::helpWindow() {
-	ImVec2 menuDimensions = { HELP_WIDTH , HELP_HEIGHT };
-	ImVec2 menuPosition = { (1600 - HELP_WIDTH) / 2 , (900 - HELP_HEIGHT) / 2 };
-
-	ImGui::SetNextWindowSize(menuDimensions);
-	ImGui::SetNextWindowPos(menuPosition);
+	ImGui::SetNextWindowSize(HELP_DIMENSIONS);
+	ImGui::SetNextWindowPos(HELP_POSITION);
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, MID_GRAY_SOLID);
 	ImGui::PushFont(fontLarge);
 
 	if (ImGui::BeginPopupModal("Getting Started", NULL, ImGuiWindowFlags_NoResize)) {
-		ImGui::PushStyleColor(ImGuiCol_Text, DARK_SOLID);
+		ImGui::PushStyleColor(ImGuiCol_Text, BLACK);
 
-		ImGui::Text("Camera");
-		ImGui::PushFont(fontMedium);
-		ImGui::TextWrapped("	Use the WASD or arrow keys to move the environment field of view.");
-		ImGui::TextWrapped("	Use the mouse wheel to zoom in and out.");
-		ImGui::PopFont();
-
-		ImGui::Dummy(ITEM_SPACING);
-		ImGui::Text("Control Panel");
-		ImGui::PushFont(fontMedium);
-		ImGui::TextWrapped("	Press the 'Create Object' button to create an object at the center of the screen.");
-		ImGui::TextWrapped("	Press the 'Delete All Objects' button to clear all objects on the screen.");
-		ImGui::PopFont();
-		
-		ImGui::Dummy(ITEM_SPACING);
-		ImGui::Text("Object Manager");
-		ImGui::PushFont(fontMedium);
-		ImGui::TextWrapped("	X Position: changes the horizontal position of the object in meters.");
-		ImGui::TextWrapped("	Y Position: changes the vertical position of the object in meters.");
-		ImGui::TextWrapped("	Speed: changes the initial speed of the objects in meters per second.");
-		ImGui::TextWrapped("	Angle: changes the angle of the object in degrees.");
-		ImGui::PopFont();
-		
-		ImGui::Dummy(ITEM_SPACING);
-		ImGui::Text("Experiments");
-		ImGui::PushFont(fontMedium);
-		ImGui::TextWrapped("	Open any previously made Kinetics Lab experiments.");
-		ImGui::TextWrapped("	Save the currently set up experiment on screen.");
-		ImGui::TextWrapped("	Open a sample experiment provided by the developers of Kinetics Lab.");
-		ImGui::PopFont();
+		int my_image_width = 0;
+		int my_image_height = 0;
+		GLuint my_image_texture = 0;
+		bool ret = itemDisplayed->LoadTextureFromFile(itemDisplayed->imgPath.c_str(), &my_image_texture, &my_image_width, &my_image_height);
 
 		ImGui::Dummy(ITEM_SPACING);
+		ImGui::Image((void*)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));
+
+		ImGui::Dummy(ITEM_SPACING);
+		ImGui::Text(itemDisplayed->title.c_str());
+
+		ImGui::Dummy(ITEM_SPACING);
+		ImGui::PushFont(fontMedium);
+		ImGui::TextWrapped(itemDisplayed->description.c_str());
+
+		ImGui::PopFont();
 		ImGui::PopStyleColor();
+
+		if (index == 0 || index == 1 || index == 3)
+			ImGui::Dummy(ImVec2(0.0f, 77.0f));
+		else if (index == 4 || index == 5)
+			ImGui::Dummy(ImVec2(0.0f, 62.0f));
+		else
+			ImGui::Dummy(ITEM_SPACING);
+
+		if (index > 0) {
+			float width = ImGui::GetContentRegionAvailWidth();
+
+			if (index != helpItems.size() - 1)
+				width = width / 2 - 5.0f;
+
+			if (ImGui::Button("PREVIOUS", ImVec2(width, 0.0f))) {
+				index--;
+				itemDisplayed = helpItems.begin();
+				std::advance(itemDisplayed, index);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+
+			if (index != helpItems.size() - 1)
+				ImGui::SameLine();
+		}
+
+		if (index < helpItems.size() - 1) {
+			float width = ImGui::GetContentRegionAvailWidth();
+
+			if (ImGui::Button("NEXT", ImVec2(width, 0.0f))) {
+				index++;
+				itemDisplayed = helpItems.begin();
+				std::advance(itemDisplayed, index);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+		}
+
+		ImGui::Dummy(ITEM_SPACING);
 		exitPopupButton("CLOSE");
 		ImGui::EndPopup();
 	}
@@ -408,7 +467,7 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 			highlight = objectNumber;
 
 		// Allows us to make the width smaller for the input fields
-		// Scales to be a third of the size of the window, but no less than 100 px
+		// Scales to be a third of the size of the window, but no less than 100 pixels
 		if (ImGui::GetWindowWidth() / 4.0f < 75.0f)
 			ImGui::PushItemWidth(75.0f);
 		else
@@ -456,6 +515,7 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 			else {
 				activateErrorAlert = true;
 				errorMessage = CONTROLPANEL_ERRORMESSAGE;
+				errorAlertHeight = MAX_ALERTMESSAGE_HEIGHT;
 			}
 		}
 		ImGui::PopStyleColor();
@@ -484,7 +544,6 @@ void Menu::disableCameraIfFocused() {
 
 void Menu::deleteButtonStyling() {
 	ImGui::PushStyleColor(ImGuiCol_Text, WHITE);
-	ImGui::PushStyleColor(ImGuiCol_Button, RED);
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, LIGHT_RED);
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LIGHT_RED);
 }

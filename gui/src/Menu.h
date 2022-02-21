@@ -14,32 +14,36 @@
 #include "Environment.h"
 #include "Shape.h"
 #include "PhysicsObject.h"
+#include "HelpItem.h"
 
 #include <iostream>
-#include <string>
 
 // Dimensions
 #define ENVSETTINGS_WIDTH 300
 #define ENVSETTINGS_HEIGHT 145
+#define ENVSETTINGS_DIMENSIONS ImVec2(ENVSETTINGS_WIDTH, ENVSETTINGS_HEIGHT)
+#define ENVSETTINGS_POSITION ImVec2((1600 - ENVSETTINGS_WIDTH) / 2, (900 - ENVSETTINGS_HEIGHT) / 2)
 
-#define HELP_WIDTH 530
-#define HELP_HEIGHT 400
+#define HELP_WIDTH 620
+#define HELP_HEIGHT 470
+#define HELP_DIMENSIONS ImVec2(HELP_WIDTH, HELP_HEIGHT)
+#define HELP_POSITION ImVec2((1600 - HELP_WIDTH) / 2, (900 - HELP_HEIGHT) / 2)
 
 #define ALERTMESSAGE_WIDTH 300
-#define ALERTMESSAGE_HEIGHT 130
+#define MIN_ALERTMESSAGE_HEIGHT 103
+#define MAX_ALERTMESSAGE_HEIGHT 118
 
 #define MIN_CONTROLPANEL_WIDTH 265
 #define MIN_CONTROLPANEL_HEIGHT 400
 
 // Colors
 #define WHITE ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
+#define WHITE_T ImVec4(1.0f, 1.0f, 1.0f, 0.15f)
 #define LIGHT_RED ImVec4(220.0f / 255.0f, 24.0f / 255.0f, 17.0f / 255.0f, 1.0f)
-#define RED ImVec4(180.0f / 255.0f, 24.0f / 255.0f, 17.0f / 255.0f, 1.0f)
 
 #define LIGHTEST_BLUE ImVec4(71.0f / 255.0f, 158.0f / 255.0f, 215.0f / 255.0f, 1.0f)
 #define LIGHT_BLUE ImVec4(41.0f / 255.0f, 128.0f / 255.0f, 185.0f / 255.0f, 1.0f)
 #define BLUE ImVec4(37.0f / 255.0f, 64.0f / 255.0f, 90.0f / 255.0f, 1.0f)
-#define BLUE_T ImVec4(37.0f / 255.0f, 64.0f / 255.0f, 90.0f / 255.0f, 0.9f)
 
 #define MID_GRAY_SOLID ImVec4(223.0f / 255.0f, 223.0f / 255.0f, 236.0f / 255.0f, 1.0f)
 #define MID_GRAY_T ImVec4(0.5f, 0.5f, 0.7f, 0.25f)
@@ -47,8 +51,7 @@
 #define DARK_GRAY_SOLID ImVec4(0.15f, 0.15f, 0.2f, 1.0f)
 #define DARK_GRAY_T ImVec4(0.15f, 0.15f, 0.15f, 0.95f)
 
-#define DARK_SOLID ImVec4(0.0f, 0.0f, 0.0f, 1.0f)
-#define DARK_T ImVec4(0.0f, 0.0f, 0.0f, 0.15f)
+#define BLACK ImVec4(0.0f, 0.0f, 0.0f, 1.0f)
 
 // Other
 #define ITEM_SPACING ImVec2(0.0f, 2.5f)
@@ -71,10 +74,11 @@ public:
 	ImFont* fontMedium;
 	ImFont* fontSmall;
 
-	bool activateErrorAlert;
 	bool activateEnvironmentWindow;
 	bool activateHelpWindow;
+	bool activateErrorAlert;
 	std::string errorMessage;
+	float errorAlertHeight;
 
 	unsigned short deleteObject;
 	int highlight;
@@ -82,6 +86,8 @@ public:
 	Menu(Environment* env, StorageManager* storage, Camera* camera, bool* isPhysicsActive, bool* hasSimStarted, float* frameStart, float* startTime);
 
 	void initializeStyle();
+	
+	void createSimulatorManager();
 
 	void createMenuBar();
 
@@ -91,9 +97,13 @@ public:
 
 private:
 	// TODO: COMMENTS
+	std::list <HelpItem> helpItems;
+	std::list<HelpItem>::iterator itemDisplayed;
+	int index;
+
 	void createAllObjectMenus();
 
-	void makeAlert(std::string windowName, std::string alertMessage);
+	void makeAlert(std::string windowName, std::string alertMessage, float alertWindowHeight);
 		
 	void environmentMenu();
 
