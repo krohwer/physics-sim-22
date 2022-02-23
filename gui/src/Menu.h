@@ -114,6 +114,7 @@ private:
 	void createSingleObjectMenu(Body& object, int objectNumber);
 
 	void disableCameraIfFocused();
+	void disableCameraIfHovered();
 
 	void deleteButtonStyling();
 

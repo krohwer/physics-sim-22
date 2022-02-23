@@ -251,7 +251,7 @@ void Menu::createControlPanel() {
 
 	ImGui::Begin("Control Panel");
 
-	disableCameraIfFocused();
+	disableCameraIfHovered();
 
 	// Creates an object at the center of the screen
 	if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
@@ -476,32 +476,46 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 		// Dummy is used for selective line padding
 
 		ImGui::InputFloat(xPositionText.c_str(), &object.position.x);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 		ImGui::InputFloat(yPositionText.c_str(), &object.position.y);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(SpeedText.c_str(), &object.vSpeed);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 		ImGui::InputFloat(DirectionText.c_str(), &object.vDirection);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(massText.c_str(), &object.mass);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 
 		ImGui::Dummy(ITEM_SPACING);
 		ImGui::InputFloat(xScaleText.c_str(), &object.scale.x);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 		ImGui::InputFloat(yScaleText.c_str(), &object.scale.y);
-		if (ImGui::IsItemFocused())
+		if (ImGui::IsItemFocused()) {
 			highlight = objectNumber;
+			camera->disabled = true;
+		}
 
 		ImGui::PopFont();
 		ImGui::Dummy(ITEM_SPACING);
@@ -535,6 +549,14 @@ void Menu::createSingleObjectMenu(Body& object, int objectNumber) {
 
 void Menu::disableCameraIfFocused() {
 	if (ImGui::IsWindowFocused() || activateEnvironmentWindow || activateHelpWindow) {
+		camera->disabled = true;
+	}
+	else {
+		camera->disabled = false;
+	}
+}
+void Menu::disableCameraIfHovered() {
+	if (ImGui::IsWindowHovered() || activateEnvironmentWindow || activateHelpWindow) {
 		camera->disabled = true;
 	}
 	else {
