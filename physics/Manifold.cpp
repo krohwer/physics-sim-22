@@ -84,6 +84,7 @@ void Manifold::ApplyImpulse() {
 			B->velocity += B->inverseMass * frictionImpluse;
 		}
 	}
+	// recalculate each velocity vector so the UI displays properly
 	A->computeVelocityVector();
 	B->computeVelocityVector();
 	// positional correction
@@ -102,6 +103,7 @@ void Manifold::InfiniteMassCorrection() {
 	A->velocity = glm::vec3(0.0f);
 	B->velocity = glm::vec3(0.0f);
 
+	// recalculate each velocity vector so the UI displays properly
 	A->computeVelocityVector();
 	B->computeVelocityVector();
 }

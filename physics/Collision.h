@@ -13,24 +13,17 @@ struct Pair {
 	Body* B;
 };
 
-//float findAxisLeastPenetration(int* faceIndex, Shape* A, Shape* B);
-
-//void FindIncidentFace(glm::vec3* v, Shape* RefPoly, Shape* IncPoly, int referenceIndex);
-
-//int Clip(glm::vec3 n, float c, glm::vec3* face);
-
-/// detect a collision between two polygons
-//void PolygonvsPolygon(Manifold* m);
-
 /// detect a collision between two bounding boxes
 void BoxvsBox(Manifold *manifold);
 
 /// detect a collision between two balls
 void BallvsBall(Manifold* manifold);
 
+/// detect a collision between a box and a ball (both ways)
 void BoxvsBall(Manifold* manifold);
 void BallvsBox(Manifold* manifold);
 
+/// collision callback to ensure appropriate detection code is used
 typedef void (*collisionCallback)(Manifold* man);
 
 extern collisionCallback Dispatch[2][2];
