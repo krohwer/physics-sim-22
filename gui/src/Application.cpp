@@ -163,6 +163,7 @@ int main(void)
 		Renderer renderer;
 
 		// IMGUI WINDOW CREATION //
+		// a lot of this is standard and must be done
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -185,7 +186,9 @@ int main(void)
 		// Initialize the storage manager
 		StorageManager storage;
 
+		// Initialize the menu with appropriate references to manage the environment and the simulation
 		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		// Setting the colors/style of the menu
 		menu.initializeStyle();
 
 		// RENDER LOOP //
@@ -388,14 +391,22 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
+			// Pushing the font style onto the GUI
 			ImGui::PushFont(menu.fontMedium);
+
+			// Creating the top menu bar
 			menu.createMenuBar();
+			// Creating the buttons that manage the simulator
 			menu.createSimulatorManager();
+			// Creating the Control Panel
 			menu.createControlPanel();
+			// Calling any functionality that needs to run outside of the above windows
 			menu.cleanUp();
+			
+			// Every pushed font must be popped
 			ImGui::PopFont();
 
-			// End of all ImGui windows
+			// End of IMGUI WINDOWS
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
