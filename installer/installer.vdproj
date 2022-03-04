@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:TestSetup"
+"ProjectName" = "8:installer"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -15,7 +15,73 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_E9AD1637031C4CC884CD1E2C6CB12DE6"
+        "MsmKey" = "8:_1B59C5D760DF41DEA14B8A3C1AFBCFE5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_35BB2E8E0BDC413B86B4ED3BD9105C7A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_5004925098F64F488D06FC878E0ECA4D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6E8B4922F4F74EE19D1C01F92DA96664"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7ED8DAB8377242FDBAA1AAA59B8B9615"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8CE432B7989F40589F80D86CE31F39C3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_92BA294087A243D4A3EDDBFEBF4133CB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AC9DDDCFD4374F798ECD651FE1B5B317"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B510BAA24219423898C3CFD62F6B4392"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D06F27DC8ECF4CB89E8513B4D53E4450"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D240244D98C64080BC80164F52898E73"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -27,7 +93,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\TestSetup.msi"
+        "OutputFilename" = "8:KineticsLab_Setup_1_0.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -44,6 +110,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -51,7 +125,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\TestSetup.msi"
+        "OutputFilename" = "8:KineticsLab_Setup_1_0.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -68,6 +142,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -90,6 +172,246 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1B59C5D760DF41DEA14B8A3C1AFBCFE5"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\shaders\\Vertex.shader"
+            "TargetName" = "8:Vertex.shader"
+            "Tag" = "8:"
+            "Folder" = "8:_1D05E4D95846471EA1A42648CFEF641E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_35BB2E8E0BDC413B86B4ED3BD9105C7A"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\shaders\\Fragment.shader"
+            "TargetName" = "8:Fragment.shader"
+            "Tag" = "8:"
+            "Folder" = "8:_1D05E4D95846471EA1A42648CFEF641E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5004925098F64F488D06FC878E0ECA4D"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\obj_menu.png"
+            "TargetName" = "8:obj_menu.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6E8B4922F4F74EE19D1C01F92DA96664"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\exp_options.png"
+            "TargetName" = "8:exp_options.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7ED8DAB8377242FDBAA1AAA59B8B9615"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\cp_buttons.png"
+            "TargetName" = "8:cp_buttons.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8CE432B7989F40589F80D86CE31F39C3"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\sim_buttons.png"
+            "TargetName" = "8:sim_buttons.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_92BA294087A243D4A3EDDBFEBF4133CB"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\controls.png"
+            "TargetName" = "8:controls.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AC9DDDCFD4374F798ECD651FE1B5B317"
+            {
+            "SourcePath" = "8:..\\gui\\Experiments\\ProjectileMotionSample.klx"
+            "TargetName" = "8:ProjectileMotionSample.klx"
+            "Tag" = "8:"
+            "Folder" = "8:_AACAD28E7AA0413DAE70C7663875B593"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B510BAA24219423898C3CFD62F6B4392"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\icon\\kl_icon.png"
+            "TargetName" = "8:kl_icon.png"
+            "Tag" = "8:"
+            "Folder" = "8:_28BFCF8209E946D0AED24FD823A493BD"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D06F27DC8ECF4CB89E8513B4D53E4450"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\env_window.png"
+            "TargetName" = "8:env_window.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D240244D98C64080BC80164F52898E73"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\fonts\\Rubik-Medium.ttf"
+            "TargetName" = "8:Rubik-Medium.ttf"
+            "Tag" = "8:"
+            "Folder" = "8:_B32EB5DAA6FA4FBABAF2C11DBA63D2FB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_FEDB1812CA8443138200A7DA172FA4AF"
+            {
+            "SourcePath" = "8:..\\gui\\kl_icon.ico"
+            "TargetName" = "8:kl_icon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_304DE6B3817848BE99E6849FC050387D"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -117,6 +439,72 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_13C2D51B5FD44B01BCB6CCEEC3119709"
+                    {
+                    "Name" = "8:resources"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_557E511759FC49E0A35683448CDE340A"
+                        "Folders"
+                        {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_1D05E4D95846471EA1A42648CFEF641E"
+                            {
+                            "Name" = "8:shaders"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_330A2D3A85E8429AB7F2F810DEA0F048"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_28BFCF8209E946D0AED24FD823A493BD"
+                            {
+                            "Name" = "8:icon"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_AE4E173F0B97400992F886D71597D5F0"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_8487C493AC8E45F78469F7F80AA8C130"
+                            {
+                            "Name" = "8:help-images"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_836A5BEF4C0D4B69A2B04BD8DDF3AB98"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_B32EB5DAA6FA4FBABAF2C11DBA63D2FB"
+                            {
+                            "Name" = "8:fonts"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_A7DA10A26E6B47088D346292D4F0580B"
+                                "Folders"
+                                {
+                                }
+                            }
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_AACAD28E7AA0413DAE70C7663875B593"
+                    {
+                    "Name" = "8:Experiments"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_1B0A23367A524DEFBD4416D7F852B2A9"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_3F2A4E549D54409686BF52E332ED7D4D"
@@ -145,9 +533,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:It's a vector test!"
+        "ProductName" = "8:Kinetics Lab"
         "ProductCode" = "8:{D0033307-FB19-4D79-8D20-ACE63CD16E03}"
-        "PackageCode" = "8:{A6E8C47E-5DB0-449C-A573-19D476276402}"
+        "PackageCode" = "8:{50FF605D-E35E-4A70-B838-F78A1DC9795F}"
         "UpgradeCode" = "8:{01CBD241-B45F-4586-89E0-1797D70F1584}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -155,16 +543,16 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Keaton"
+        "Manufacturer" = "8:KineticsLab"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:TestSetup"
+        "Title" = "8:KineticsLabSetup"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Default Company Name"
+        "ARPCONTACT" = "8:Cristina Reyes, Keaton Rohwer"
         "Keywords" = "8:"
-        "ARPCOMMENTS" = "8:"
+        "ARPCOMMENTS" = "8:Kinetics Lab educational physics simulator"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -267,18 +655,18 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_9AD995ECD11E4DFDA14F45A6254B1A1D"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1257BCE9DE9C498BAE2C1C36F459C0B6"
             {
-            "Name" = "8:Shortcut to Primary Output from tests (Active)"
+            "Name" = "8:Kinetics Lab"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_E9AD1637031C4CC884CD1E2C6CB12DE6"
+            "Target" = "8:_DD8294AF308A4446B2C5E3E8B7FA6863"
             "Folder" = "8:_15424E0FAD5C4B8E906D73E5CD1699CF"
             "WorkingFolder" = "8:_304DE6B3817848BE99E6849FC050387D"
-            "Icon" = "8:"
+            "Icon" = "8:_FEDB1812CA8443138200A7DA172FA4AF"
             "Feature" = "8:"
             }
         }
@@ -680,9 +1068,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E9AD1637031C4CC884CD1E2C6CB12DE6"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DD8294AF308A4446B2C5E3E8B7FA6863"
             {
-            "SourcePath" = "8:..\\Debug\\tests.exe"
+            "SourcePath" = "8:..\\Release\\gui.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_304DE6B3817848BE99E6849FC050387D"
@@ -700,9 +1088,9 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:"
+            "OutputConfiguration" = "8:Release|Win32"
             "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{08FFFEAF-18A0-42F6-9950-157883FF722E}"
+            "OutputProjectGuid" = "8:{2628AD97-BF7A-4FB6-A5FC-DC82FB781A22}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

@@ -10,6 +10,9 @@
 #include <glm/glm.hpp> // glm version 9.9.8
 #include <glm/gtc/matrix_transform.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
@@ -58,6 +61,19 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	// Loading icon image
+	int width, height;
+	int channels;
+	unsigned char* pixels = stbi_load("resources/icon/kl_icon.png", &width, &height, &channels, 4);
+
+	// Changing window icon
+	GLFWimage images[1];
+	images[0].width = width;
+	images[0].height = height;
+	images[0].pixels = pixels;
+
+	glfwSetWindowIcon(window, 1, images);
+	
 	// waits for 1 screen update to swap the interval, results in basically vsync!
 	glfwSwapInterval(1);
 
@@ -69,6 +85,8 @@ int main(void)
 	// DEFINING THE OBJECT TO RENDER //
 
 	{ // this is a scope to prevent errors when we end our GL context by calling our destructors at end of scope
+
+		const int MAX_RULER_MARKS = 30;
 
 		// each line is a vertex position in the form x, y
 		// since we have a projection matrix set up now, 0,0 is the bottom left of the screen
@@ -87,6 +105,10 @@ int main(void)
 			0, 1, 2,
 			2, 3, 0
 		};
+		unsigned int axesIndices[] = {
+			0, 1, 0, 3
+		};
+		unsigned int marksIndices[MAX_RULER_MARKS * 2];
 
 		// INITIAL VERTEX ARRAY OBJECT AND BUFFER CREATION //
 
@@ -94,13 +116,17 @@ int main(void)
 		VertexArray va;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
+		VertexBuffer marksBuffer;
+
 		VertexBufferLayout layout;
 		// this can be expanded on later and include many types including vec2s or vec3s when it comes to positions
 		layout.push<float>(2);	// this means we have 2 floats for a vertex
 		va.addBuffer(vb, layout);
 
+
 		// create an index buffer and automatically bind it
 		IndexBuffer ib(indices, 6);
+		IndexBuffer axesIB(axesIndices, 4);
 
 		// CREATE CAMERA //
 		float halfWidth = (float)windowWidth / 2.0f;
@@ -137,6 +163,7 @@ int main(void)
 		Renderer renderer;
 
 		// IMGUI WINDOW CREATION //
+		// a lot of this is standard and must be done
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -147,7 +174,6 @@ int main(void)
 		// Setup for ImGui Window variables
 		bool doPhysics = false;
 		bool beginPhysics = false;
-		bool activateAlert = false;
 
 		// timing variables
 		float accumulator = 0;
@@ -155,10 +181,15 @@ int main(void)
 		float startTime = (float)glfwGetTime();
 
 		// Physics environment setup
-		Environment env = Environment(2000.0f, 1000.0f, DEFAULT_GRAVITY, timestep);
+		Environment env = Environment(1000.0f, 500.0f, DEFAULT_GRAVITY, timestep);
 
 		// Initialize the storage manager
 		StorageManager storage;
+
+		// Initialize the menu with appropriate references to manage the environment and the simulation
+		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		// Setting the colors/style of the menu
+		menu.initializeStyle();
 
 		// RENDER LOOP //
 
@@ -193,21 +224,105 @@ int main(void)
 
 				camera.recalculateView();
 
-				// render the axes
+				// render workspace and axes
+
+				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
+
+				float workspace[] = {
+					0.0f, 0.0f,	// 0
+					env.width * PIXEL_RATIO, 0.0f,	// 1
+					env.width * PIXEL_RATIO, env.height * PIXEL_RATIO,	// 2
+					0.0f, env.height * PIXEL_RATIO	// 3
+				};
+				VertexArray ws;
+				VertexBuffer wsb(workspace, 4 * 2 * sizeof(float));
+
+				shader.setUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+				ws.addBuffer(wsb, layout);
+				renderer.draw(ws, ib, shader); // workspace background
+
+				//shader.setUniform4f("u_Color", 0.3f, 0.3f, 0.3f, 1.0f); // X COLOR
+				//shader.setUniform4f("u_Color", 0.0f, 0.9f, 0.2f, 1.0f); // Y COLOR
 				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
+				renderer.drawLine(ws, axesIB, shader, 3.0f); // axes
 
-				renderer.setMVP(shader, camera, env.xAxis);
-				renderer.draw(va, ib, shader);
-				renderer.setMVP(shader, camera, env.yAxis);
-				renderer.draw(va, ib, shader);
+				// TICK MARK RENDERING
 
+				// Height/length of the tick marks
+				float rulerHeight = -1.0f * PIXEL_RATIO * camera.cZoom;
+
+				float meterMarks[MAX_RULER_MARKS * 2 * 2];
+				// position markers
+				float xMark = 0.0f;
+				float yMark = 0.0f;
+				// index and count
+				int markIndex = 0;
+				int markCounter = 0;
+
+ 				bool xAxisInView = camera.cPosition.y - halfHeight * camera.cZoom < 0;
+ 				bool yAxisInView = camera.cPosition.x - halfWidth * camera.cZoom < 0;
+ 				bool xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
+				bool yMarkInView = yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO;
+
+				// generate vertex array for tick marks, rendering all tick marks in view with a max of MAX_RULER_MARKS
+				while (markCounter < MAX_RULER_MARKS - 1 && (xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO || yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO)) {
+					xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
+					if (xAxisInView && xMarkInView && xMark < env.width) {
+						meterMarks[markIndex] = xMark * PIXEL_RATIO;
+						meterMarks[markIndex + 1] = 0.0f;
+
+						meterMarks[markIndex + 2] = xMark * PIXEL_RATIO;
+						if (xMark == 0.0f)
+							meterMarks[markIndex + 3] = rulerHeight * 1.5;
+						else
+							meterMarks[markIndex + 3] = rulerHeight;
+						markIndex += 4;
+						markCounter++;
+					}
+					xMark++;
+
+					yMarkInView = yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO;
+					if (yAxisInView && yMarkInView && yMark < env.height) {
+						meterMarks[markIndex] = 0.0f;
+						meterMarks[markIndex + 1] = yMark * PIXEL_RATIO;
+
+						if (yMark == 0.0f)
+							meterMarks[markIndex + 2] = rulerHeight * 1.5;
+						else
+							meterMarks[markIndex + 2] = rulerHeight;
+						meterMarks[markIndex + 3] = yMark * PIXEL_RATIO;
+						markIndex += 4;
+						markCounter++;
+					}
+					yMark++;
+				}
+
+				VertexArray marks;
+				marksBuffer.bind();
+				glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(meterMarks), meterMarks);
+				
+				// generate and indexBuffer
+				for (int j = 0; j < markIndex / 2; j += 2) {
+					marksIndices[j] = j;
+					marksIndices[j + 1] = j + 1;
+				}
+				IndexBuffer marksIndexBuffer(marksIndices, markIndex / 2);
+				marks.addBuffer(marksBuffer, layout);
+
+				// set the mvp and render
+				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
+				renderer.drawLine(marks, marksIndexBuffer, shader, 3.0f);
+
+				// OBJECT RENDERING
+
+				// object index for highlighting
+				int i = 1;
 				// render each object
 				for (Body& body : env.bodyList) {
-
 					// set the MVP for the object
 					renderer.setMVP(shader, camera, body);
 
-					// infinite mass is gray!
+					// infinite mass is lower opacity!
 					if (body.mass == 0) {
 						body.color.a = 0.4f;
 						shader.setUniform4f("u_Color", body.color);
@@ -217,20 +332,55 @@ int main(void)
 						shader.setUniform4f("u_Color", body.color);
 					}
 
-					// call the renderer to draw something
-					// send in a vertex array, an index buffer, and a shader
-					// in a more traditional setup, we would be using a material instead of a shader
-					// a material is a shader AND its associated uniforms
+					// render a single object
 					renderer.draw(va, ib, shader);
-				}
+					
+					// draw highlight
+					if (i == menu.highlight) {
+						shader.setUniform4f("u_Color", 0.0f, 0.31f, 0.435f, 1.0f);
+						unsigned int outline[] = {
+							0, 1, 1, 2, 2, 3, 3, 0
+						};
+						// render highlight outline
+						renderer.drawLine(va, IndexBuffer(outline, 8), shader, 4.0f);
+					}
+					i++;
+
+					// draw velocity line
+					if (body.vSpeed > 0.01) {
+						shader.setUniform4f("u_Color", 0.745f, 0.106f, 0.012f, 1.0f);
+						float velocityLine[4] = {};
+						// only draw with object velocity vectors while physics is running to ensure proper updates
+						if (doPhysics) {
+							velocityLine[2] = body.velocity.x * 10;
+							velocityLine[3] = body.velocity.y * 10;
+						}
+						else {
+							velocityLine[2] = (body.vSpeed * cos(toRadians * body.vDirection)) * 10; // x
+							velocityLine[3] = (body.vSpeed * sin(toRadians * body.vDirection)) * 10; // y
+						}
+						unsigned int velocityLineIndices[] = {
+							0, 1
+						};
+						VertexArray velocityLineArray;
+						VertexBuffer velocityLineBuffer(velocityLine, 2 * 2 * sizeof(float));
+						velocityLineArray.addBuffer(velocityLineBuffer, layout);
+
+						// render velocity line
+						renderer.setLineMVP(shader, camera, body.position);
+						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader, 4.0f);
+					}
+
+				} // end of body loop
 
 			} // end of MVP matrix scope
 
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			xpos -= halfWidth;
-			ypos = halfHeight - ypos;
-
+			// get mouse cursor position and create an object on mouse click
+//			double xpos, ypos;
+//			glfwGetCursorPos(window, &xpos, &ypos);
+//			xpos -= halfWidth;
+//			ypos = halfHeight - ypos;
+//
 // 			if (!doPhysics && !isPaused && createObject) {
 // 				// Cannot press this button if the simulation is running or paused
 // 				Shape shape;
@@ -241,172 +391,22 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
-			Menu::createMenuBar(env, doPhysics, beginPhysics);
+			// Pushing the font style onto the GUI
+			ImGui::PushFont(menu.fontMedium);
 
-			// Forces next window to be a width of 300px and height of 400px upon launch of application
-			// Users can still resize it afterwards
-			// TODO: throw the sizes to a variable outside of the render loop
-			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT), ImGuiCond_FirstUseEver);
-			ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, 50), ImGuiCond_FirstUseEver);
+			// Creating the top menu bar
+			menu.createMenuBar();
+			// Creating the buttons that manage the simulator
+			menu.createSimulatorManager();
+			// Creating the Control Panel
+			menu.createControlPanel();
+			// Calling any functionality that needs to run outside of the above windows
+			menu.cleanUp();
+			
+			// Every pushed font must be popped
+			ImGui::PopFont();
 
-			// TODO: Potentially throw all created windows into GuiUtils for structure
-			// Window to manage environment objects
-			ImGui::Begin("Control Panel");
-
-			if (ImGui::BeginTabBar("Control Panel Tabs")) {
-				// Creates a new object at the center of the screen
-				if (ImGui::BeginTabItem("Object Manager")) {
-					if (ImGui::Button("Create Object", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-						if (!doPhysics && !beginPhysics) {
-							float xPosition = camera.cPosition.x / PIXEL_RATIO;
-							float yPosition = camera.cPosition.y  / PIXEL_RATIO;
-							env.addBody(xPosition, yPosition);
-						}
-						else
-							activateAlert = true;
-					}
-					// Removes all objects in the current environment
-					if (ImGui::Button("Delete All Objects", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-						if (!doPhysics && !beginPhysics) {
-							// Cannot press this button if the simulation is running or paused
-							doPhysics = false;
-
-							// TODO: throw this into a helper function
-							// We'll need this for our pre-made experiments
-							env.bodyList.clear();
-							storage.clear();
-						}
-						else
-							activateAlert = true;
-					}
-
-					Menu::createAllObjectMenus(env);
-
-					ImGui::EndTabItem();
-				}
-
-				/*if (ImGui::BeginTabItem("Properties")) {
-					ImGui::Text("TODO: Implement this :b");
-					ImGui::EndTabItem();
-				}*/
-
-				if (ImGui::BeginTabItem("Experiments")) {
-					if (ImGui::TreeNode("Projectile Motion")) {
-						
-						ImGui::TextWrapped("Two identical boxes are held at the same height.");
-						ImGui::TextWrapped("One falls straight down, and the other is projected horizontally.");
-						ImGui::TextWrapped("Which one hits the ground first?");
-					
-						if (ImGui::Button("Load Experiment", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-							env.bodyList.clear();
-							storage.clear();
-
-							Experiment::load(env, camera, "sampleExp.klx");
-						}
-
-						ImGui::TreePop();
-					}
-					if (ImGui::TreeNode("TODO")) {
-						ImGui::TextWrapped("Throw the premade experiments into an expandable file where we can just append them.");
-						ImGui::TextWrapped("Or something like that.");
-
-						ImGui::TreePop();
-					}
-					ImGui::EndTabItem();
-				}
-			}
-			ImGui::EndTabBar();
-
-			// std::cout << ImGui::IsWindowHovered() << std::endl;
-
-			ImGui::End(); // End of Control Panel Window
-
-			// Forces window to a width of 200px and height of 100px upon launch of application
-			// Users can still resize it afterwards
-			// TODO: throw the sizes to a variable outside of the render loop
-
-			ImGui::SetNextWindowSize(ImVec2(MIN_CONTROLPANEL_WIDTH, ALERTMESSAGE_HEIGHT), ImGuiCond_FirstUseEver);
-			ImGui::SetNextWindowPos(ImVec2(1600 - MIN_CONTROLPANEL_WIDTH, MIN_CONTROLPANEL_HEIGHT + 50), ImGuiCond_FirstUseEver);
-			// Window with buttons to manage the set up experiment
-			ImGui::Begin("Simulation Manager");
-			// TODO: Mess with the style of the buttons when they're disabled
-			// Begins simulation and stores initial objects
-
-			if (!doPhysics) {
-				if (ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-					if (!env.bodyList.empty()) {
-						// Cannot press this button if the simulation is running or paused
-						if (!beginPhysics) {
-
-							// initialize the axes
-							env.xAxis.init();
-							env.yAxis.init();
-
-							// Physics pre-calculations
-							for (Body& body : env.bodyList) {
-								// save object starting positions and velocities
-								storage.save(body);
-								// Incoming storage manager POG?
-
-								// while we're looping objects, go ahead and recalculate some important values
-								body.init();
-								// calculate the force of gravitation for the object into a vector and apply it
-								glm::vec3 gravity(0, body.mass * env.gravity, 0);
-								body.force -= gravity;
-							}
-							env.generatePairs();
-							beginPhysics = true;
-						}
-
-						// Physics happens here
-						frameStart = glfwGetTime();
-						startTime = glfwGetTime();
-						// TODO: Generate a set of ALL pairs to use for generating manifolds and detecting collisions between objects
-						doPhysics = true;
-					}
-				}
-			}
-			else {
-				if (ImGui::Button("Pause", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-					// Pauses simulation if it's running
-					doPhysics = false;
-				}
-			}
-
-			// Stops and resets objects as they were at the start of the simulation
-			if (ImGui::Button("Reset", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f))) {
-				if (doPhysics || beginPhysics) {
-					int count = 0;
-					for (Body& body : env.bodyList) {
-						storage.restore(body, count);
-						// clear forces!
-						body.force = glm::vec3(0.0f);
-
-						count++;
-					}
-					storage.clear();
-					doPhysics = false;
-					beginPhysics = false;
-				}
-			}
-
-			ImGui::End(); // End of Simulation Manager Window
-
-			// Alert handling
-			if (activateAlert) {
-				ImGui::OpenPopup("WARNING");
-				activateAlert = false;
-			}
-
-			Menu::makeAlert("WARNING", "Cannot mess with Control Panel when simulator is running.");
-
-			if (GuiUtils::deleteObject) {
-				std::list<Body>::iterator i = env.bodyList.begin();
-				env.bodyList.erase(i);
-				GuiUtils::deleteObject = false;
-			}
-
-			// End of all ImGui windows
+			// End of IMGUI WINDOWS
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
@@ -417,7 +417,9 @@ int main(void)
 
 			/* Poll for and process events */
 			glfwPollEvents();
-		}
+
+		} // end of render loop
+
 	} // end of GL scope
 
 	// Delete things related to ImGUI

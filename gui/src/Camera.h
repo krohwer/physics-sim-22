@@ -20,6 +20,8 @@ struct Camera {
 	glm::vec3 cVelocity;
 	float cZoom;
 
+	bool disabled;
+
 	Camera(float left, float right, float bottom, float top);
 
 	void recalculateView();
