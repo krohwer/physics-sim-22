@@ -27,6 +27,36 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_5004925098F64F488D06FC878E0ECA4D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6E8B4922F4F74EE19D1C01F92DA96664"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7ED8DAB8377242FDBAA1AAA59B8B9615"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8CE432B7989F40589F80D86CE31F39C3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_92BA294087A243D4A3EDDBFEBF4133CB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AC9DDDCFD4374F798ECD651FE1B5B317"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -34,6 +64,18 @@
         "Entry"
         {
         "MsmKey" = "8:_B510BAA24219423898C3CFD62F6B4392"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D06F27DC8ECF4CB89E8513B4D53E4450"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D240244D98C64080BC80164F52898E73"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -170,6 +212,106 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5004925098F64F488D06FC878E0ECA4D"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\obj_menu.png"
+            "TargetName" = "8:obj_menu.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6E8B4922F4F74EE19D1C01F92DA96664"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\exp_options.png"
+            "TargetName" = "8:exp_options.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7ED8DAB8377242FDBAA1AAA59B8B9615"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\cp_buttons.png"
+            "TargetName" = "8:cp_buttons.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8CE432B7989F40589F80D86CE31F39C3"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\sim_buttons.png"
+            "TargetName" = "8:sim_buttons.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_92BA294087A243D4A3EDDBFEBF4133CB"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\controls.png"
+            "TargetName" = "8:controls.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AC9DDDCFD4374F798ECD651FE1B5B317"
             {
             "SourcePath" = "8:..\\gui\\Experiments\\ProjectileMotionSample.klx"
@@ -196,6 +338,46 @@
             "TargetName" = "8:kl_icon.png"
             "Tag" = "8:"
             "Folder" = "8:_28BFCF8209E946D0AED24FD823A493BD"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D06F27DC8ECF4CB89E8513B4D53E4450"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\help-images\\env_window.png"
+            "TargetName" = "8:env_window.png"
+            "Tag" = "8:"
+            "Folder" = "8:_8487C493AC8E45F78469F7F80AA8C130"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D240244D98C64080BC80164F52898E73"
+            {
+            "SourcePath" = "8:..\\gui\\resources\\fonts\\Rubik-Medium.ttf"
+            "TargetName" = "8:Rubik-Medium.ttf"
+            "Tag" = "8:"
+            "Folder" = "8:_B32EB5DAA6FA4FBABAF2C11DBA63D2FB"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -284,6 +466,28 @@
                             "Condition" = "8:"
                             "Transitive" = "11:FALSE"
                             "Property" = "8:_AE4E173F0B97400992F886D71597D5F0"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_8487C493AC8E45F78469F7F80AA8C130"
+                            {
+                            "Name" = "8:help-images"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_836A5BEF4C0D4B69A2B04BD8DDF3AB98"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_B32EB5DAA6FA4FBABAF2C11DBA63D2FB"
+                            {
+                            "Name" = "8:fonts"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_A7DA10A26E6B47088D346292D4F0580B"
                                 "Folders"
                                 {
                                 }

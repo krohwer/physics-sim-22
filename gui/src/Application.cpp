@@ -163,6 +163,7 @@ int main(void)
 		Renderer renderer;
 
 		// IMGUI WINDOW CREATION //
+		// a lot of this is standard and must be done
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -185,7 +186,9 @@ int main(void)
 		// Initialize the storage manager
 		StorageManager storage;
 
+		// Initialize the menu with appropriate references to manage the environment and the simulation
 		Menu menu = Menu(&env, &storage, &camera, &doPhysics, &beginPhysics, &frameStart, &startTime);
+		// Setting the colors/style of the menu
 		menu.initializeStyle();
 
 		// RENDER LOOP //
@@ -243,36 +246,25 @@ int main(void)
 				shader.setUniform4f("u_Color", 0.2f, 0.2f, 0.2f, 1.0f);
 				renderer.drawLine(ws, axesIB, shader, 3.0f); // axes
 
-				// render tick marks
-				// TODO: Batch render
+				// TICK MARK RENDERING
+
+				// Height/length of the tick marks
 				float rulerHeight = -1.0f * PIXEL_RATIO * camera.cZoom;
+
 				float meterMarks[MAX_RULER_MARKS * 2 * 2];
-// 				float meterMarks[] = {
-// 					// x
-// 					0.0f, 0.0f,	// 0
-// 					0.0f * PIXEL_RATIO, rulerHeight * 1.5f,	// 1
-// 					1.0f * PIXEL_RATIO, 0.0f,			// 2
-// 					1.0f * PIXEL_RATIO, rulerHeight,	// 3
-// 					2.0f * PIXEL_RATIO, 0.0f,			// 4
-// 					2.0f * PIXEL_RATIO, rulerHeight,	// 5
-// 
-// 					// y
-// 					0.0f, 0.0f,	// 0
-// 					rulerHeight * 1.5f, 0.0f * PIXEL_RATIO, // 1
-// 					0.0f,		 1.0f * PIXEL_RATIO, 	// 2
-// 					rulerHeight, 1.0f * PIXEL_RATIO, 	// 3
-// 					0.0f,		 2.0f * PIXEL_RATIO, 	// 2
-// 					rulerHeight, 2.0f * PIXEL_RATIO, 	// 3
-// 				};
+				// position markers
 				float xMark = 0.0f;
 				float yMark = 0.0f;
+				// index and count
 				int markIndex = 0;
 				int markCounter = 0;
+
  				bool xAxisInView = camera.cPosition.y - halfHeight * camera.cZoom < 0;
  				bool yAxisInView = camera.cPosition.x - halfWidth * camera.cZoom < 0;
  				bool xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
 				bool yMarkInView = yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO;
 
+				// generate vertex array for tick marks, rendering all tick marks in view with a max of MAX_RULER_MARKS
 				while (markCounter < MAX_RULER_MARKS - 1 && (xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO || yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO)) {
 					xMarkInView = xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO;
 					if (xAxisInView && xMarkInView && xMark < env.width) {
@@ -304,59 +296,24 @@ int main(void)
 					}
 					yMark++;
 				}
-// 				while (xAxisInView && markIndex < MAX_RULER_MARKS * 2 * 2 && xMark < env.width && xMark < (camera.cPosition.x + halfWidth * camera.cZoom) / PIXEL_RATIO) {
-// 					if (xMark > (camera.cPosition.x - halfWidth * camera.cZoom) / PIXEL_RATIO) {
-// 						meterMarks[markIndex] = xMark * PIXEL_RATIO;
-// 						meterMarks[markIndex + 1] = 0.0f;
-// 
-// 						meterMarks[markIndex + 2] = xMark * PIXEL_RATIO;
-// 						if (xMark == 0.0f)
-// 							meterMarks[markIndex + 3] = rulerHeight * 1.5;
-// 						else
-// 							meterMarks[markIndex + 3] = rulerHeight;
-// 						markIndex += 4;
-// 					}
-// 					xMark++;
-// 				}
-// 				while (yAxisInView && markIndex < MAX_RULER_MARKS * 2 * 2 && yMark < env.height && yMark < (camera.cPosition.y + halfHeight * camera.cZoom) / PIXEL_RATIO) {
-// 					if (yMark > (camera.cPosition.y - halfHeight * camera.cZoom) / PIXEL_RATIO) {
-// 						meterMarks[markIndex] = 0.0f;
-// 						meterMarks[markIndex + 1] = yMark * PIXEL_RATIO;
-// 
-// 						if (yMark == 0.0f)
-// 							meterMarks[markIndex + 2] = rulerHeight * 1.5;
-// 						else
-// 							meterMarks[markIndex + 2] = rulerHeight;
-// 						meterMarks[markIndex + 3] = yMark * PIXEL_RATIO;
-// 						markIndex += 4;
-// 					}
-// 					yMark++;
-// 				}
+
 				VertexArray marks;
 				marksBuffer.bind();
 				glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(meterMarks), meterMarks);
-				//VertexBuffer marksBuffer(meterMarks, markIndex * sizeof(float));
+				
+				// generate and indexBuffer
 				for (int j = 0; j < markIndex / 2; j += 2) {
 					marksIndices[j] = j;
 					marksIndices[j + 1] = j + 1;
 				}
 				IndexBuffer marksIndexBuffer(marksIndices, markIndex / 2);
 				marks.addBuffer(marksBuffer, layout);
+
+				// set the mvp and render
 				renderer.setLineMVP(shader, camera, glm::vec3(0.0f));
 				renderer.drawLine(marks, marksIndexBuffer, shader, 3.0f);
 
-// 				glm::vec3 position(0.5f, -0.5f, 0.0f);
-// 				while (position.x < env.width && position.x < (camera.cPosition.x + halfWidth / PIXEL_RATIO) * camera.cZoom) {
-// 					renderer.setLineMVP(shader, camera, position);
-// 					renderer.drawLine(va, yb, shader, 3.0f);
-// 					position.x++;
-// 				}
-// 				position = glm::vec3(-0.5f, 0.5f, 0.0f);
-// 				while (position.y < env.height && position.y < (camera.cPosition.y + halfHeight / PIXEL_RATIO) * camera.cZoom) {
-// 					renderer.setLineMVP(shader, camera, position);
-// 					renderer.drawLine(va, xb, shader, 3.0f);
-// 					position.y++;
-// 				}
+				// OBJECT RENDERING
 
 				// object index for highlighting
 				int i = 1;
@@ -375,10 +332,7 @@ int main(void)
 						shader.setUniform4f("u_Color", body.color);
 					}
 
-					// call the renderer to draw something
-					// send in a vertex array, an index buffer, and a shader
-					// in a more traditional setup, we would be using a material instead of a shader
-					// a material is a shader AND its associated uniforms
+					// render a single object
 					renderer.draw(va, ib, shader);
 					
 					// draw highlight
@@ -387,6 +341,7 @@ int main(void)
 						unsigned int outline[] = {
 							0, 1, 1, 2, 2, 3, 3, 0
 						};
+						// render highlight outline
 						renderer.drawLine(va, IndexBuffer(outline, 8), shader, 4.0f);
 					}
 					i++;
@@ -395,6 +350,7 @@ int main(void)
 					if (body.vSpeed > 0.01) {
 						shader.setUniform4f("u_Color", 0.745f, 0.106f, 0.012f, 1.0f);
 						float velocityLine[4] = {};
+						// only draw with object velocity vectors while physics is running to ensure proper updates
 						if (doPhysics) {
 							velocityLine[2] = body.velocity.x * 10;
 							velocityLine[3] = body.velocity.y * 10;
@@ -410,6 +366,7 @@ int main(void)
 						VertexBuffer velocityLineBuffer(velocityLine, 2 * 2 * sizeof(float));
 						velocityLineArray.addBuffer(velocityLineBuffer, layout);
 
+						// render velocity line
 						renderer.setLineMVP(shader, camera, body.position);
 						renderer.drawLine(velocityLineArray, IndexBuffer(velocityLineIndices, 2), shader, 4.0f);
 					}
@@ -418,11 +375,12 @@ int main(void)
 
 			} // end of MVP matrix scope
 
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			xpos -= halfWidth;
-			ypos = halfHeight - ypos;
-
+			// get mouse cursor position and create an object on mouse click
+//			double xpos, ypos;
+//			glfwGetCursorPos(window, &xpos, &ypos);
+//			xpos -= halfWidth;
+//			ypos = halfHeight - ypos;
+//
 // 			if (!doPhysics && !isPaused && createObject) {
 // 				// Cannot press this button if the simulation is running or paused
 // 				Shape shape;
@@ -433,15 +391,22 @@ int main(void)
 
 			// IMGUI WINDOWS //
 
+			// Pushing the font style onto the GUI
 			ImGui::PushFont(menu.fontMedium);
-			menu.createMenuBar();
-			
-			menu.createControlPanel();
 
+			// Creating the top menu bar
+			menu.createMenuBar();
+			// Creating the buttons that manage the simulator
+			menu.createSimulatorManager();
+			// Creating the Control Panel
+			menu.createControlPanel();
+			// Calling any functionality that needs to run outside of the above windows
 			menu.cleanUp();
+			
+			// Every pushed font must be popped
 			ImGui::PopFont();
 
-			// End of all ImGui windows
+			// End of IMGUI WINDOWS
 
 			// Must be included after the above set of code related to ImGUI
 			ImGui::Render();
